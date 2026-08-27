@@ -1,0 +1,21 @@
+name: smoke
+model: yolov8n.pt
+data: smoke
+imgsz: 320
+epochs: 3
+patience: 0
+seeds:
+- 0
+batch: 8
+workers: 0
+amp: false
+close_mosaic: 0
+val_conf: 0.001
+val_iou: 0.7
+extra:
+  plots: false
+seed: 0
+device: '0'
+device_resolved: cuda (NVIDIA GeForce RTX 4060 Laptop GPU, 8.0 GB)
+fish_env: workstation
+run_dir: runs/20260827-smoke-s0

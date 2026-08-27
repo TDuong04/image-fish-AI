@@ -1,4 +1,7 @@
 # FD-015. Proves the pipeline end-to-end in minutes, on any machine including CPU.
+# Uses the `smoke` dataset (12 frames per site, still spanning all 20 sites) so
+# validation is cheap too -- capping only the training side leaves per-epoch
+# validation dominating the runtime.
 # Run this before every full training run and after every pipeline change.
 name: smoke
 model: yolov8n.pt
@@ -7,9 +10,11 @@ imgsz: 320
 epochs: 3
 patience: 0
 seeds: [0]
-batch: 2
+batch: 8
 workers: 0
 amp: false
 close_mosaic: 0
 val_conf: 0.001
 val_iou: 0.7
+extra:
+  plots: false

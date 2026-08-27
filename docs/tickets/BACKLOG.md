@@ -84,7 +84,8 @@ model family FD-020 trains.
 
 ---
 
-## FD-001 · Initialise git repository · P0 · TODO
+## FD-001 · Initialise git repository · P0 · **DONE**
+**Done:** repo initialised, `.gitattributes` + `.gitignore` with `runs/**` negations, pushed to `IoT-Group/image-fish-AI`. Splits tracked; weights and data excluded.
 **Why:** No version control. No result can be tied to a commit.
 
 **Do:**
@@ -102,7 +103,8 @@ model family FD-020 trains.
 
 ---
 
-## FD-002 · Portable training environment bootstrap · P0 · TODO
+## FD-002 · Portable training environment bootstrap · P0 · **DONE**
+**Verified:** Python 3.11 venv, torch 2.6.0+cu124, `cuda.is_available()==True` on RTX 4060, ultralytics 8.4.130. `check_env.py` reports READY. Caches redirected into `data/.cache` by the env profile.
 **Why:** Installed torch is `2.12.1+cpu` (`cuda.is_available() == False`) — training today runs
 silently on CPU. System Python is 3.14.4, unsupported by Ultralytics and CUDA torch wheels. And
 this must be fixable identically on Linux, a hosted notebook, and a collaborator's machine.
@@ -130,7 +132,8 @@ NVIDIA's prebuilt wheels matched to the JetPack version. `bootstrap.py` branches
 
 ---
 
-## FD-006 · Portable path and config layer · P0 · **IN PROGRESS** **[added]**
+## FD-006 · Portable path and config layer · P0 · **DONE** **[added]**
+**Done:** `src/fish/{paths,device,env,datasets}.py`; 55 pytest checks enforce no absolute paths, no hardcoded cuda, `__main__` guards. The tests caught a real regression -- `configs/data/*.yaml` were being written with absolute paths -- now stored relative to `DATA_ROOT` and resolved per machine at run time.
 **Done so far:** `src/fish/{paths,device,env}.py`, `.gitattributes`, `scripts/{bootstrap,check_env,train}.py`, `requirements-{train,edge,dev}.txt`. Remaining: the `pytest` guard in FD-110 that keeps absolute paths from reappearing.
 **Why:** This project already spans a Windows workstation, a hosted Linux notebook, and an ARM64
 Jetson. Any absolute path, drive letter, or hardcoded device breaks two of the three. Retrofitting
@@ -199,7 +202,8 @@ fetch script checks free space against the declared size and refuses up front.
 
 ---
 
-## FD-005 · Evaluation protocol, written before training · **P0** · TODO **[corrected]**
+## FD-005 · Evaluation protocol, written before training · **P0** · **DONE** **[corrected]**
+**Done:** `docs/eval_protocol.md`, written before any real training run. Resolves the FD-005/FD-024 threshold contradiction and absorbs FD-103's seed rule.
 **Why:** Defining metrics after seeing results is p-hacking. Was P1 while blocking a P0 — fixed.
 
 **Do:** `docs/eval_protocol.md` specifying:
@@ -239,7 +243,8 @@ another account, no benefit here.
 
 ---
 
-## FD-110 · Regression tests · P1 · TODO **[added]**
+## FD-110 · Regression tests · P1 · **DONE** **[added]**
+**Done:** `tests/`, 55 checks covering grouping, label parsing and the portability rules. Already caught one real bug. Remaining: wire a pre-commit hook.
 **Why:** Four checks are load-bearing and all currently manual: label round-trip (FD-011),
 leakage assertion (FD-013), ONNX parity (FD-030), benchmark repeatability (FD-050). FD-030 says
 its check is "committed as a regression test" but nothing runs tests.
@@ -336,7 +341,8 @@ fabricated ground truth.
 
 ---
 
-## FD-013 · Leakage-free splits · P0 · TODO
+## FD-013 · Leakage-free splits · P0 · **DONE**
+**Done:** site-level split in `scripts/prepare_dataset.py` with a hard assertion that no group appears on both sides. The risk was real: DeepFish clips run to 462 consecutive frames, so a random split would have scattered ~73 near-identical frames of one clip across train and val. Splits committed under `splits/`.
 **Why:** OzFish frames come from video. Random per-image splitting puts near-identical adjacent
 frames in train and test, inflating mAP by a large unknown margin. **Still the single most likely
 way this project produces a wrong headline number.** Depends on FD-011 preserving video IDs.
@@ -347,7 +353,8 @@ randomly per run.
 
 ---
 
-## FD-014 · Dataset characterisation audit · **P0, before FD-020** · TODO **[corrected]**
+## FD-014 · Dataset characterisation audit · **P0, before FD-020** · **DONE** **[corrected]**
+**Done:** `scripts/audit_dataset.py` + `docs/data_audit.md`. Headline finding: at 640 px, 14% of DeepFish and 35% of OzFish boxes fall below ~16 px, the floor a stride-8 P3 head can resolve. Resolution is now a first-class variable, not a default.
 **Why:** Was P1 running beside training. It gates more than FD-022's resolution list: **if the
 median box is under ~32 px at training resolution, the project needs tiling** — which changes the
 architecture of FD-030, FD-031, FD-034, FD-042 and FD-043. Discovering that after E2 invalidates
@@ -358,7 +365,8 @@ fraction of frames with **zero** fish; source resolutions; brightness/turbidity 
 
 ---
 
-## FD-015 · Smoke subset · P1 · TODO
+## FD-015 · Smoke subset · P1 · **DONE**
+**Done:** `--max-per-group 12` builds a 240-image subset spanning all 20 sites, sampled evenly within each clip rather than taking the first N (consecutive frames are near-identical). Full train->val cycle in ~2 min.
 ~200 train / 50 val, stratified across sites and count buckets, wired as `data/smoke.yaml`. Every
 pipeline change smoke-tested first. **Done when** a full train→export→eval cycle runs in under
 10 minutes.
@@ -429,6 +437,89 @@ ticket already permitted satisfying in writing. Cite their published number with
 statement that the splits differ. **[corrected]** Extend that caveat to **throughput**: their
 "179 FPS" is a desktop-GPU number and must never appear near an Orin Nano FPS figure. Also
 removes the GPL-3.0 linkage concern.
+
+---
+
+# E2b - Training quality
+
+Everything here is about extracting the best achievable accuracy from the data,
+*before* anything is traded away for the board. Ordered by expected value.
+
+## FD-120 - Small-object architecture: P2 head - P1 - TODO
+**Why:** The audit's central finding is that 14% (DeepFish) / 35% (OzFish) of boxes sit below
+the ~16 px floor of a stride-8 P3 head at 640 px. A **P2 head (stride 4)** attacks that failure
+mode directly and costs far less than doubling input resolution, which is the one thing the
+Orin Nano can least afford.
+**Do:** Train `yolov8n-p2` against the 640 and 960 baselines. Compare mAP overall *and*
+restricted to boxes under 32 px, which is where the effect must appear if it is real. Record
+parameter and FLOP cost, since it carries straight into E3.
+**Done when:** the small-box mAP delta is measured, with the latency cost stated.
+
+## FD-121 - Tiled inference vs upscaling - P2 - TODO
+**Why:** The other route to small objects: slice 1920x1080 into overlapping tiles inferred at
+native scale. Higher effective resolution without a larger network, at the cost of several
+forward passes per frame - a very different point on the Jetson cost curve than a bigger
+input, and possibly a better one in *batch* mode where latency is soft.
+**Do:** SAHI-style tiling at inference against plain upscaling, matched on total compute.
+Handle duplicate detections across tile seams explicitly.
+**Done when:** both sit on the same accuracy-vs-compute plot.
+
+## FD-122 - Hyperparameter search - P2 - TODO
+**Why:** Ultralytics defaults are tuned for COCO: 80 classes, ~7 objects per image, large
+objects. This is 1 class, 2.4 objects per image, mostly small. lr, warmup, box/cls loss
+weights and the optimiser are unlikely to be at their best.
+**Do:** `model.tune()` or a bounded random search on the val split, budget fixed in advance.
+Validate the winner across FD-103's seeds - a search this small will otherwise select noise.
+**Done when:** tuned settings beat defaults by more than the seed spread, or are shown not to.
+
+## FD-123 - Dense-scene NMS and max_det - P1 - TODO
+**Why:** OzFish reaches **232 boxes in one frame**, against an Ultralytics default of
+`max_det=300`. Close enough to check rather than assume. Class-agnostic NMS and the IoU
+threshold also behave differently on overlapping schooling fish than on COCO. The smoke run
+already showed **postprocess 11.1 ms vs inference 3.3 ms** - NMS dominating even on a desktop
+GPU, which is FD-034's problem arriving early.
+**Do:** Sweep `iou` and `max_det`; confirm no truncation on the densest frames; measure the
+postprocess share of end-to-end latency.
+**Done when:** settings are fixed with evidence and no evaluation is silently truncating.
+
+## FD-124 - Augmentation for underwater density - P2 - TODO
+**Why:** Replaces the cut FD-023 with something narrower and better motivated. Two augments
+plausibly matter here and are not defaults: `copy_paste` (raises object density, matching the
+OzFish target domain) and HSV/turbidity jitter (the dominant real-world nuisance).
+**Do:** Test exactly these two, evaluated on the **cross-dataset** set, not in-domain.
+**Done when:** kept or rejected on cross-dataset evidence.
+
+## FD-125 - Training schedule and checkpoint selection - P2 - TODO
+**Why:** `epochs: 150, patience: 30` was a reasonable guess, not a measurement. The selection
+metric matters too: mAP@50-95 favours tight boxes, F1 favours the operating point the device
+actually runs at.
+**Do:** Confirm from the loss/mAP curves that 150 epochs is enough. State the selection metric
+in `eval_protocol.md` and apply it consistently.
+**Done when:** the schedule is justified from a curve rather than assumed.
+
+## FD-126 - Merge DeepFish + OzFish training - P2 - **blocked by FD-113** - TODO
+**Why:** The YOLO-Fish authors' own best results came from a *merged* dataset, and their
+`merge_*.weights` are already on disk. Given the sharp domain gap measured in the audit
+(2.4 vs 23.7 boxes/image), merging is the obvious way to cover both regimes.
+**Do:** Once OzFish training data exists, build a merged dataset with grouping preserved across
+both sources and compare against DeepFish-only under the same protocol.
+**Done when:** merged vs single-source is measured on both test sets.
+
+## FD-127 - Zero-shot and trivial baselines - P1 - TODO
+**Why:** FD-104's floor, made concrete now that data exists. Cheap, and the report has no lower
+bound without it.
+**Do:** (a) predict-nothing on the 30%-empty DeepFish val; (b) COCO-pretrained YOLOv8n with no
+fine-tuning (COCO has no fish class - report what it confuses them for); (c) frame-differencing
+on static BRUVS footage.
+**Done when:** all three appear in the results table.
+
+## FD-128 - Small-box stratified reporting - P1 - TODO
+**Why:** A single mAP number hides the exact effect this project is about. If resolution
+recovers small fish, that shows up in a size-stratified breakdown and is invisible in the
+aggregate.
+**Do:** Report mAP split by box area (<16 px, 16-32, 32-96, >96) for every model. Build it into
+the eval harness so it is produced automatically, not by hand.
+**Done when:** every results row carries a size breakdown.
 
 ---
 

@@ -57,6 +57,29 @@ def resolve_dataset(key: str) -> Path:
     return path
 
 
+def materialise_dataset(cfg_path: Path, run_dir: Path) -> Path:
+    """Resolve the committed dataset config against this machine's DATA_ROOT.
+
+    Committed configs store `path` relative to DATA_ROOT so they are portable.
+    Ultralytics needs an absolute path, so write a resolved copy into the run
+    directory -- which also records exactly which data the run consumed.
+    """
+    spec = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+    raw = Path(str(spec.get("path", ".")))
+    spec["path"] = str(raw if raw.is_absolute() else (paths.DATA_ROOT / raw).resolve())
+
+    root = Path(spec["path"])
+    if not root.exists():
+        raise SystemExit(
+            f"\nDataset {cfg_path.stem!r} points at {root}, which does not exist "
+            f"on this machine.\nRun: python scripts/prepare_dataset.py {cfg_path.stem}"
+        )
+    run_dir.mkdir(parents=True, exist_ok=True)
+    out = run_dir / "data.yaml"
+    out.write_text(yaml.safe_dump(spec, sort_keys=False), encoding="utf-8")
+    return out
+
+
 def set_seed(seed: int) -> None:
     random.seed(seed)
     try:
@@ -120,9 +143,10 @@ def train_one(cfg: dict, profile: dict, seed: int, dry_run: bool) -> Path | None
         print("  (dry run -- nothing trained)")
         return None
 
-    data_yaml = resolve_dataset(cfg["data"])
+    data_cfg = resolve_dataset(cfg["data"])
     set_seed(seed)
     run_dir.mkdir(parents=True, exist_ok=True)
+    data_yaml = materialise_dataset(data_cfg, run_dir)
     (run_dir / "config.yaml").write_text(
         yaml.safe_dump(resolved, sort_keys=False), encoding="utf-8"
     )
@@ -147,6 +171,7 @@ def train_one(cfg: dict, profile: dict, seed: int, dry_run: bool) -> Path | None
         name=run_name,
         exist_ok=True,
         val=True,
+        **(cfg.get("extra") or {}),
     )
 
     metrics = {}

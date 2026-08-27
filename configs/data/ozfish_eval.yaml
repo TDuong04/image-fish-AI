@@ -1,0 +1,5 @@
+path: processed/ozfish_eval
+train: images/val
+val: images/val
+names:
+  0: fish

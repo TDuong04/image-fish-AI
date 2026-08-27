@@ -1,13 +1,21 @@
 __pycache__/
 *.pyc
 .venv/
-data/
-runs/**
-!runs/**/config.yaml
-!runs/**/metrics.json
-!runs/**/env.txt
-!runs/**/env.json
-models/
+
+# Datasets and downloads (root-anchored: configs/data/ must stay tracked)
+/data/
+/fish-research/
+/models/
+
+# Run outputs: keep the provenance, drop the artifacts.
+# Exclude the heavy files directly -- a broad /runs/** exclusion cannot be
+# undone by negations, because git will not descend into an excluded directory.
+/runs/**/weights/
+/runs/**/*.jpg
+/runs/**/*.png
+/runs/**/*.csv
+/runs/**/*.yaml.bak
+
 *.pt
 *.pth
 *.onnx
@@ -15,4 +23,3 @@ models/
 *.weights
 *.tar
 *.zip
-fish-research/

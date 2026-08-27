@@ -5,12 +5,12 @@
 # head can resolve -- is 14.4% at 640 and 2.3% at 960. Higher input resolution
 # recovers small fish; it is also the single most expensive thing to ask of an
 # Orin Nano. That trade-off is the project's research question, not a detail.
-name: yolov8n-640
+name: yolov8n-960
 model: yolov8n.pt   # NOTE (FD-008): COCO weights are AGPL-3.0 and the trained
                     # checkpoint inherits it. Settle the licence before shipping.
 data: deepfish
 
-imgsz: 640
+imgsz: 960
 epochs: 150         # upper bound; patience stops it
 patience: 30
 seeds: [0, 1, 2]    # FD-103: >=3 seeds for any comparison that drives a decision

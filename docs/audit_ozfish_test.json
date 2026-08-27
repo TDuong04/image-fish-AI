@@ -1,0 +1,71 @@
+{
+  "root": "data\\interim\\ozfish_test\\test",
+  "images": 352,
+  "labels_malformed": 0,
+  "malformed_examples": [],
+  "native_resolution": [
+    1920,
+    1080
+  ],
+  "resolutions_seen": {
+    "1920x1080": 80
+  },
+  "boxes_total": 8329,
+  "classes": {
+    "0": 8329
+  },
+  "boxes_per_image": {
+    "mean": 23.66,
+    "median": 16.0,
+    "p95": 66,
+    "max": 232
+  },
+  "empty_images": 0,
+  "empty_pct": 0.0,
+  "box_side_px_native": {
+    "p5": 17.0,
+    "p25": 36.7,
+    "median": 67.1,
+    "p75": 124.2,
+    "p95": 272.3,
+    "max": 862.6
+  },
+  "by_input_size": {
+    "416": {
+      "median_px": 14.5,
+      "pct_under_32px": 80.6,
+      "pct_under_16px": 54.2
+    },
+    "512": {
+      "median_px": 17.9,
+      "pct_under_32px": 73.8,
+      "pct_under_16px": 45.1
+    },
+    "640": {
+      "median_px": 22.4,
+      "pct_under_32px": 65.3,
+      "pct_under_16px": 34.8
+    },
+    "800": {
+      "median_px": 28.0,
+      "pct_under_32px": 55.9,
+      "pct_under_16px": 26.5
+    },
+    "960": {
+      "median_px": 33.5,
+      "pct_under_32px": 48.0,
+      "pct_under_16px": 20.4
+    },
+    "1280": {
+      "median_px": 44.7,
+      "pct_under_32px": 34.8,
+      "pct_under_16px": 12.4
+    }
+  },
+  "source_groups": 297,
+  "frames_per_group": {
+    "median": 1,
+    "max": 4,
+    "singletons": 253
+  }
+}
