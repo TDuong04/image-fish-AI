@@ -13,5 +13,6 @@ pycocotools>=2.0.7
 pandas>=2.0
 matplotlib>=3.7
 tqdm>=4.66
+gdown>=5.1          # fetches the datasets in scripts/get_data.py
 onnx>=1.15
 onnxruntime>=1.17
