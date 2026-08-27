@@ -1,0 +1,15 @@
+# FD-015. Proves the pipeline end-to-end in minutes, on any machine including CPU.
+# Run this before every full training run and after every pipeline change.
+name: smoke
+model: yolov8n.pt
+data: smoke
+imgsz: 320
+epochs: 3
+patience: 0
+seeds: [0]
+batch: 2
+workers: 0
+amp: false
+close_mosaic: 0
+val_conf: 0.001
+val_iou: 0.7

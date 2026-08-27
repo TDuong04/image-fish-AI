@@ -1,0 +1,14 @@
+# Jetson / inference-only dependencies (ARM64 + JetPack).
+#
+# Deliberately excluded:
+#   torch, torchvision -- the PyPI ARM64 wheels have no Jetson CUDA support.
+#     Use NVIDIA's prebuilt wheels for your exact JetPack version, or the
+#     dusty-nv containers. Edge inference goes through TensorRT and needs neither.
+#   ultralytics -- training-only; edge/ must not import it (CLAUDE.md).
+#
+# tensorrt and pycuda ship with JetPack via apt -- do not pip install them.
+
+numpy>=1.24,<2.3
+PyYAML>=6.0
+opencv-python>=4.8,<5   ; platform_machine != "aarch64"
+tqdm>=4.66

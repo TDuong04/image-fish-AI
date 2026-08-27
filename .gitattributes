@@ -1,0 +1,14 @@
+* text=auto
+
+# Shell scripts must keep LF or they fail on the Jetson with "\r: command not found"
+*.sh    text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.py    text eol=lf
+
+# Never diff or line-ending-mangle binaries
+*.pt      binary
+*.pth     binary
+*.onnx    binary
+*.engine  binary
+*.weights binary

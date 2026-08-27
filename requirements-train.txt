@@ -1,0 +1,17 @@
+# Training dependencies -- x86_64 with CUDA, or macOS with MPS.
+# torch/torchvision are NOT listed here: scripts/bootstrap.py installs them from
+# the correct index for this machine. Installing torch from PyPI on Windows
+# silently gives a CPU-only build.
+#
+# This file will NOT install on a Jetson. See requirements-edge.txt.
+
+ultralytics>=8.3.0,<9
+opencv-python>=4.8,<5
+numpy>=1.24,<2.3
+PyYAML>=6.0
+pycocotools>=2.0.7
+pandas>=2.0
+matplotlib>=3.7
+tqdm>=4.66
+onnx>=1.15
+onnxruntime>=1.17

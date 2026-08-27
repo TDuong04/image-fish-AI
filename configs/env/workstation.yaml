@@ -1,0 +1,17 @@
+# Generic x86 workstation or laptop with an NVIDIA GPU.
+# Copy this file to add your own machine; select it with FISH_ENV=<name>.
+name: workstation
+description: x86_64 desktop/laptop with a discrete NVIDIA GPU
+
+device: auto          # auto | cuda | mps | cpu
+workers: 4            # DataLoader workers. 0 if you hit spawn problems on Windows.
+batch: null           # null -> derived from detected VRAM by device.suggested_batch
+amp: true
+
+# Cache redirection. ${REPO_ROOT} and ${DATA_ROOT} are substituted at load time.
+# Keeps multi-GB model/dataset caches off a full system drive.
+env:
+  HF_HOME: ${DATA_ROOT}/.cache/huggingface
+  TORCH_HOME: ${DATA_ROOT}/.cache/torch
+  ULTRALYTICS_DIR: ${DATA_ROOT}/.cache/ultralytics
+  YOLO_CONFIG_DIR: ${DATA_ROOT}/.cache/ultralytics

@@ -1,0 +1,15 @@
+# Hosted notebook (Colab / Kaggle). Ephemeral: nothing persists between sessions.
+# Set FISH_DATA_ROOT to mounted storage before running, or results are lost.
+name: colab
+description: Hosted Linux x86 notebook, T4/P100-class GPU
+
+device: cuda          # a hosted GPU runtime with no GPU is a misconfiguration; fail loudly
+workers: 2            # hosted runtimes are CPU-starved; more workers is usually slower
+batch: null
+amp: true
+
+env:
+  HF_HOME: ${DATA_ROOT}/.cache/huggingface
+  TORCH_HOME: ${DATA_ROOT}/.cache/torch
+  ULTRALYTICS_DIR: ${DATA_ROOT}/.cache/ultralytics
+  YOLO_CONFIG_DIR: ${DATA_ROOT}/.cache/ultralytics

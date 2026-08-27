@@ -1,0 +1,25 @@
+# FD-020 baseline. Single-class fish detection.
+# Every field here is recorded into the run directory, so a result is always
+# traceable to the config that produced it.
+name: yolov8n-640-baseline
+
+model: yolov8n.pt     # NOTE (FD-008): these COCO weights are AGPL-3.0, and the
+                      # resulting checkpoint inherits that. Decide the licence
+                      # position BEFORE relying on this for a shipped device.
+data: ozfish          # dataset key -> configs/data/<key>.yaml (built by FD-011)
+
+imgsz: 640
+epochs: 300           # upper bound; `patience` stops it. NOT a target.
+patience: 50          # early stop on val mAP. Never report an unconverged run.
+seeds: [0, 1, 2]      # FD-103: >=3 seeds for any comparison that drives a decision
+batch: null           # null -> derived from detected VRAM
+workers: null         # null -> from the machine profile
+amp: null             # null -> from the machine profile
+
+# Augmentation: Ultralytics defaults, mosaic closed for the final 10 epochs.
+# FD-023 (a full ablation) was cut -- effects are smaller than seed variance.
+close_mosaic: 10
+
+# Fixed at eval time, identical across every compared model (FD-005).
+val_conf: 0.001       # low, for mAP integration -- NOT the operating threshold
+val_iou: 0.7

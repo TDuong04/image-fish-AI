@@ -1,0 +1,15 @@
+# No GPU. Useful only for smoke-testing the pipeline (configs/train/smoke.yaml).
+# A real training run on CPU is ~100x slower and is not a supported workflow.
+name: cpu
+description: Any machine with no usable accelerator
+
+device: cpu
+workers: 0
+batch: 2
+amp: false
+
+env:
+  HF_HOME: ${DATA_ROOT}/.cache/huggingface
+  TORCH_HOME: ${DATA_ROOT}/.cache/torch
+  ULTRALYTICS_DIR: ${DATA_ROOT}/.cache/ultralytics
+  YOLO_CONFIG_DIR: ${DATA_ROOT}/.cache/ultralytics

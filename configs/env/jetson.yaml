@@ -1,0 +1,16 @@
+# Jetson Orin Nano. INFERENCE ONLY -- never train here.
+# Training deps (ultralytics, CUDA torch from PyPI) do not install on ARM64+JetPack.
+# See CLAUDE.md, "Jetson-specific packaging trap".
+name: jetson
+description: Jetson Orin Nano (ARM64, JetPack), inference only
+
+device: cuda
+workers: 2
+batch: 1
+amp: false            # inference runs through TensorRT, not torch AMP
+
+training_allowed: false
+
+env:
+  ULTRALYTICS_DIR: ${DATA_ROOT}/.cache/ultralytics
+  YOLO_CONFIG_DIR: ${DATA_ROOT}/.cache/ultralytics
