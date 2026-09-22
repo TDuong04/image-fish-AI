@@ -141,8 +141,37 @@ def main() -> int:
     restored = restore_previous_checkpoints()
     report["restored_runs"] = restored
 
+    # Snapshot what the clone (and any restored checkpoints) already carried, so
+    # the final report can distinguish inherited results from this session's.
+    runs_dir = repo / "runs"
+    pre_existing_runs = {d.name for d in runs_dir.glob("*")
+                         if d.is_dir() and (d / "metrics.json").exists()}
+    if pre_existing_runs:
+        print(f"inherited {len(pre_existing_runs)} run(s) with metrics from the clone; "
+              f"these are excluded from this session's report")
+
     py = sys.executable
-    sh([py, str(repo / "scripts" / "bootstrap.py")], cwd=repo, check=False)
+    # check=True: a failed install must stop the session here. Running it with
+    # check=False let bootstrap's "refusing to install into the system Python"
+    # pass silently, and training then died on `import ultralytics` after the
+    # data download had already run.
+    sh([py, str(repo / "scripts" / "bootstrap.py"), "--allow-system"], cwd=repo)
+
+    # Prove the install actually took before spending GPU hours on it.
+    probe = subprocess.run(
+        [py, "-c", "import ultralytics, torch; "
+                   "print(ultralytics.__version__, torch.__version__, torch.cuda.is_available())"],
+        capture_output=True, text=True, cwd=repo)
+    if probe.returncode != 0:
+        report["outcome"] = "setup_failed"
+        report["setup_error"] = (probe.stdout + probe.stderr)[-1500:]
+        out = (WORKING if IS_KAGGLE else repo) / "kaggle_report.json"
+        out.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        print("SETUP FAILED -- dependencies are not importable:")
+        print(probe.stdout + probe.stderr)
+        return 1
+    print(f"deps ok: ultralytics/torch/cuda = {probe.stdout.strip()}")
+
     sh([py, str(repo / "scripts" / "check_env.py")], cwd=repo, check=False)
     sh([py, str(repo / "scripts" / "get_data.py")], cwd=repo)
 
@@ -165,14 +194,19 @@ def main() -> int:
         report["supervisor"] = json.loads((sup / "summary.json").read_text())
     report["failures"] = [json.loads(f.read_text()) for f in sorted(sup.glob("*-failure.json"))]
 
-    # Final metrics per run, so results are readable without unpacking weights.
+    # Only runs produced by THIS session. The repo commits run provenance, so a
+    # clone arrives carrying previous machines' metrics.json -- reporting those
+    # made a failed session look like it had results.
     results = {}
     for m in sorted((repo / "runs").glob("*/metrics.json")):
+        if m.parent.name in pre_existing_runs:
+            continue
         try:
             results[m.parent.name] = json.loads(m.read_text())
         except json.JSONDecodeError:
             pass
     report["metrics"] = results
+    report["inherited_runs_ignored"] = sorted(pre_existing_runs)
 
     out = (WORKING if IS_KAGGLE else repo) / "kaggle_report.json"
     out.write_text(json.dumps(report, indent=2), encoding="utf-8")

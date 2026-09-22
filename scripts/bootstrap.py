@@ -13,6 +13,7 @@ script branches on platform so a teammate does not have to know that.
 from __future__ import annotations
 
 import argparse
+import os
 import platform
 import subprocess
 import sys
@@ -28,6 +29,34 @@ CUDA_INDEX = {
     "cu126": "https://download.pytorch.org/whl/cu126",
     "cpu": "https://download.pytorch.org/whl/cpu",
 }
+
+
+def is_managed_runtime() -> str | None:
+    """Kaggle / Colab / similar, where the system Python *is* the environment.
+
+    On a laptop, installing into the system interpreter is a mistake worth
+    blocking. In a disposable managed container there is no venv and creating
+    one is pointless -- so the same guard that protects a developer silently
+    breaks an unattended cloud run. Name the runtime instead of guessing.
+    """
+    if os.environ.get("KAGGLE_KERNEL_RUN_TYPE") or Path("/kaggle").exists():
+        return "kaggle"
+    if "COLAB_GPU" in os.environ or Path("/content").exists():
+        return "colab"
+    return None
+
+
+def torch_already_works() -> bool:
+    """True when the runtime ships a torch that already sees a GPU.
+
+    Kaggle and Colab preinstall a CUDA-matched torch. Reinstalling ours over it
+    wastes minutes and can leave a build that does not match the driver.
+    """
+    try:
+        import torch
+        return bool(torch.cuda.is_available())
+    except Exception:
+        return False
 
 
 def is_jetson() -> bool:
@@ -86,6 +115,8 @@ def main() -> int:
     ap.add_argument("--edge", action="store_true", help="install inference-only deps (Jetson)")
     ap.add_argument("--dev", action="store_true", help="also install dev/test deps")
     ap.add_argument("--cpu", action="store_true", help="force the CPU-only torch wheel")
+    ap.add_argument("--allow-system", action="store_true",
+                    help="install into the system Python (managed runtimes only)")
     args = ap.parse_args()
 
     pyver = sys.version_info[:2]
@@ -100,15 +131,22 @@ def main() -> int:
         print("  python3.10 -m venv .venv                 # Linux / macOS")
         return 1
 
+    managed = is_managed_runtime()
+    if managed:
+        print(f"Runtime : {managed} (managed container -- system Python IS the environment)")
+
     if sys.prefix == getattr(sys, "base_prefix", sys.prefix):
-        print("\nWARNING: not inside a virtual environment. Create one first:")
-        print("  python -m venv .venv")
-        print("  .venv\\Scripts\\activate     (Windows)")
-        print("  source .venv/bin/activate   (Linux / macOS)")
-        if not args.dry_run:
-            print("\nRefusing to install into the system Python. Re-run inside a venv,")
-            print("or pass --dry-run to see the commands.")
-            return 1
+        if managed or args.allow_system:
+            print("Installing into the system Python, which is correct here.")
+        else:
+            print("\nWARNING: not inside a virtual environment. Create one first:")
+            print("  python -m venv .venv")
+            print("  .venv\\Scripts\\activate     (Windows)")
+            print("  source .venv/bin/activate   (Linux / macOS)")
+            if not args.dry_run:
+                print("\nRefusing to install into the system Python. Re-run inside a venv,")
+                print("pass --allow-system if you mean it, or --dry-run for the commands.")
+                return 1
 
     pip = [sys.executable, "-m", "pip"]
     run([*pip, "install", "--upgrade", "pip"], args.dry_run)
@@ -142,10 +180,17 @@ def main() -> int:
         else:
             print(f"Detected CUDA driver -> torch wheel index: {tag}")
 
-    torch_cmd = [*pip, "install", "torch", "torchvision"]
-    if not (tag == "cpu" and platform.system() == "Darwin"):
-        torch_cmd += ["--index-url", CUDA_INDEX[tag]]
-    run(torch_cmd, args.dry_run)
+    if managed and torch_already_works():
+        # Kaggle and Colab ship a CUDA-matched torch. Replacing it costs minutes
+        # and risks a wheel that does not match the container's driver.
+        import torch
+        print(f"Keeping the runtime's torch {torch.__version__} "
+              f"(CUDA already available) -- not reinstalling.")
+    else:
+        torch_cmd = [*pip, "install", "torch", "torchvision"]
+        if not (tag == "cpu" and platform.system() == "Darwin"):
+            torch_cmd += ["--index-url", CUDA_INDEX[tag]]
+        run(torch_cmd, args.dry_run)
     run([*pip, "install", "-r", str(REPO_ROOT / "requirements-train.txt")], args.dry_run)
     if args.dev:
         run([*pip, "install", "-r", str(REPO_ROOT / "requirements-dev.txt")], args.dry_run)
