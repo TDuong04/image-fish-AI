@@ -123,14 +123,16 @@ def get_status(plan: dict) -> dict:
     text = out.strip()
     low = text.lower()
 
-    # Check auth failures FIRST. A permission error is not "no kernel yet" --
-    # conflating them would make `cycle` push a new version every tick while
-    # credentials are broken.
-    if any(s in low for s in ("authentication required", "permission",
-                              "denied", "401", "403", "unauthorized")):
+    # Only the CLI's own "authentication required" banner means broken
+    # credentials. Kaggle answers a kernel that does not exist yet with
+    # "Permission 'kernels.get' was denied" rather than a 404, so treating any
+    # permission wording as an auth failure would stall the very first push --
+    # which is exactly what it did before this was split out.
+    if "authentication required" in low or "unauthorized" in low:
         return {"status": "auth_error", "raw": text[:500]}
 
-    if "not found" in low or "404" in low:
+    if ("not found" in low or "404" in low
+            or "cannot access kernel" in low or "kernels.get" in low):
         return {"status": "absent", "raw": text[:500]}
 
     for word in ("complete", "running", "queued", "error", "cancelrequested"):

@@ -1,0 +1,13 @@
+{
+  "id": "hunhthidng04/fish-detection-train",
+  "title": "fish-detection-train",
+  "code_file": "fish-detection-train.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": false,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}
