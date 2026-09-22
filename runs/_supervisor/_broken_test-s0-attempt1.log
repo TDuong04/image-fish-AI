@@ -1,0 +1,20 @@
+config  : _broken_test
+profile : workstation
+seeds   : [0]
+
+--- 20260922-broken-test-s0 ---
+  model     : yolov8n.pt
+  data      : does_not_exist
+  imgsz     : 320
+  epochs    : 1
+  patience  : (default)
+  batch     : 64
+  workers   : 4
+  amp       : True
+  device    : cuda (NVIDIA GeForce RTX 4060 Laptop GPU, 8.0 GB)
+
+Dataset config 'does_not_exist' not found at configs/data/does_not_exist.yaml.
+
+The dataset is not set up on this machine yet. See docs/TRAINING.md
+step 4, and ticket FD-011 (dataset conversion) in docs/tickets/BACKLOG.md.
+Nothing has been downloaded -- this is expected on a fresh checkout.

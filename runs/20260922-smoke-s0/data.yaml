@@ -1,0 +1,5 @@
+path: D:\[github] - projects\Fish_Detection\data\processed\smoke
+train: images/train
+val: images/val
+names:
+  0: fish

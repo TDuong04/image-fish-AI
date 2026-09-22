@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 import sys
 from datetime import datetime, timezone
@@ -93,7 +94,8 @@ def set_seed(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
-def train_one(cfg: dict, profile: dict, seed: int, dry_run: bool) -> Path | None:
+def train_one(cfg: dict, profile: dict, seed: int, dry_run: bool,
+              resume: bool = False) -> Path | None:
     # Checked before device resolution so the message names the real reason
     # rather than failing on a CUDA probe first.
     if profile.get("training_allowed") is False and not dry_run:
@@ -108,9 +110,16 @@ def train_one(cfg: dict, profile: dict, seed: int, dry_run: bool) -> Path | None
     except RuntimeError as exc:
         raise SystemExit(f"\n{exc}") from None
 
-    batch = cfg.get("batch") or profile.get("batch")
-    if batch is None:
-        batch = suggested_batch(device, cfg.get("imgsz", 640), Path(cfg["model"]).stem)
+    # $FISH_BATCH lets a supervisor retry an OOM with a smaller batch without
+    # rewriting the committed config (see scripts/supervise.py).
+    batch_env = os.environ.get("FISH_BATCH")
+    if batch_env:
+        batch = int(batch_env)
+        print(f"  (batch overridden to {batch} by $FISH_BATCH)")
+    else:
+        batch = cfg.get("batch") or profile.get("batch")
+        if batch is None:
+            batch = suggested_batch(device, cfg.get("imgsz", 640), Path(cfg["model"]).stem)
     workers = cfg.get("workers")
     if workers is None:
         workers = profile.get("workers", 4)
@@ -135,8 +144,11 @@ def train_one(cfg: dict, profile: dict, seed: int, dry_run: bool) -> Path | None
     }
 
     print(f"\n--- {run_name} ---")
+    # .get(), not [] -- these keys are optional in a config and defaulted at the
+    # point of use, so indexing them here turned a missing key into a KeyError
+    # traceback before any real validation ran.
     for key in ("model", "data", "imgsz", "epochs", "patience", "batch", "workers", "amp"):
-        print(f"  {key:10s}: {resolved[key]}")
+        print(f"  {key:10s}: {resolved.get(key, '(default)')}")
     print(f"  {'device':10s}: {device}")
 
     if dry_run:
@@ -154,25 +166,37 @@ def train_one(cfg: dict, profile: dict, seed: int, dry_run: bool) -> Path | None
 
     from ultralytics import YOLO
 
-    model = YOLO(cfg["model"])
-    results = model.train(
-        data=str(data_yaml),
-        epochs=cfg.get("epochs", 300),
-        patience=cfg.get("patience", 50),
-        imgsz=cfg.get("imgsz", 640),
-        batch=batch,
-        workers=workers,
-        amp=amp,
-        device=device.ultralytics,
-        seed=seed,
-        deterministic=True,
-        close_mosaic=cfg.get("close_mosaic", 10),
-        project=str(paths.RUNS_ROOT),
-        name=run_name,
-        exist_ok=True,
-        val=True,
-        **(cfg.get("extra") or {}),
-    )
+    # Resume picks up from the interrupted run's own last.pt, which carries the
+    # optimizer and epoch counter. Ultralytics rejects every other argument when
+    # resuming -- they are restored from the checkpoint -- so the call shapes
+    # differ and must not be merged.
+    last = run_dir / "weights" / "last.pt"
+    if resume and last.exists():
+        print(f"  resuming from {paths.rel(last)}")
+        model = YOLO(str(last))
+        results = model.train(resume=True)
+    else:
+        if resume:
+            print("  (--resume asked, but no last.pt yet -- starting fresh)")
+        model = YOLO(cfg["model"])
+        results = model.train(
+            data=str(data_yaml),
+            epochs=cfg.get("epochs", 300),
+            patience=cfg.get("patience", 50),
+            imgsz=cfg.get("imgsz", 640),
+            batch=batch,
+            workers=workers,
+            amp=amp,
+            device=device.ultralytics,
+            seed=seed,
+            deterministic=True,
+            close_mosaic=cfg.get("close_mosaic", 10),
+            project=str(paths.RUNS_ROOT),
+            name=run_name,
+            exist_ok=True,
+            val=True,
+            **(cfg.get("extra") or {}),
+        )
 
     metrics = {}
     box = getattr(getattr(results, "box", None), "__dict__", {})
@@ -201,6 +225,8 @@ def main() -> int:
                     help="run a single seed instead of every seed in the config")
     ap.add_argument("--dry-run", action="store_true",
                     help="resolve and print settings without training")
+    ap.add_argument("--resume", action="store_true",
+                    help="continue an interrupted run from its last.pt instead of restarting")
     args = ap.parse_args()
 
     try:
@@ -219,7 +245,8 @@ def main() -> int:
     if len(seeds) == 1 and args.seed is None:
         print("NOTE: a single seed does not support a comparison between models (FD-103).")
 
-    run_dirs = [d for s in seeds if (d := train_one(cfg, profile, s, args.dry_run))]
+    run_dirs = [d for s in seeds
+                if (d := train_one(cfg, profile, s, args.dry_run, args.resume))]
 
     if len(run_dirs) > 1:
         maps = []
