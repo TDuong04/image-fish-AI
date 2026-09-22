@@ -9,5 +9,7 @@
   "enable_internet": true,
   "dataset_sources": [],
   "competition_sources": [],
-  "kernel_sources": []
+  "kernel_sources": [
+    "hunhthidng04/fish-detection-train"
+  ]
 }

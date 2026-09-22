@@ -143,12 +143,18 @@ def main() -> int:
 
     # Snapshot what the clone (and any restored checkpoints) already carried, so
     # the final report can distinguish inherited results from this session's.
+    # Keyed by name AND content: run directories are named by UTC date, so a
+    # session can legitimately write to the same name as an inherited run. A
+    # name-only check silently discarded that session's real result.
     runs_dir = repo / "runs"
-    pre_existing_runs = {d.name for d in runs_dir.glob("*")
-                         if d.is_dir() and (d / "metrics.json").exists()}
+    pre_existing_runs = {}
+    for d in runs_dir.glob("*"):
+        m = d / "metrics.json"
+        if d.is_dir() and m.exists():
+            pre_existing_runs[d.name] = m.read_bytes()
     if pre_existing_runs:
         print(f"inherited {len(pre_existing_runs)} run(s) with metrics from the clone; "
-              f"these are excluded from this session's report")
+              f"excluded from this session's report unless this session rewrites them")
 
     py = sys.executable
     # check=True: a failed install must stop the session here. Running it with
@@ -199,14 +205,16 @@ def main() -> int:
     # made a failed session look like it had results.
     results = {}
     for m in sorted((repo / "runs").glob("*/metrics.json")):
-        if m.parent.name in pre_existing_runs:
-            continue
+        raw = m.read_bytes()
+        if pre_existing_runs.get(m.parent.name) == raw:
+            continue  # unchanged since the clone -- genuinely inherited
         try:
-            results[m.parent.name] = json.loads(m.read_text())
-        except json.JSONDecodeError:
+            results[m.parent.name] = json.loads(raw.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
             pass
     report["metrics"] = results
-    report["inherited_runs_ignored"] = sorted(pre_existing_runs)
+    report["inherited_runs_ignored"] = sorted(
+        n for n in pre_existing_runs if n not in results)
 
     out = (WORKING if IS_KAGGLE else repo) / "kaggle_report.json"
     out.write_text(json.dumps(report, indent=2), encoding="utf-8")
