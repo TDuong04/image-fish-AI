@@ -1,0 +1,34 @@
+username: thaiduong1
+kernel: fish-detection-train
+private: false
+current: 0
+steps:
+- config: smoke
+  seeds:
+  - 0
+  max_hours: 1.0
+  note: pipeline check on Kaggle hardware before spending real hours
+- config: yolov8n_640
+  seeds:
+  - 0
+  max_hours: 10.5
+- config: yolov8n_640
+  seeds:
+  - 1
+  max_hours: 10.5
+- config: yolov8n_640
+  seeds:
+  - 2
+  max_hours: 10.5
+- config: yolov8n_960
+  seeds:
+  - 0
+  max_hours: 10.5
+- config: yolov8n_960
+  seeds:
+  - 1
+  max_hours: 10.5
+- config: yolov8n_960
+  seeds:
+  - 2
+  max_hours: 10.5
