@@ -23,3 +23,6 @@ __pycache__/
 *.weights
 *.tar
 *.zip
+
+# Personal files that are not part of this project
+creativity_marks_appeal.md
