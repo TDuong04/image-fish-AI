@@ -38,3 +38,4 @@ creativity_marks_appeal.md
 # a sample clip from consecutive DeepFish frames in a few seconds.
 *.mp4
 /demo/demo_data.json
+/demo/device_data.json
