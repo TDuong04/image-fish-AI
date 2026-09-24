@@ -33,3 +33,8 @@ creativity_marks_appeal.md
 # reports them as if the remote session had just produced them.
 /runs/_supervisor/
 /runs/_kaggle/
+
+# Demo media: derived from the dataset and large. demo/app.py regenerates
+# a sample clip from consecutive DeepFish frames in a few seconds.
+*.mp4
+/demo/demo_data.json
