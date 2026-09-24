@@ -1,0 +1,23 @@
+name: yolov8n-640
+model: yolov8n.pt
+data: deepfish
+imgsz: 640
+epochs: 150
+patience: 30
+seeds:
+- 0
+- 1
+- 2
+batch: 52
+workers: 2
+amp: true
+close_mosaic: 10
+val_conf: 0.001
+val_iou: 0.7
+extra:
+  plots: true
+seed: 1
+device: '0'
+device_resolved: cuda (Tesla T4, 14.6 GB)
+fish_env: colab
+run_dir: runs/20260922-yolov8n-640-s1

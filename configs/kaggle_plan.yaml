@@ -1,7 +1,7 @@
 username: hunhthidng04
 kernel: fish-detection-train
 private: false
-current: 1
+current: 7
 steps:
 - config: smoke
   seeds:

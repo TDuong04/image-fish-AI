@@ -13,7 +13,8 @@ __pycache__/
 /runs/**/weights/
 /runs/**/*.jpg
 /runs/**/*.png
-/runs/**/*.csv
+# results.csv is the epoch-by-epoch curve -- ~15 KB and the only evidence that
+# a run converged rather than being truncated. Keep it.
 /runs/**/*.yaml.bak
 
 *.pt
