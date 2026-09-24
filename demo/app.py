@@ -180,7 +180,7 @@ def build_ui(default_model: int) -> gr.Blocks:
     ck = available_checkpoints()
     found = ", ".join(f"{k}px" for k in sorted(ck)) or "none found"
 
-    with gr.Blocks(title="Fish Detector", theme=gr.themes.Soft()) as ui:
+    with gr.Blocks(title="Fish Detector") as ui:
         gr.Markdown(
             "# Fish Detector\n"
             "Drop in a photo or a clip and watch the model work. These are the real trained "
@@ -252,7 +252,9 @@ def main() -> int:
             f"No checkpoints in {paths.rel(paths.MODELS_ROOT)}/.\n"
             f"Copy a trained best.pt there, named like 'yolov8n-960-s0.pt'."
         )
+    # Gradio 6 moved `theme` from the Blocks constructor to launch().
     build_ui(args.model).launch(server_port=args.port, share=args.share,
+                                theme=gr.themes.Soft(),
                                 inbrowser=not args.share)
     return 0
 
