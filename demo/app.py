@@ -249,8 +249,10 @@ def main() -> int:
 
     if not available_checkpoints():
         raise SystemExit(
-            f"No checkpoints in {paths.rel(paths.MODELS_ROOT)}/.\n"
-            f"Copy a trained best.pt there, named like 'yolov8n-960-s0.pt'."
+            f"No model files found in {paths.rel(paths.MODELS_ROOT)}/.\n"
+            f"The trained models are not stored in git. Get the .pt files from a teammate\n"
+            f"and put them in that folder (names like '20260922-yolov8n-960-s0.pt' -- the\n"
+            f"name must contain '-640-' or '-960-')."
         )
     # Gradio 6 moved `theme` from the Blocks constructor to launch().
     build_ui(args.model).launch(server_port=args.port, share=args.share,
