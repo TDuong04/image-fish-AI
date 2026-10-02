@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import cv2  # noqa: E402
 import gradio as gr  # noqa: E402
+import imageio  # noqa: E402
 import numpy as np  # noqa: E402
 
 from fish import paths  # noqa: E402
@@ -126,9 +127,15 @@ def run_video(video, imgsz_choice, conf, stride, max_seconds, progress=gr.Progre
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     limit = int(fps_in * max_seconds) if max_seconds else total
 
+    # H.264 via imageio's bundled ffmpeg, NOT cv2.VideoWriter. OpenCV's "mp4v"
+    # writes MPEG-4 Part 2, which browsers and the Gradio player cannot decode --
+    # the file saves fine and then will not play. OpenCV cannot write H.264 here
+    # either (no OpenH264 DLL), so it has to be ffmpeg.
     out_path = str(Path(video).with_name(Path(video).stem + f"_detected_{sz}.mp4"))
-    writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"),
-                             fps_in / max(1, stride), (w, h))
+    writer = imageio.get_writer(out_path, fps=max(1.0, fps_in / max(1, stride)),
+                                codec="libx264", quality=7,
+                                macro_block_size=1,   # don't silently resize odd dimensions
+                                pixelformat="yuv420p")  # the format browsers decode
 
     counts, times, i, kept = [], [], 0, 0
     while True:
@@ -143,13 +150,14 @@ def run_video(video, imgsz_choice, conf, stride, max_seconds, progress=gr.Progre
             boxes = r.boxes.xyxy.cpu().numpy()
             confs = r.boxes.conf.cpu().numpy()
             counts.append(len(boxes))
-            writer.write(draw(frame, boxes, confs, sz, False))
+            writer.append_data(
+                cv2.cvtColor(draw(frame, boxes, confs, sz, False), cv2.COLOR_BGR2RGB))
             kept += 1
             if total:
                 progress(min(i / min(limit, total), 1.0), desc=f"frame {i}")
         i += 1
     cap.release()
-    writer.release()
+    writer.close()
 
     if not counts:
         raise gr.Error("No frames were processed.")
