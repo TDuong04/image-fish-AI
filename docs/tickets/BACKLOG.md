@@ -825,3 +825,5 @@ nothing is compared on fewer than 3 seeds. The sealed OzFish set is used only fo
 | FD-133 | Explain the 43 confident top-left-corner boxes at site 7398 (F11) | TODO |
 | FD-134 | Larger models (YOLOv8s/m, YOLO11) and non-AGPL models (YOLOX, NanoDet-Plus), after FD-129/130 and the FD-008 licence decision | IN PROGRESS: YOLOv8s, YOLOv8m, YOLO11s at 960, seed 0, queued on `ai-gpu` (started early at the user's request, because the FD-129 screens looked marginal); non-AGPL models not started |
 | FD-113 | Full OzFish training set: needs a person to open the portal in a browser | BLOCKED on the user |
+| FD-135 | **Kakadu dataset as extra training data** (Zenodo 7250921, CC BY 4.0, 44k frames, 5.9 GB): download, collapse 23 species to one class, group frames by video, split by site/video, audit, then train. Replaces dependence on Pawsey for scene diversity. | TODO, needs a go-ahead for the 5.9 GB download |
+| FD-136 | **NOAA Puget Sound (LILA) empty frames** as hard negatives and an empty-frame false-alarm test (FD-024, FD-130). Check size first. | TODO |

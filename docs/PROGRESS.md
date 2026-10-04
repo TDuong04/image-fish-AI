@@ -507,6 +507,15 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
   Australian Institute of Marine Science, University of Western Australia and Curtin University (2019), OzFish Dataset,
   https://doi.org/10.25845/5e28f062c5097. An earlier chat estimate of "about 7x the images" was wrong; it was never in
   these docs.
+- **Other open fish-detection datasets found (2026-10-04, not downloaded, figures from a curated third-party list and
+  the Zenodo page, to be verified at the source).** No third-party mirror of OzFish exists on HuggingFace, Kaggle or
+  Zenodo (searched). Candidates with direct downloads and open licences: **Kakadu** (Zenodo 7250921; 44,112 optical
+  1920x1080 frames from remote underwater video in northern Australia, 82,904 boxes, 23 species to be collapsed to one
+  class, COCO format, CC BY 4.0, training zip 5.9 GB); **NOAA Puget Sound Nearshore Fish** (LILA; 77,739 images,
+  67,990 boxes, CDLA-permissive 1.0, so many empty frames: a source of hard negatives and of a false-alarm test);
+  **PomerFish** (Zenodo, CC BY 4.0), **OBSEA** (Zenodo, CC BY 4.0), **Brackish** (Kaggle, CC BY-SA 4.0, share-alike).
+  Excluded by licence: TORSI (CC BY-NC-SA). Whatever is used needs the same site/video-level split and leakage check as
+  DeepFish, because all of it is video frames.
 - **Label audit is one reviewer's sample** (F11: 48 missed, 24 found, 36 false alarms). A second reviewer, and a larger sample outside site 7398, would firm it up; it is not a blocker for the small-fish experiments.
 - **Error analysis covers one seed per size and DeepFish validation only.** It has not been run on the OzFish set (sealed; would need a decision about analysing without tuning).
 - **No ONNX / TensorRT export or parity check.**
