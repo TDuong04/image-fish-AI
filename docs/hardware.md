@@ -102,15 +102,20 @@ was touched and deleting them undoes it:
 ```bash
 cd ~/fish-detection
 PYTHONPATH=$HOME/fish-detection/pylibs:$HOME/fish-detection/pylibs-ui:$HOME/fish-detection \
-  python3 app.py --engines-dir engines          # binds 127.0.0.1:7860
-# from your computer:
+  python3 app.py --engines-dir engines          # binds 0.0.0.0:7860 (default)
+# from any computer on the same network:  http://<board-address>:7860
+# private alternative: add --host 127.0.0.1 and tunnel from your computer:
 ssh -N -L 7861:127.0.0.1:7860 <user>@<board-address>     # then open http://127.0.0.1:7861
 ```
 
-**Why a tunnel and not the network address.** The app listens on localhost only. When it was bound to all
-interfaces, connections from another machine on the network **silently timed out** on port 7860 while SSH
-(port 22) worked, which points to a firewall on the board dropping everything but SSH. That was not changed:
-opening the port would expose an app with no login to the whole network. `--host 0.0.0.0` exists as an opt-in.
+**Network access and its risk.** The app has **no login**: anyone who can reach the port can run inference on the
+board. `ufw` is active with default deny; it currently allows 22, 3000, 7860 and 7861 (read with `ufw status`;
+those rules were not added by this project). At an earlier check 7860 was not allowed and connections silently
+timed out. Use `--host 127.0.0.1` with the tunnel above on any network you do not control. `7861` is only the
+tunnel's port on your own computer; nothing listens on it on the board.
+
+**Long runs.** `edge/sustained.py` logs throughput against temperature, fan, clocks and power for N minutes. Start
+it with `setsid nohup ... &` so it survives the SSH session, and do not use the app meanwhile.
 
 **Do not kill processes by name on this board.** NVIDIA's own system services (`nvpmodel_indicator`,
 `nvidiaPvaAllowd`) run as `python3`. Find the PID from the port owner (`ss -ltnp | grep :7860`) and kill that.

@@ -38,7 +38,7 @@ FD-127 trivial baselines (not started; COCO zero-shot and predict-nothing still 
 **Not started — and blocking the deployment half of the thesis**
 FD-040 provisioning (the board is already set up; swap and SSH details were not recorded) ·
 E3 beyond FP16 (INT8 with explicit quantisation, NMS placement) ·
-E4 beyond a serial end-to-end measurement (FD-044 sustained throughput and thermals, FD-045 memory, NVDEC decode, optimising the CPU stages that dominate a frame) ·
+E4 beyond a serial end-to-end measurement (FD-044 other power modes and a repeat of the sustained run, FD-045 memory, NVDEC decode, optimising the CPU stages that dominate a frame) ·
 FD-008 licence decision · FD-024 false-alarm rate on empty frames · FD-105 annotation-quality audit
 
 **New since the plan was written, not ticketed originally**
@@ -691,7 +691,8 @@ consequences, none previously ticketed:
 **Do:** SORT / ByteTrack, no appearance model — near-free on CPU. Report MaxN per clip alongside
 detection metrics, and the FP reduction from track filtering.
 
-## FD-044 · Power mode and thermal characterisation · P1 · TODO **[corrected]**
+## FD-044 · Power mode and thermal characterisation · P1 · PARTLY DONE **[corrected]**
+**Status:** one 30-min sustained run done at 960 / 25 W, 34 fps flat, plateau 56 C (PROGRESS F9). Not done: the other power modes ± `jetson_clocks`, 640, a repeat, a warmer ambient, an explained GPU-clock reading.
 **Why:** An FPS number without a power mode is meaningless, and a short benchmark hides
 throttling — a passively cooled Orin can lose a large fraction of throughput after minutes.
 **[corrected]** CLAUDE.md previously asserted "power mode changes FPS by 2–3×." That is

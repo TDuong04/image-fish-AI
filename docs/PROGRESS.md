@@ -20,7 +20,7 @@ Last updated: 2026-10-04.
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
 | Automation | Crash-recovering supervisor and a Kaggle session runner. |
-| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** **End to end, a serial pipeline takes about 33 ms per frame at 640 and 41 ms at 960 (about 30 and 24 fps), and a web app runs on the board** (`edge/app.py`). Not yet measured: sustained throughput, hardware video decode, INT8, on-device mAP. The deployment half of the thesis is only partly answered. |
+| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** **End to end, a serial pipeline takes about 33 ms per frame at 640 and 41 ms at 960 (about 30 and 24 fps), and a web app runs on the board** (`edge/app.py`). **A 30-minute sustained run held about 34 fps at 960 with no throttling (F9, one run, 25 W mode, ambient 26 C assumed).** Not yet measured: hardware video decode, INT8, on-device mAP, other power modes. The deployment half of the thesis is only partly answered. |
 | Report | `report_sections.md` still describes the older LCFCN *counting* experiment, not this work. Needs rewriting. |
 
 ---
@@ -79,10 +79,16 @@ Last updated: 2026-10-04.
 - `edge/app.py` — the web app for the board: photo tab (640 vs 960, median of 7 warm runs, stage timings) and
   video tab (MaxN, per-frame CSV, the frame with the most fish). It deliberately writes **no annotated video**,
   because the Orin Nano has no hardware encoder. Shows the board's power mode, temperature and fan next to every
-  timing. Reached through an SSH tunnel; setup is in `docs/hardware.md`.
+  timing. Listens on `0.0.0.0:7860` by default (no login; `--host 127.0.0.1` plus an SSH tunnel keeps it private);
+  setup is in `docs/hardware.md`.
+- `edge/sustained.py` — runs on the board; loops one clip through the same decode, letterbox, GPU and NMS path as
+  `edge/trt_runner.py` for N minutes and writes one JSON line per 10 s window: fps, total / decode / copy+GPU
+  latency (median and p95), mean detections, all thermal zones, fan RPM, GPU/CPU clocks and input power from
+  sysfs (no sudo). Unreadable fields are `null`, never guessed. It changes no power mode and locks no clocks; the
+  state is recorded in the first line. Ambient temperature cannot be read and is added by hand.
 
 ### Safety net
-- 161 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
+- 164 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
   `__main__` guards, and `tests/test_docs.py`, which fails if a committed result run or a script
   is not named in this file — the mechanical half of the documentation rule in `CLAUDE.md`.
 
@@ -277,8 +283,39 @@ A crowded OzFish frame (7 and 10 detections) totals 32.4 ms and 40.9 ms, within 
 the hardware can do. JPEG decode is not video decode; the app's video tab uses software H.264 decode (it
 reported about 8.6 ms per frame on the sample clip) and the board's hardware decoder (NVDEC) is **not used**, so
 real video throughput could be better. One image per case, warm in the page cache. Junction temperature stayed at
-49 to 50 C because the GPU is idle most of each frame, so this is **not** a sustained-load test. Both engines are
+49 to 50 C because the GPU is idle most of each frame, so this is **not** a sustained-load test (see F9). Both engines are
 from seed 2.
+
+### F9. A 30-minute run at 960 held its frame rate; temperature plateaued at about 56 C
+`edge/sustained.py` on the board: 960 engine (`20260923-yolov8n-960-s2-544x960-fp16.engine`) looping
+`sample_clip.mp4`, serial pipeline with software H.264 decode, **nvpmodel 25W** (not MAXN_SUPER), clocks not
+locked, fan on, governor `schedutil`. Started 07:20:24Z, ended 07:50:24Z, 179 ten-second windows. **Ambient 26 C,
+assumed by the user, not measured.** The web app was running but idle. Log: `runs/device-20261004/sustained_960.jsonl`.
+
+| | First 2 min | Last 2 min |
+|---|---|---|
+| Frames per second (mean of windows) | 34.16 | 33.99 |
+| Total p50 / p95 per frame | 28.6 / 30.2 ms | 28.8 / 29.9 ms |
+| Junction temperature (mean) | 51.7 C | 56.5 C |
+
+- **Throughput did not decay.** Per-window fps: min 33.03, median 34.14, max 35.08; first and last 2 minutes
+  differ by 0.5%, inside the window-to-window spread. No throttling is visible at this load and ambient.
+- **Temperature climbed then flattened.** Junction 49.5 C at start, 56.9 C maximum, 56.6 C at the end; slope over
+  the last 15 min is +0.03 C/min. The fan rose from 1566 to 2089 RPM to hold it.
+- **Input power 6.5 to 7.1 W** (INA3221 channel 1; the channel mapping is assumed, not checked against a meter).
+  CPU core 0 ran 730 to 1344 MHz under `schedutil`.
+- **The GPU clock reading is not usable.** `gpu_mhz` read 306 in all 179 windows against a 918 max, while the GPU
+  was demonstrably working. The sysfs node was either not the live clock or was sampled while idle; it is
+  recorded as unexplained and **no claim about GPU clocks is made**. Throughput flat at constant temperature is the
+  evidence offered, not clocks.
+- **Not comparable stage-for-stage with F8.** 34 fps here against 24.5 fps at 960 in F8 is mostly decode: 8.4 ms
+  H.264 video against 17.5 ms JPEG in F8, from different source frames. The GPU stage (copy + forward) is 14.2 ms
+  here against 14.4 ms in F8.
+
+**Limits.** One run, one clip, one engine (seed 2), 960 only, 25 W mode only, serial pipeline. Load is a light
+duty cycle (the GPU idles for part of each frame), so a heavier pipeline, MAXN_SUPER or a warmer room may behave
+differently. Mean detections per frame is about 1.5, so NMS load is trivial. Not repeated, so run-to-run spread is
+unknown.
 
 ---
 
@@ -324,6 +361,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Parity results held numpy `float32` values | A passing check printed PASS, then crashed writing its result, leaving no record | The first real engine run |
 | `trtexec --warmUp=0` intermittently exports no output | Looked like per-frame failures (1 of 12, then 10 of 12, succeeded); the same frame worked on re-run | Re-running a "failing" frame by hand |
 | Parity-set label counted OzFish frames by an `A0` filename prefix | Reported 1 OzFish frame when 4 were used (OzFish names also start with E and G) | Listing the actual frames |
+| `docs/hardware.md` said the board's firewall drops everything but SSH and documented the app as localhost-only | The code default is `--host 0.0.0.0`. The timeout was real at the time; `ufw` now lists allow rules for 7860 and 7861 (not added by this work), and direct access works. | A user could not reach the app on the board's address; `ufw status` |
 | `fish.parity.nms()` modified the array it was given | Ultralytics' NMS converts boxes xywh to xyxy in place and `torch.from_numpy` shares memory, so the caller's raw output was silently overwritten and a second decoder converted it twice (boxes like `[167, 52, 628, 248]`). Fixed with a copy and a regression test. | Cross-checking the edge decoder against it |
 | `cuda-python` pinned at 12.6.2 | That release was yanked by its maintainers. Replaced by 12.6.2.post1. | pip's yanked-version warning |
 | `pkill -f "python3 app.py"` run over SSH | It matched the SSH session's own command line and killed it (exit 255). The bracket trick fails too when the pattern also appears elsewhere in the command. Kill by PID found from the port owner, never by name: NVIDIA's system services also run as `python3`. | Two failed launches |
@@ -332,7 +370,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 
 ## 8. Not done / open
 
-- **Device measurement is only partly done.** GPU kernel time is measured for both engines (F6) and parity holds on 12 frames (F7). End-to-end latency is measured for a serial pipeline (F8). Still unmeasured: **sustained throughput and thermals** over 30+ minutes, **hardware video decode (NVDEC)**, memory under a real pipeline, any **overlap or pinned-memory optimisation** of the CPU stages that dominate, INT8, and **mAP on the device**. Engines exist only for seed 2, and the board boots from an SD card with about 8 GB free.
+- **Device measurement is only partly done.** GPU kernel time is measured for both engines (F6) and parity holds on 12 frames (F7). End-to-end latency is measured for a serial pipeline (F8). Sustained 30-min throughput and thermals are measured once at 960 / 25 W (F9); still open: other power modes, a repeat, a warmer ambient, an explained GPU-clock reading, **hardware video decode (NVDEC)**, memory under a real pipeline, any **overlap or pinned-memory optimisation** of the CPU stages that dominate, INT8, and **mAP on the device**. Engines exist only for seed 2, and the board boots from an SD card with about 8 GB free.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
 - **No hue-augmentation retraining** (F4 hypothesis).
@@ -355,6 +393,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Engine provenance, build and benchmark logs, parity results | `runs/device-20261004/` (`engine_registry.json` links each engine to its ONNX, checkpoint, TensorRT and L4T) |
 | ONNX export manifest | `docs/onnx_manifest.json` |
 | End-to-end per-stage timing logs | `runs/device-20261004/e2e_*.log` |
+| 30-minute sustained run (F9) | `runs/device-20261004/sustained_960.jsonl` |
 | Weights | GitHub release `v0.1.0-models` (not in git) |
 | Checksums | `docs/model_manifest.json` |
 | Evaluation contract | `docs/eval_protocol.md` |

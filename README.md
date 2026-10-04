@@ -3,8 +3,8 @@
 Finds fish in underwater video with a box around each one, using a model small enough
 for a Jetson Orin Nano. **Status:** trained and evaluated on a desktop GPU, and running on
 a Jetson Orin Nano (8 GB) as TensorRT FP16 engines. End to end, a simple serial pipeline
-takes about 33 ms per frame at 640 px and 41 ms at 960 px. Sustained load, the hardware
-video decoder and INT8 are not measured yet. Details: `docs/PROGRESS.md`.
+takes about 33 ms per frame at 640 px and 41 ms at 960 px, and held about 34 fps at 960 for
+30 minutes on a video clip (one run). The hardware video decoder and INT8 are not measured yet. Details: `docs/PROGRESS.md`.
 
 ## 1. Set up (once)
 
@@ -58,15 +58,16 @@ board they were built on, so they are built there (`edge/build_engines.py`); set
 
 ```bash
 # on the Jetson
-python3 edge/app.py --engines-dir engines        # serves 127.0.0.1:7860 only
+python3 edge/app.py --engines-dir engines        # serves 0.0.0.0:7860
 
-# on your computer
+# on a computer on the same network: open http://<jetson-address>:7860
+# private option: run with --host 127.0.0.1, then on your computer
 ssh -N -L 7861:127.0.0.1:7860 <user>@<jetson-address>
-# then open http://127.0.0.1:7861
+# and open http://127.0.0.1:7861
 ```
 
-It is reached through an SSH tunnel on purpose: the app has no login, so it is not
-exposed to the network. Timings shown there are measured on the board, with its power
+The app has no login, so anyone on the network can use it; use the tunnel option on a
+network you do not trust. Timings shown there are measured on the board, with its power
 mode and temperature displayed next to them.
 
 ## 3. Train
