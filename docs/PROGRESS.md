@@ -495,6 +495,18 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
   keep the comparison fair across machine, Ultralytics version (8.4.172 here, 8.4.130 on Kaggle) and batch size. One
   seed cannot decide anything: the 960 baseline seed spread is 0.034 mAP@50, so only a difference clearly larger than
   that justifies 3 seeds. Logs are on the server (`~/workspace/train_*.log`) until copied into `runs/`.
+- **OzFish full training set: the route is real, and it is smaller than assumed (2026-10-04).** The official AIMS
+  catalogue record (DOI 10.25845/5e28f062c5097, licence Creative Commons Attribution Australia, read from the public
+  catalogue index) says the boxes are "~45k bounding box annotations ... of fish/no fish across **1800 frames**", about
+  25 boxes per frame. So it adds crowded scenes, not many images: against our 6,517 DeepFish images it is 1,800 frames
+  (the sealed test set's 352 frames are probably part of them, which must be checked before any training on it, by
+  video and not only by file name, because frames from one video are near-duplicates). The Pawsey store is a real
+  file portal (seen in a browser by the user): `frames.zip` 106 GB (out of scope), `labelled-zip.zip` 2.91 GB (likely
+  the labelled frames, unverified), `crops-zip.zip` 3.18 GB (species crops, not needed). Direct `curl` to the zips
+  returns 404, so the download link has to come from the browser. Attribution to use:
+  Australian Institute of Marine Science, University of Western Australia and Curtin University (2019), OzFish Dataset,
+  https://doi.org/10.25845/5e28f062c5097. An earlier chat estimate of "about 7x the images" was wrong; it was never in
+  these docs.
 - **Label audit is one reviewer's sample** (F11: 48 missed, 24 found, 36 false alarms). A second reviewer, and a larger sample outside site 7398, would firm it up; it is not a blocker for the small-fish experiments.
 - **Error analysis covers one seed per size and DeepFish validation only.** It has not been run on the OzFish set (sealed; would need a decision about analysing without tuning).
 - **No ONNX / TensorRT export or parity check.**

@@ -52,7 +52,8 @@ checkpoint. E4 needs the board. **E6 does not wait for anything — start FD-060
 
 # E0 — Unblock, decide, bootstrap
 
-## FD-113 · OzFish acquisition sprint — parallel routes, 5-day gate · P0 · TODO **[added]**
+## FD-113 · OzFish acquisition sprint — parallel routes, 5-day gate · P0 · IN PROGRESS **[added]**
+**Status 2026-10-04:** the Pawsey store exists and is browsable (`labelled-zip.zip` 2.91 GB, `frames.zip` 106 GB). The AIMS record says 1800 labelled frames, ~45k boxes. Waiting on a browser-sourced download link for `labelled-zip.zip`, and on confirming it contains the images. Must exclude the sealed test frames by video. See PROGRESS section 8.
 **Why:** Every ticket in E2–E5 and the whole results half of the report is blocked on box
 training data, none is on disk, and the previously-recorded acquisition routes do not hold up
 (see FD-010). An open-ended "try in order" on the only blocking dependency is not a plan.
