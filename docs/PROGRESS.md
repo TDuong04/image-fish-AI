@@ -397,6 +397,36 @@ Run: `runs/audit-labels-20260923-yolov8n-960-s2` (`manifest.json`, `verdicts.jso
 fish look easier than they are at the model's input, so "plainly visible in the crop" does not mean "findable at 960".
 The sample is skewed to site 7398. Counts are descriptive and the proportions carry wide intervals.
 
+### F12. A stride-4 (P2) head did not raise small-fish recall and scored lower on mAP@50-95 (one seed, a screen)
+FD-129 screen B: `yolov8n-960-p2`, seed 0, on `ai-gpu` (RTX 5060 8 GB, Ultralytics 8.4.172, **batch 5**), COCO weights
+loaded into every layer whose shape still matched. Early-stopped at epoch 80 (best epoch 50) after 1.42 h. Run:
+`runs/20261004-yolov8n-960-p2-s0`. Compared with the Kaggle baseline `20260922-yolov8n-960-s0` (T4, Ultralytics 8.4.130,
+batch 23), validation split.
+
+| | P2 (seed 0) | Baseline 960 (seed 0) | Baseline 960 range, 3 seeds |
+|---|---|---|---|
+| mAP@50 | 0.5075 | 0.4876 | 0.4876 to 0.5220 |
+| mAP@50-95 | 0.2830 | 0.3124 | 0.3124 to 0.3201 |
+| Recall, 16-32 px boxes (n=273) at conf 0.25 | 3.7% (10 found) | 1.5% (4 found) | |
+| Recall, 32-96 px boxes (n=746) | 45.3% | 44.5% | |
+| Fish found / missed (1,385) | 673 / 712 | 664 / 721 | |
+| False alarms, all / empty frames (464) | 364 / 115 | 659 / 207 | |
+
+Error analysis: `runs/analysis-20261004-20261004-yolov8n-960-p2-s0`, `runs/analysis-20261004-20260922-yolov8n-960-s0`.
+
+- **Not a win.** P2 moved mAP@50 inside the baseline's own seed range and mAP@50-95 **below all three baseline seeds**
+  (0.283 against 0.312 to 0.320). The small-fish hypothesis behind P2 is not supported: boxes of 16-32 px went from 4
+  found to 10 of 273, and 32-96 px recall is unchanged, so the failure on small fish is not fixed by a finer output grid.
+- **The false-alarm drop is not attributable to P2.** The baseline's own seeds differ as much: seed 0 has 659 false
+  alarms and seed 2 has 365 (F10). One seed each cannot separate the head from seed-to-seed noise.
+- **Confounded.** Machine, Ultralytics version and batch size (5 against 23) all differ from the baseline, and the
+  P2 layers start from scratch. The same-machine control (`yolov8n-960` seed 0, queued) is what separates "P2" from
+  "this setup"; until it finishes the comparison above is indicative only.
+
+**Limits.** One seed, one split of near-duplicate frames. The baseline's seed spread at 960 is 0.034 mAP@50 and 0.008
+mAP@50-95, so only the mAP@50-95 gap is clearly outside it. Not tested on the sealed OzFish set and not timed on the
+Orin (the P2 head adds compute at 960).
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
@@ -456,8 +486,8 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
 - **No hue-augmentation retraining** (F4 hypothesis).
-- **FD-129 screens are running on `ai-gpu`** (started 2026-10-04): one seed (0) each of `yolov8n-960-p2`, then
-  `yolov8n-960-aug`, then a control rerun of `yolov8n-960` on the same machine. About 65 s per epoch for the P2 run on
+- **FD-129 screens on `ai-gpu`** (started 2026-10-04): one seed (0) each of `yolov8n-960-p2` (done, F12), then
+  `yolov8n-960-aug` (running) and a control rerun of `yolov8n-960` on the same machine (queued). About 65 s per epoch for the P2 run on
   the RTX 5060 at batch 5 (the Kaggle T4 runs used batch 23 and about 115 s per epoch), so the control rerun exists to
   keep the comparison fair across machine, Ultralytics version (8.4.172 here, 8.4.130 on Kaggle) and batch size. One
   seed cannot decide anything: the 960 baseline seed spread is 0.034 mAP@50, so only a difference clearly larger than

@@ -817,7 +817,7 @@ nothing is compared on fewer than 3 seeds. The sealed OzFish set is used only fo
 
 | ID | Item | Status |
 |---|---|---|
-| FD-129 | **Small-fish experiments**: 960 with stronger scale/hue augmentation; a stride-4 (P2) head; tiled or crop training. Goal: recall on 16-96 px fish. | IN PROGRESS: P2 and augmentation screens (seed 0) plus a same-machine control running on `ai-gpu`; tiled training not started |
+| FD-129 | **Small-fish experiments**: 960 with stronger scale/hue augmentation; a stride-4 (P2) head; tiled or crop training. Goal: recall on 16-96 px fish. | IN PROGRESS: P2 screen done and negative (PROGRESS F12); augmentation screen running and same-machine control queued on `ai-gpu`; tiled training not started |
 | FD-130 | **Hard negatives**: add and weight mangrove-leaf and empty-water frames (44% and 33% of sampled false alarms, F11). Needs a source of empty frames; OzFish has none. | TODO |
 | FD-131 | Remote GPU server `ai-gpu` (RTX 5060 8 GB) as a training machine: environment ready (`configs/env/aigpu.yaml`), data fetched, smoke run passed, FD-129 screens running. Its repo copy is not synced by git (files were copied by hand because the work is unpushed) | DONE for now |
 | FD-132 | Second reviewer and a larger label-audit sample outside site 7398 | TODO |
