@@ -1,0 +1,20 @@
+{
+  "missed": {
+    "n": 48,
+    "clear": 32,
+    "ambiguous": 12,
+    "nothing-visible": 4
+  },
+  "found": {
+    "n": 24,
+    "clear": 24
+  },
+  "false_alarm": {
+    "n": 36,
+    "empty-water": 12,
+    "leaf": 16,
+    "rock-or-pole": 2,
+    "top-left-corner": 4,
+    "possible-fish": 2
+  }
+}

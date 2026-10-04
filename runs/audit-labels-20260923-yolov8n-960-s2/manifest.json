@@ -1,0 +1,1406 @@
+[
+ {
+  "id": "M01",
+  "frame": "7398_F5_f000004.jpg",
+  "clip": "7398_F5",
+  "box_xyxy": [
+   1303.0,
+   475.0,
+   1485.0,
+   561.0
+  ],
+  "size_at_640": 60.7,
+  "conf": null
+ },
+ {
+  "id": "M02",
+  "frame": "7398_F5_f000040.jpg",
+  "clip": "7398_F5",
+  "box_xyxy": [
+   1429.0,
+   859.0,
+   1496.0,
+   939.0
+  ],
+  "size_at_640": 26.7,
+  "conf": null
+ },
+ {
+  "id": "M03",
+  "frame": "7398_F1_f000015.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   439.0,
+   908.0,
+   493.0,
+   999.0
+  ],
+  "size_at_640": 30.3,
+  "conf": null
+ },
+ {
+  "id": "M04",
+  "frame": "7398_F1_f000093.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   1220.0,
+   585.0,
+   1281.0,
+   700.0
+  ],
+  "size_at_640": 38.3,
+  "conf": null
+ },
+ {
+  "id": "M05",
+  "frame": "7623_F1_f000127.jpg",
+  "clip": "7623_F1",
+  "box_xyxy": [
+   1152.0,
+   242.0,
+   1275.0,
+   344.0
+  ],
+  "size_at_640": 41.0,
+  "conf": null
+ },
+ {
+  "id": "M06",
+  "frame": "7623_F1_f000114.jpg",
+  "clip": "7623_F1",
+  "box_xyxy": [
+   1209.0,
+   197.0,
+   1311.0,
+   329.0
+  ],
+  "size_at_640": 44.0,
+  "conf": null
+ },
+ {
+  "id": "M07",
+  "frame": "7398_F5_f000028.jpg",
+  "clip": "7398_F5",
+  "box_xyxy": [
+   1156.0,
+   472.0,
+   1246.0,
+   590.0
+  ],
+  "size_at_640": 39.3,
+  "conf": null
+ },
+ {
+  "id": "M08",
+  "frame": "7398_F1_f000144.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   226.0,
+   822.0,
+   356.0,
+   887.0
+  ],
+  "size_at_640": 43.3,
+  "conf": null
+ },
+ {
+  "id": "M09",
+  "frame": "7623_F1_f000102.jpg",
+  "clip": "7623_F1",
+  "box_xyxy": [
+   630.0,
+   246.0,
+   771.0,
+   402.0
+  ],
+  "size_at_640": 52.0,
+  "conf": null
+ },
+ {
+  "id": "M10",
+  "frame": "7398_F3_f000046.jpg",
+  "clip": "7398_F3",
+  "box_xyxy": [
+   1.0,
+   705.0,
+   174.0,
+   821.0
+  ],
+  "size_at_640": 57.7,
+  "conf": null
+ },
+ {
+  "id": "M11",
+  "frame": "7623_F2_f000063.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   718.0,
+   4.0,
+   1326.0,
+   148.0
+  ],
+  "size_at_640": 202.7,
+  "conf": null
+ },
+ {
+  "id": "M12",
+  "frame": "7398_F1_f000066.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   576.0,
+   756.0,
+   735.0,
+   822.0
+  ],
+  "size_at_640": 53.0,
+  "conf": null
+ },
+ {
+  "id": "M13",
+  "frame": "7623_F1_f000124.jpg",
+  "clip": "7623_F1",
+  "box_xyxy": [
+   592.0,
+   251.0,
+   690.0,
+   410.0
+  ],
+  "size_at_640": 53.0,
+  "conf": null
+ },
+ {
+  "id": "M14",
+  "frame": "7398_F1_f000043.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   366.0,
+   779.0,
+   515.0,
+   850.0
+  ],
+  "size_at_640": 49.7,
+  "conf": null
+ },
+ {
+  "id": "M15",
+  "frame": "7398_F1_f000119.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   1218.0,
+   705.0,
+   1301.0,
+   824.0
+  ],
+  "size_at_640": 39.7,
+  "conf": null
+ },
+ {
+  "id": "M16",
+  "frame": "7398_F1_f000043.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   728.0,
+   927.2,
+   865.0,
+   1009.2
+  ],
+  "size_at_640": 45.7,
+  "conf": null
+ },
+ {
+  "id": "M17",
+  "frame": "7398_F1_f000032.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   958.0,
+   490.0,
+   1014.0,
+   534.0
+  ],
+  "size_at_640": 18.7,
+  "conf": null
+ },
+ {
+  "id": "M18",
+  "frame": "9862_Acanthopagrus_palmaris_f000073.jpg",
+  "clip": "9862_Acanthopagrus_palmaris",
+  "box_xyxy": [
+   5.0,
+   378.0,
+   51.0,
+   399.0
+  ],
+  "size_at_640": 15.3,
+  "conf": null
+ },
+ {
+  "id": "M19",
+  "frame": "7398_F1_f000089.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   1230.0,
+   552.0,
+   1304.0,
+   676.0
+  ],
+  "size_at_640": 41.3,
+  "conf": null
+ },
+ {
+  "id": "M20",
+  "frame": "7623_F1_f000286.jpg",
+  "clip": "7623_F1",
+  "box_xyxy": [
+   596.0,
+   229.0,
+   786.0,
+   417.0
+  ],
+  "size_at_640": 63.3,
+  "conf": null
+ },
+ {
+  "id": "M21",
+  "frame": "7623_F2_f000354.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   862.0,
+   46.0,
+   1203.0,
+   468.0
+  ],
+  "size_at_640": 140.7,
+  "conf": null
+ },
+ {
+  "id": "M22",
+  "frame": "7398_F1_f000046.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   811.0,
+   939.0,
+   971.0,
+   1019.0
+  ],
+  "size_at_640": 53.3,
+  "conf": null
+ },
+ {
+  "id": "M23",
+  "frame": "7398_F1_f000164.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   1810.0,
+   1012.0,
+   1920.0,
+   1077.0
+  ],
+  "size_at_640": 36.7,
+  "conf": null
+ },
+ {
+  "id": "M24",
+  "frame": "7398_F1_f000033.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   1780.0,
+   672.0,
+   1884.0,
+   766.0
+  ],
+  "size_at_640": 34.7,
+  "conf": null
+ },
+ {
+  "id": "M25",
+  "frame": "7398_F1_f000024.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   105.0,
+   784.0,
+   294.0,
+   852.0
+  ],
+  "size_at_640": 63.0,
+  "conf": null
+ },
+ {
+  "id": "M26",
+  "frame": "7398_F1_f000188.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   634.0,
+   490.0,
+   845.0,
+   611.0
+  ],
+  "size_at_640": 70.3,
+  "conf": null
+ },
+ {
+  "id": "M27",
+  "frame": "7623_F1_f000097.jpg",
+  "clip": "7623_F1",
+  "box_xyxy": [
+   640.0,
+   229.0,
+   785.0,
+   395.0
+  ],
+  "size_at_640": 55.3,
+  "conf": null
+ },
+ {
+  "id": "M28",
+  "frame": "7623_F2_f000009.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   237.0,
+   245.0,
+   406.0,
+   509.0
+  ],
+  "size_at_640": 88.0,
+  "conf": null
+ },
+ {
+  "id": "M29",
+  "frame": "7398_F1_f000033.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   238.0,
+   792.0,
+   390.0,
+   850.0
+  ],
+  "size_at_640": 50.7,
+  "conf": null
+ },
+ {
+  "id": "M30",
+  "frame": "7398_F3_f000042.jpg",
+  "clip": "7398_F3",
+  "box_xyxy": [
+   281.0,
+   707.0,
+   624.0,
+   807.0
+  ],
+  "size_at_640": 114.3,
+  "conf": null
+ },
+ {
+  "id": "M31",
+  "frame": "7398_F5_f000140.jpg",
+  "clip": "7398_F5",
+  "box_xyxy": [
+   1056.0,
+   634.0,
+   1261.0,
+   757.0
+  ],
+  "size_at_640": 68.3,
+  "conf": null
+ },
+ {
+  "id": "M32",
+  "frame": "7398_F1_f000167.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   920.0,
+   612.0,
+   1051.0,
+   749.0
+  ],
+  "size_at_640": 45.7,
+  "conf": null
+ },
+ {
+  "id": "M33",
+  "frame": "7623_F2_f000359.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   843.0,
+   253.0,
+   913.0,
+   357.0
+  ],
+  "size_at_640": 34.7,
+  "conf": null
+ },
+ {
+  "id": "M34",
+  "frame": "9892_acanthopagrus_palmaris_f000078.jpg",
+  "clip": "9892_acanthopagrus_palmaris",
+  "box_xyxy": [
+   1005.0,
+   2.0,
+   1177.0,
+   85.0
+  ],
+  "size_at_640": 57.3,
+  "conf": null
+ },
+ {
+  "id": "M35",
+  "frame": "7398_F1_f000061.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   1538.0,
+   566.0,
+   1659.0,
+   651.0
+  ],
+  "size_at_640": 40.3,
+  "conf": null
+ },
+ {
+  "id": "M36",
+  "frame": "7623_F2_f000001.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   264.0,
+   200.0,
+   392.0,
+   402.0
+  ],
+  "size_at_640": 67.3,
+  "conf": null
+ },
+ {
+  "id": "M37",
+  "frame": "7398_F5_f000252.jpg",
+  "clip": "7398_F5",
+  "box_xyxy": [
+   320.0,
+   634.0,
+   444.0,
+   699.0
+  ],
+  "size_at_640": 41.3,
+  "conf": null
+ },
+ {
+  "id": "M38",
+  "frame": "7623_F1_f000132.jpg",
+  "clip": "7623_F1",
+  "box_xyxy": [
+   1141.0,
+   240.0,
+   1269.0,
+   342.0
+  ],
+  "size_at_640": 42.7,
+  "conf": null
+ },
+ {
+  "id": "M39",
+  "frame": "7398_F1_f000094.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   1220.0,
+   592.0,
+   1284.0,
+   704.0
+  ],
+  "size_at_640": 37.3,
+  "conf": null
+ },
+ {
+  "id": "M40",
+  "frame": "7398_F1_f000021.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   1843.0,
+   675.0,
+   1920.0,
+   780.0
+  ],
+  "size_at_640": 35.0,
+  "conf": null
+ },
+ {
+  "id": "M41",
+  "frame": "7623_F1_f000401.jpg",
+  "clip": "7623_F1",
+  "box_xyxy": [
+   173.0,
+   68.0,
+   275.0,
+   210.0
+  ],
+  "size_at_640": 47.3,
+  "conf": null
+ },
+ {
+  "id": "M42",
+  "frame": "7398_F1_f000007.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   848.0,
+   542.0,
+   913.0,
+   601.0
+  ],
+  "size_at_640": 21.7,
+  "conf": null
+ },
+ {
+  "id": "M43",
+  "frame": "7398_F1_f000031.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   209.0,
+   792.0,
+   359.0,
+   850.0
+  ],
+  "size_at_640": 50.0,
+  "conf": null
+ },
+ {
+  "id": "M44",
+  "frame": "7398_F5_f000021.jpg",
+  "clip": "7398_F5",
+  "box_xyxy": [
+   1169.0,
+   462.0,
+   1274.0,
+   577.0
+  ],
+  "size_at_640": 38.3,
+  "conf": null
+ },
+ {
+  "id": "M45",
+  "frame": "9898_Acanthopagrus_palmaris_f000109.jpg",
+  "clip": "9898_Acanthopagrus_palmaris",
+  "box_xyxy": [
+   1478.0,
+   517.0,
+   1909.0,
+   717.0
+  ],
+  "size_at_640": 143.7,
+  "conf": null
+ },
+ {
+  "id": "M46",
+  "frame": "9870_Gerres_f000008.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   213.0,
+   439.0,
+   336.0,
+   501.0
+  ],
+  "size_at_640": 41.0,
+  "conf": null
+ },
+ {
+  "id": "M47",
+  "frame": "7398_F1_f000000.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   820.0,
+   565.0,
+   880.0,
+   616.0
+  ],
+  "size_at_640": 20.0,
+  "conf": null
+ },
+ {
+  "id": "M48",
+  "frame": "7623_F2_f000359.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   852.0,
+   48.0,
+   1145.0,
+   476.0
+  ],
+  "size_at_640": 142.7,
+  "conf": null
+ },
+ {
+  "id": "F01",
+  "frame": "9892_Acanthopagrus_palmaris_2_f000005.jpg",
+  "clip": "9892_Acanthopagrus_palmaris_2",
+  "box_xyxy": [
+   736.0,
+   1.0,
+   1189.0,
+   264.0
+  ],
+  "size_at_640": 151.0,
+  "conf": null
+ },
+ {
+  "id": "F02",
+  "frame": "9862_Acanthopagrus_palmaris_f000042.jpg",
+  "clip": "9862_Acanthopagrus_palmaris",
+  "box_xyxy": [
+   287.0,
+   362.0,
+   479.0,
+   653.0
+  ],
+  "size_at_640": 97.0,
+  "conf": null
+ },
+ {
+  "id": "F03",
+  "frame": "7623_F2_f000263.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   1373.0,
+   140.0,
+   1920.0,
+   570.0
+  ],
+  "size_at_640": 182.3,
+  "conf": null
+ },
+ {
+  "id": "F04",
+  "frame": "9862_Acanthopagrus_palmaris_f000029.jpg",
+  "clip": "9862_Acanthopagrus_palmaris",
+  "box_xyxy": [
+   252.0,
+   449.0,
+   431.0,
+   668.0
+  ],
+  "size_at_640": 73.0,
+  "conf": null
+ },
+ {
+  "id": "F05",
+  "frame": "7398_F5_f000040.jpg",
+  "clip": "7398_F5",
+  "box_xyxy": [
+   1486.0,
+   944.0,
+   1810.0,
+   1070.0
+  ],
+  "size_at_640": 108.0,
+  "conf": null
+ },
+ {
+  "id": "F06",
+  "frame": "7623_F2_f000236.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   364.0,
+   406.0,
+   569.0,
+   527.0
+  ],
+  "size_at_640": 68.3,
+  "conf": null
+ },
+ {
+  "id": "F07",
+  "frame": "9892_acanthopagrus_palmaris_f000064.jpg",
+  "clip": "9892_acanthopagrus_palmaris",
+  "box_xyxy": [
+   117.0,
+   219.0,
+   653.0,
+   551.0
+  ],
+  "size_at_640": 178.7,
+  "conf": null
+ },
+ {
+  "id": "F08",
+  "frame": "7623_F2_f000252.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   1547.0,
+   180.0,
+   1920.0,
+   625.0
+  ],
+  "size_at_640": 148.3,
+  "conf": null
+ },
+ {
+  "id": "F09",
+  "frame": "7623_F2_f000260.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   443.0,
+   365.0,
+   643.0,
+   511.0
+  ],
+  "size_at_640": 66.7,
+  "conf": null
+ },
+ {
+  "id": "F10",
+  "frame": "7623_F2_f000085.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   843.0,
+   8.0,
+   1730.0,
+   334.0
+  ],
+  "size_at_640": 295.7,
+  "conf": null
+ },
+ {
+  "id": "F11",
+  "frame": "9892_acanthopagrus_palmaris_f000039.jpg",
+  "clip": "9892_acanthopagrus_palmaris",
+  "box_xyxy": [
+   444.0,
+   89.0,
+   731.0,
+   434.0
+  ],
+  "size_at_640": 115.0,
+  "conf": null
+ },
+ {
+  "id": "F12",
+  "frame": "9870_Gerres_f000109.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   874.0,
+   400.0,
+   1049.0,
+   481.0
+  ],
+  "size_at_640": 58.3,
+  "conf": null
+ },
+ {
+  "id": "F13",
+  "frame": "7623_F2_f000034.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   90.0,
+   391.0,
+   275.0,
+   580.0
+  ],
+  "size_at_640": 63.0,
+  "conf": null
+ },
+ {
+  "id": "F14",
+  "frame": "7623_F1_f000073.jpg",
+  "clip": "7623_F1",
+  "box_xyxy": [
+   737.0,
+   225.0,
+   918.0,
+   370.0
+  ],
+  "size_at_640": 60.3,
+  "conf": null
+ },
+ {
+  "id": "F15",
+  "frame": "9862_Acanthopagrus_palmaris_f000022.jpg",
+  "clip": "9862_Acanthopagrus_palmaris",
+  "box_xyxy": [
+   255.0,
+   489.0,
+   377.0,
+   662.0
+  ],
+  "size_at_640": 57.7,
+  "conf": null
+ },
+ {
+  "id": "F16",
+  "frame": "9892_Acanthopagrus_palmaris_2_f000020.jpg",
+  "clip": "9892_Acanthopagrus_palmaris_2",
+  "box_xyxy": [
+   412.0,
+   121.0,
+   816.0,
+   407.0
+  ],
+  "size_at_640": 134.7,
+  "conf": null
+ },
+ {
+  "id": "F17",
+  "frame": "9892_Acanthopagrus_palmaris_2_f000001.jpg",
+  "clip": "9892_Acanthopagrus_palmaris_2",
+  "box_xyxy": [
+   830.0,
+   1.0,
+   1314.0,
+   232.0
+  ],
+  "size_at_640": 161.3,
+  "conf": null
+ },
+ {
+  "id": "F18",
+  "frame": "7623_F2_f000055.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   546.0,
+   2.0,
+   1173.0,
+   100.0
+  ],
+  "size_at_640": 209.0,
+  "conf": null
+ },
+ {
+  "id": "F19",
+  "frame": "9862_Acanthopagrus_palmaris_f000001.jpg",
+  "clip": "9862_Acanthopagrus_palmaris",
+  "box_xyxy": [
+   83.0,
+   588.0,
+   278.0,
+   781.0
+  ],
+  "size_at_640": 65.0,
+  "conf": null
+ },
+ {
+  "id": "F20",
+  "frame": "9892_acanthopagrus_palmaris_f000047.jpg",
+  "clip": "9892_acanthopagrus_palmaris",
+  "box_xyxy": [
+   330.0,
+   106.0,
+   705.0,
+   434.0
+  ],
+  "size_at_640": 125.0,
+  "conf": null
+ },
+ {
+  "id": "F21",
+  "frame": "7623_F2_f000408.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   679.0,
+   115.0,
+   1554.0,
+   615.0
+  ],
+  "size_at_640": 291.7,
+  "conf": null
+ },
+ {
+  "id": "F22",
+  "frame": "7623_F2_f000065.jpg",
+  "clip": "7623_F2",
+  "box_xyxy": [
+   667.0,
+   0.0,
+   1364.0,
+   170.0
+  ],
+  "size_at_640": 232.3,
+  "conf": null
+ },
+ {
+  "id": "F23",
+  "frame": "9892_acanthopagrus_palmaris_f000043.jpg",
+  "clip": "9892_acanthopagrus_palmaris",
+  "box_xyxy": [
+   396.0,
+   99.0,
+   704.0,
+   432.0
+  ],
+  "size_at_640": 111.0,
+  "conf": null
+ },
+ {
+  "id": "F24",
+  "frame": "9862_Acanthopagrus_palmaris_f000041.jpg",
+  "clip": "9862_Acanthopagrus_palmaris",
+  "box_xyxy": [
+   278.0,
+   371.0,
+   470.0,
+   651.0
+  ],
+  "size_at_640": 93.3,
+  "conf": null
+ },
+ {
+  "id": "B01",
+  "frame": "9892_Caranx_f000031.jpg",
+  "clip": "9892_Caranx",
+  "box_xyxy": [
+   1535.0,
+   508.2,
+   1894.0,
+   663.4
+  ],
+  "size_at_640": 119.7,
+  "conf": 0.3360201120376587
+ },
+ {
+  "id": "B02",
+  "frame": "9870_Gerres_f000027.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1651.1,
+   648.1,
+   1814.4,
+   772.1
+  ],
+  "size_at_640": 54.4,
+  "conf": 0.7831552624702454
+ },
+ {
+  "id": "B03",
+  "frame": "9898_Acanthopagrus_palmaris_f000035.jpg",
+  "clip": "9898_Acanthopagrus_palmaris",
+  "box_xyxy": [
+   498.8,
+   358.1,
+   661.5,
+   455.4
+  ],
+  "size_at_640": 54.2,
+  "conf": 0.36619022488594055
+ },
+ {
+  "id": "B04",
+  "frame": "9892_Caranx_f000037.jpg",
+  "clip": "9892_Caranx",
+  "box_xyxy": [
+   1514.2,
+   497.9,
+   1886.6,
+   657.2
+  ],
+  "size_at_640": 124.1,
+  "conf": 0.3575952351093292
+ },
+ {
+  "id": "B05",
+  "frame": "9892_no_fish_2_f000055.jpg",
+  "clip": "9892_no_fish_2",
+  "box_xyxy": [
+   1339.9,
+   452.2,
+   1625.2,
+   596.7
+  ],
+  "size_at_640": 95.1,
+  "conf": 0.25223904848098755
+ },
+ {
+  "id": "B06",
+  "frame": "9870_Gerres_f000103.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1647.5,
+   646.1,
+   1813.6,
+   770.8
+  ],
+  "size_at_640": 55.4,
+  "conf": 0.7210925221443176
+ },
+ {
+  "id": "B07",
+  "frame": "9892_Acanthopagrus_palmaris_2_f000017.jpg",
+  "clip": "9892_Acanthopagrus_palmaris_2",
+  "box_xyxy": [
+   1480.0,
+   505.7,
+   1875.7,
+   665.8
+  ],
+  "size_at_640": 131.9,
+  "conf": 0.2895989418029785
+ },
+ {
+  "id": "B08",
+  "frame": "9862_Acanthopagrus_palmaris_f000015.jpg",
+  "clip": "9862_Acanthopagrus_palmaris",
+  "box_xyxy": [
+   0.0,
+   787.7,
+   154.3,
+   875.4
+  ],
+  "size_at_640": 51.4,
+  "conf": 0.5131917595863342
+ },
+ {
+  "id": "B09",
+  "frame": "9892_no_fish_2_f000067.jpg",
+  "clip": "9892_no_fish_2",
+  "box_xyxy": [
+   1522.7,
+   500.3,
+   1909.4,
+   664.6
+  ],
+  "size_at_640": 128.9,
+  "conf": 0.6066179871559143
+ },
+ {
+  "id": "B10",
+  "frame": "9870_no_fish_f000012.jpg",
+  "clip": "9870_no_fish",
+  "box_xyxy": [
+   1650.3,
+   647.9,
+   1813.5,
+   772.4
+  ],
+  "size_at_640": 54.4,
+  "conf": 0.5279717445373535
+ },
+ {
+  "id": "B11",
+  "frame": "9870_Gerres_f000110.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1827.8,
+   442.2,
+   1920.0,
+   550.3
+  ],
+  "size_at_640": 36.0,
+  "conf": 0.6018503904342651
+ },
+ {
+  "id": "B12",
+  "frame": "9892_no_fish_2_f000030.jpg",
+  "clip": "9892_no_fish_2",
+  "box_xyxy": [
+   1456.5,
+   507.8,
+   1875.7,
+   662.3
+  ],
+  "size_at_640": 139.7,
+  "conf": 0.2607836127281189
+ },
+ {
+  "id": "B13",
+  "frame": "9870_Gerres_f000042.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1839.3,
+   440.1,
+   1920.0,
+   554.2
+  ],
+  "size_at_640": 38.0,
+  "conf": 0.32923606038093567
+ },
+ {
+  "id": "B14",
+  "frame": "9870_Gerres_f000103.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1449.0,
+   398.0,
+   1620.1,
+   540.8
+  ],
+  "size_at_640": 57.0,
+  "conf": 0.4672679901123047
+ },
+ {
+  "id": "B15",
+  "frame": "9870_Gerres_f000019.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   0.0,
+   447.0,
+   43.4,
+   501.0
+  ],
+  "size_at_640": 18.0,
+  "conf": 0.264045774936676
+ },
+ {
+  "id": "B16",
+  "frame": "9870_Gerres_f000021.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1649.0,
+   646.8,
+   1813.0,
+   771.2
+  ],
+  "size_at_640": 54.7,
+  "conf": 0.3965195119380951
+ },
+ {
+  "id": "B17",
+  "frame": "9870_Gerres_f000020.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1649.3,
+   648.1,
+   1813.7,
+   770.3
+  ],
+  "size_at_640": 54.8,
+  "conf": 0.6124847531318665
+ },
+ {
+  "id": "B18",
+  "frame": "7398_F1_f000079.jpg",
+  "clip": "7398_F1",
+  "box_xyxy": [
+   0.0,
+   0.0,
+   376.0,
+   114.1
+  ],
+  "size_at_640": 125.3,
+  "conf": 0.39024776220321655
+ },
+ {
+  "id": "B19",
+  "frame": "9898_no_fish_f000009.jpg",
+  "clip": "9898_no_fish",
+  "box_xyxy": [
+   1074.0,
+   362.5,
+   1133.2,
+   436.1
+  ],
+  "size_at_640": 24.5,
+  "conf": 0.2649196684360504
+ },
+ {
+  "id": "B20",
+  "frame": "9870_Gerres_f000095.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1447.8,
+   399.0,
+   1621.4,
+   539.7
+  ],
+  "size_at_640": 57.9,
+  "conf": 0.5031808018684387
+ },
+ {
+  "id": "B21",
+  "frame": "9892_acanthopagrus_palmaris_f000010.jpg",
+  "clip": "9892_acanthopagrus_palmaris",
+  "box_xyxy": [
+   1494.0,
+   502.1,
+   1912.5,
+   666.9
+  ],
+  "size_at_640": 139.5,
+  "conf": 0.7048245072364807
+ },
+ {
+  "id": "B22",
+  "frame": "7398_NF2_f000105.jpg",
+  "clip": "7398_NF2",
+  "box_xyxy": [
+   0.0,
+   0.0,
+   422.3,
+   131.7
+  ],
+  "size_at_640": 140.8,
+  "conf": 0.35140711069107056
+ },
+ {
+  "id": "B23",
+  "frame": "9862_Acanthopagrus_palmaris_f000008.jpg",
+  "clip": "9862_Acanthopagrus_palmaris",
+  "box_xyxy": [
+   0.3,
+   787.9,
+   170.3,
+   911.0
+  ],
+  "size_at_640": 56.6,
+  "conf": 0.25329330563545227
+ },
+ {
+  "id": "B24",
+  "frame": "9870_Gerres_f000000.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1645.3,
+   646.6,
+   1812.9,
+   769.6
+  ],
+  "size_at_640": 55.9,
+  "conf": 0.42723777890205383
+ },
+ {
+  "id": "B25",
+  "frame": "9870_Gerres_f000007.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1442.9,
+   398.5,
+   1610.4,
+   540.1
+  ],
+  "size_at_640": 55.8,
+  "conf": 0.4503946602344513
+ },
+ {
+  "id": "B26",
+  "frame": "7398_F2_f000002.jpg",
+  "clip": "7398_F2",
+  "box_xyxy": [
+   0.0,
+   0.0,
+   422.7,
+   128.1
+  ],
+  "size_at_640": 140.9,
+  "conf": 0.25913020968437195
+ },
+ {
+  "id": "B27",
+  "frame": "7398_NF2_f000120.jpg",
+  "clip": "7398_NF2",
+  "box_xyxy": [
+   0.0,
+   0.0,
+   445.2,
+   112.4
+  ],
+  "size_at_640": 148.4,
+  "conf": 0.34910744428634644
+ },
+ {
+  "id": "B28",
+  "frame": "9870_no_fish_f000014.jpg",
+  "clip": "9870_no_fish",
+  "box_xyxy": [
+   1452.1,
+   397.7,
+   1621.0,
+   538.7
+  ],
+  "size_at_640": 56.3,
+  "conf": 0.25854256749153137
+ },
+ {
+  "id": "B29",
+  "frame": "9892_Caranx_f000026.jpg",
+  "clip": "9892_Caranx",
+  "box_xyxy": [
+   445.1,
+   0.0,
+   907.5,
+   133.4
+  ],
+  "size_at_640": 154.1,
+  "conf": 0.8273377418518066
+ },
+ {
+  "id": "B30",
+  "frame": "9870_Gerres_f000099.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1447.6,
+   398.5,
+   1615.3,
+   538.7
+  ],
+  "size_at_640": 55.9,
+  "conf": 0.5197719931602478
+ },
+ {
+  "id": "B31",
+  "frame": "9892_Caranx_f000025.jpg",
+  "clip": "9892_Caranx",
+  "box_xyxy": [
+   1337.4,
+   450.4,
+   1632.1,
+   594.6
+  ],
+  "size_at_640": 98.2,
+  "conf": 0.6116737723350525
+ },
+ {
+  "id": "B32",
+  "frame": "9870_Gerres_f000041.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1446.4,
+   398.2,
+   1610.3,
+   533.5
+  ],
+  "size_at_640": 54.6,
+  "conf": 0.5147379040718079
+ },
+ {
+  "id": "B33",
+  "frame": "9870_Gerres_f000033.jpg",
+  "clip": "9870_Gerres",
+  "box_xyxy": [
+   1650.2,
+   646.8,
+   1814.1,
+   772.5
+  ],
+  "size_at_640": 54.7,
+  "conf": 0.5589008927345276
+ },
+ {
+  "id": "B34",
+  "frame": "9892_no_fish_2_f000056.jpg",
+  "clip": "9892_no_fish_2",
+  "box_xyxy": [
+   1341.4,
+   446.0,
+   1629.0,
+   596.8
+  ],
+  "size_at_640": 95.9,
+  "conf": 0.3685643970966339
+ },
+ {
+  "id": "B35",
+  "frame": "9870_no_fish_f000037.jpg",
+  "clip": "9870_no_fish",
+  "box_xyxy": [
+   1444.9,
+   397.8,
+   1608.9,
+   540.2
+  ],
+  "size_at_640": 54.7,
+  "conf": 0.2654006779193878
+ },
+ {
+  "id": "B36",
+  "frame": "9892_no_fish_2_f000050.jpg",
+  "clip": "9892_no_fish_2",
+  "box_xyxy": [
+   1330.8,
+   449.5,
+   1620.0,
+   598.5
+  ],
+  "size_at_640": 96.4,
+  "conf": 0.37543585896492004
+ }
+]

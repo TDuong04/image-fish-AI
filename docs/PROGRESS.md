@@ -49,6 +49,9 @@ Last updated: 2026-10-04.
   found but under the threshold / badly placed), false alarms (duplicate / badly placed / background), recall by box
   size, and a precision-recall-F1 sweep over thresholds — and draws the worst frames. Writes
   `runs/analysis-<date>-<model>/analysis.json`.
+- `scripts/label_audit.py` — FD-105. Draws a seeded random sample of missed fish (M##), found fish (F##, the control)
+  and background false alarms (B##) as zoomed contact sheets for a person to review; verdicts are recorded in
+  `verdicts.json` and `--summarise` turns them into counts. Validation split only; refuses `ozfish_eval`.
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -98,7 +101,7 @@ Last updated: 2026-10-04.
   state is recorded in the first line. Ambient temperature cannot be read and is added by hand.
 
 ### Safety net
-- 175 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
+- 179 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
   `__main__` guards, and `tests/test_docs.py`, which fails if a committed result run or a script
   is not named in this file — the mechanical half of the documentation rule in `CLAUDE.md`.
 
@@ -357,12 +360,39 @@ unknown.
 - **What the worst frames show (viewed: 2 of 24 drawn, so this is an observation and not a finding).** All 12 worst
   frames at 960 come from one clip (`7398_F1`, mangrove roots). Labelled fish there are small and camouflaged
   against the roots, and at least one labelled box shows almost no visible fish. Some "background" false alarms may
-  be unlabelled fish. Label quality has **not** been audited; that is the next step before blaming the model.
+  be unlabelled fish. Label quality was audited afterwards; see F11 (most misses are visible fish).
 
 **Limits.** One seed per resolution (seed 2), one validation split of near-duplicate video frames: the counts are
 descriptive, not independent samples. Outcome categories depend on the thresholds in the script (IoU 0.5 match,
 0.1 for "badly placed"). 'No prediction' means no prediction with IoU of at least 0.5 under the threshold and none of at
 least 0.1 above it, with predictions kept down to conf 0.001.
+
+### F11. The labels are mostly sound: the model misses fish that are visible (one reviewer, a sample)
+`scripts/label_audit.py` on the 960 seed-2 checkpoint, validation split, conf 0.25, sample seed 0:
+48 of the 688 missed fish, 24 of the 697 found fish as a control, and 36 of the 321 background false alarms.
+Reviewed by one person (the assistant) on zoomed still crops; **a second reviewer has not checked these**.
+Run: `runs/audit-labels-20260923-yolov8n-960-s2` (`manifest.json`, `verdicts.json`, `summary.json`, sheets).
+
+| Sample | n | Verdicts |
+|---|---|---|
+| Missed fish | 48 | **32 plainly visible (67%)**, 12 ambiguous (25%), 4 nothing visible (8%) |
+| Found fish (control) | 24 | 24 plainly visible |
+| Background false alarms | 36 | 16 mangrove leaf, 12 empty water, 4 top-left-corner box, 2 rock or pole, **2 possible unlabelled fish** |
+
+- **Two thirds of sampled misses are real, visible fish**, so bad labels do not explain most of the failure; the
+  model is missing fish a person sees. With n=48 the 67% has a wide interval (roughly 52% to 79%).
+- **Only 8% of misses show nothing**, and 25% are faint or translucent, so label noise is a real but minor ceiling.
+- **Few false alarms are unlabelled fish** (2 of 36). The rest are look-alikes: 44% are mangrove leaves, which the
+  model takes for fish, and a third are empty water. This is a **hard-negative** problem (add and weight leaf and
+  empty-water frames), not a label problem.
+- **Site 7398 dominates.** 22 of the 48 sampled misses come from clip `7398_F1`. On the whole validation split,
+  43 confident boxes sit anchored at the top-left corner (about 376-445 x 112-132 px), all but 2 in site 7398 (388
+  frames), 9 of them on empty frames. That is about 12% of the 365 false alarms at 960, and it is site-specific;
+  the same preprocessing finds fish correctly elsewhere, so it is not a pipeline bug. Cause unknown.
+
+**Limits.** One reviewer, one checkpoint, one split, 48/24/36 sampled boxes. Crops are zoomed 2-4x, which makes small
+fish look easier than they are at the model's input, so "plainly visible in the crop" does not mean "findable at 960".
+The sample is skewed to site 7398. Counts are descriptive and the proportions carry wide intervals.
 
 ---
 
@@ -423,7 +453,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
 - **No hue-augmentation retraining** (F4 hypothesis).
-- **Label quality is unaudited.** F10 shows the failures are mostly small, camouflaged fish and that some labelled boxes and some "background" false alarms may be label noise. A systematic review of the worst clips is needed before more training.
+- **Label audit is one reviewer's sample** (F11: 48 missed, 24 found, 36 false alarms). A second reviewer, and a larger sample outside site 7398, would firm it up; it is not a blocker for the small-fish experiments.
 - **Error analysis covers one seed per size and DeepFish validation only.** It has not been run on the OzFish set (sealed; would need a decision about analysing without tuning).
 - **No ONNX / TensorRT export or parity check.**
 - **No trivial baselines** (predict-nothing, zero-shot COCO, frame differencing).
@@ -445,6 +475,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | ONNX export manifest | `docs/onnx_manifest.json` |
 | End-to-end per-stage timing logs | `runs/device-20261004/e2e_*.log` |
 | 30-minute sustained run (F9) | `runs/device-20261004/sustained_960.jsonl` |
+| Label audit (F11) | `runs/audit-labels-20260923-yolov8n-960-s2/` (`summary.json`, `verdicts.json`, sheets) |
 | Error analysis (F10) | `runs/analysis-20261004-*/analysis.json` and the worst-frame images beside it |
 | Weights | GitHub release `v0.1.0-models` (not in git) |
 | Checksums | `docs/model_manifest.json` |

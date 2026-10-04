@@ -39,7 +39,7 @@ FD-127 trivial baselines (not started; COCO zero-shot and predict-nothing still 
 FD-040 provisioning (the board is already set up; swap and SSH details were not recorded) ·
 E3 beyond FP16 (INT8 with explicit quantisation, NMS placement) ·
 E4 beyond a serial end-to-end measurement (FD-044 other power modes and a repeat of the sustained run, FD-045 memory, NVDEC decode, optimising the CPU stages that dominate a frame) ·
-FD-008 licence decision · FD-024 false-alarm rate on empty frames · FD-105 annotation-quality audit
+FD-008 licence decision · FD-024 false-alarm rate on empty frames · FD-105 annotation-quality audit (first pass done: PROGRESS F11, one reviewer, sample of 108 boxes; second reviewer open)
 
 **New since the plan was written, not ticketed originally**
 Colour-sensitivity study (finding F4 in `PROGRESS.md`) and its follow-up hypothesis: stronger hue
@@ -807,3 +807,20 @@ These are stakeholder decisions with zero technical cost and total downstream le
 4. **Deadline and weekly hours?** FD-115 cannot be done without this, and the backlog is ~2×
    oversized until it is.
 5. **Must the LCFCN counting work appear in the report?** Drives FD-061.
+
+---
+
+## Improvement programme (added 2026-10-04, after F10 and F11)
+
+Tracked here so nothing in the plan is lost. Screen each idea on 1 seed at 640 first; only a winner gets 3 seeds, and
+nothing is compared on fewer than 3 seeds. The sealed OzFish set is used only for final numbers.
+
+| ID | Item | Status |
+|---|---|---|
+| FD-129 | **Small-fish experiments**: 960 with stronger scale/hue augmentation; a stride-4 (P2) head; tiled or crop training. Goal: recall on 16-96 px fish. | TODO, next after the label audit |
+| FD-130 | **Hard negatives**: add and weight mangrove-leaf and empty-water frames (44% and 33% of sampled false alarms, F11). Needs a source of empty frames; OzFish has none. | TODO |
+| FD-131 | Remote GPU server `ai-gpu` (RTX 5060 8 GB) as a training machine: environment ready (`configs/env/aigpu.yaml`), no data copied yet | PARTLY DONE |
+| FD-132 | Second reviewer and a larger label-audit sample outside site 7398 | TODO |
+| FD-133 | Explain the 43 confident top-left-corner boxes at site 7398 (F11) | TODO |
+| FD-134 | Larger models (YOLOv8s/m, YOLO11) and non-AGPL models (YOLOX, NanoDet-Plus), after FD-129/130 and the FD-008 licence decision | TODO |
+| FD-113 | Full OzFish training set: needs a person to open the portal in a browser | BLOCKED on the user |
