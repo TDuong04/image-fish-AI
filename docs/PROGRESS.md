@@ -68,6 +68,13 @@ Last updated: 2026-10-04.
   frames per group, and writes **train only** by default. Saves the grouping to `splits/kakadu_groups.json`. See F13.
 - `configs/data/kakadu.yaml`, `configs/data/deepfish_kakadu.yaml`, `configs/train/yolov8n_960_kakadu.yaml` —
   DeepFish train + Kakadu train, validated on the DeepFish val split so numbers stay comparable. **Not run yet.**
+- `scripts/queue_runner.py`, `configs/overnight_plan.yaml` — runs a YAML plan of steps unattended: waits for files or
+  for the GPU to go quiet, skips finished work, records state in `data/.cache/queue/status.json`, keeps going after a
+  failed step, and re-reads the plan between steps so it can be fixed while running. How a check works:
+  `docs/OVERNIGHT.md`.
+- `scripts/upload_parts.py`, `scripts/assemble_parts.py` — resumable upload of a folder of parts over ssh with a
+  checksum check, and the matching reassembly. Built for the 60 KB/s link; the full archive then reached the server
+  another way, so they are unused for now.
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -117,7 +124,7 @@ Last updated: 2026-10-04.
   state is recorded in the first line. Ambient temperature cannot be read and is added by hand.
 
 ### Safety net
-- 179 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
+- 223 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
   `__main__` guards, and `tests/test_docs.py`, which fails if a committed result run or a script
   is not named in this file — the mechanical half of the documentation rule in `CLAUDE.md`.
 
@@ -502,6 +509,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | `configs/data/*.yaml` written with an absolute drive path | Every teammate's config pointed at one machine | `test_no_absolute_paths` |
 | `.gitignore` `data/` matched `configs/data/` | Dataset configs silently excluded from the repo | Reviewing staged files |
 | `runs/_kaggle` and `runs/_supervisor` committed | Clone shipped old failures; reports showed phantom failures | Reading a failed Kaggle report |
+| `data/processed/` on the GPU server was emptied while a run was training (`deepfish`, `ozfish_eval` and the converted Kakadu set gone, loose unzipped PNGs left in their place) | The YOLOv8s run crashed at epoch 50 with `Image Not Found`, and the queued YOLOv8m and YOLO11s runs failed at once. Someone was working on the server at the time; who and why is not known. Recovered with `scripts/get_data.py` from `data/raw` and `data/interim` (no download): 5,178 train and 1,339 val images, 352 OzFish test images, and the DeepFish split identical to the workstation copy (same site groups and statistics). Kakadu was converted again from its zip. | A training log ending in `FileNotFoundError`, then `ls data/processed` |
 | `bootstrap.py` chose the `cu124` wheel on a CUDA 13 driver | RTX 5060 (compute capability 12.0) needs cu128; cu124 would fail only at the first CUDA op. The driver header said `CUDA UMD Version`, which the parser did not read, so it fell back to cu124. | Reading the dry-run output on the new server |
 | `import cv2` fails on the remote server (`libxcb.so.1`) | The headless container has no display libraries, so `opencv-python` cannot load and `check_env.py` reported ultralytics missing. Fixed there by swapping in `opencv-python-headless` (no sudo needed). Not yet automated in `bootstrap.py`. | `check_env.py --require-gpu` |
 | `bootstrap.py` refused to install outside a venv | Kaggle run died on `import ultralytics` after downloading data | Reading the supervisor log |
@@ -555,7 +563,8 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
   **PomerFish** (Zenodo, CC BY 4.0), **OBSEA** (Zenodo, CC BY 4.0), **Brackish** (Kaggle, CC BY-SA 4.0, share-alike).
   Excluded by licence: TORSI (CC BY-NC-SA). Whatever is used needs the same site/video-level split and leakage check as
   DeepFish, because all of it is video frames.
-- **Kakadu is downloading to `ai-gpu`** (about 0.4 MB/s from that host, roughly 4 hours, started 2026-10-04; the PC
+- **Kakadu on the server (2026-10-04):** the full archive reached `ai-gpu` by someone copying it there; `prepare_kakadu.py` read all 44,112 members with a CRC check (so the copy is intact), keeping 7,318 frames and 11,695 boxes (max 15 per group, 960 px wide). The workstation copy of the zip was deleted afterwards, as asked. The server's own download (about 45 KB/s) and the workstation upload (about 60 KB/s) were abandoned. Next: the `yolov8n_960_kakadu` comparison, in the order given in `docs/OVERNIGHT.md`.
+- (superseded, kept for the record) **Kakadu was downloading to `ai-gpu`** (about 0.4 MB/s from that host, roughly 4 hours, started 2026-10-04; the PC
   copy exists and is verified). Uploading from the PC measured 0.09 MB/s, so the server fetches it itself. After it is
   verified there: run `prepare_kakadu.py`, then the `yolov8n_960_kakadu` screen. The PC copy is to be deleted once the
   server copy's md5 matches (user's instruction).

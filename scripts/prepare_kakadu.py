@@ -148,6 +148,9 @@ def main() -> int:
     ap.add_argument("--threshold", type=float, default=4.0, help="grouping distance (see the docstring)")
     ap.add_argument("--val-frac", type=float, default=0.0,
                     help="0 (default) writes train only; >0 holds out groups but see the docstring: it leaks")
+    ap.add_argument("--max-side", type=int, default=0,
+                    help="resize so the longer side is at most N px (JPEG q92); 0 keeps the original bytes. "
+                         "960 matches training at imgsz 960 and makes the set about 4x smaller to move")
     ap.add_argument("--max-per-group", type=int, default=15, help="cap on frames kept per scene group; 0 keeps all")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--regroup", action="store_true", help="recompute splits/kakadu_groups.json")
@@ -241,12 +244,21 @@ def main() -> int:
             if not kept:
                 continue
             split = "val" if val else "train"
-            ext = Path(im["file_name"]).suffix.lower()
+            ext = ".jpg" if args.max_side else Path(im["file_name"]).suffix.lower()
             stem = f"kak_{im['id']:05d}"
             img_dir, lab_dir = args.out / "images" / split, args.out / "labels" / split
             img_dir.mkdir(parents=True, exist_ok=True)
             lab_dir.mkdir(parents=True, exist_ok=True)
-            (img_dir / f"{stem}{ext}").write_bytes(reader.read(im["file_name"]))
+            raw_bytes = reader.read(im["file_name"])
+            if args.max_side:
+                import cv2
+                frame = cv2.imdecode(np.frombuffer(raw_bytes, np.uint8), cv2.IMREAD_COLOR)
+                scale = args.max_side / max(frame.shape[:2])
+                if scale < 1:
+                    frame = cv2.resize(frame, (round(frame.shape[1] * scale), round(frame.shape[0] * scale)),
+                                       interpolation=cv2.INTER_AREA)
+                raw_bytes = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 92])[1].tobytes()
+            (img_dir / f"{stem}{ext}").write_bytes(raw_bytes)
             rows = []
             for bb in boxes.get(im["id"], []):
                 yolo = coco_to_yolo(bb, im["width"], im["height"])
@@ -259,7 +271,7 @@ def main() -> int:
     (args.out / "prepare.json").write_text(json.dumps({
         "name": "kakadu", "source": "Kakadu Fish AI dataset, doi:10.5281/zenodo.7250921, CC BY 4.0",
         "grouping": "picture-similarity scene groups (no video or site field exists)", "threshold": args.threshold,
-        "seed": args.seed, "val_frac": args.val_frac, "max_per_group": args.max_per_group,
+        "seed": args.seed, "val_frac": args.val_frac, "max_per_group": args.max_per_group, "max_side": args.max_side,
         "groups": int(len(sizes)),
         "images": n_img, "boxes": n_boxes, "closest_train_val_distance": lo,
         "split_warning": "a held-out split inside Kakadu leaks same-scene frames; train only by default",

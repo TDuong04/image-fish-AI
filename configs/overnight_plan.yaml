@@ -1,0 +1,55 @@
+# Overnight plan for the GPU server, run by scripts/queue_runner.py (FISH_ENV=aigpu).
+# The runner re-reads this file before every step: steps can be appended or fixed while it runs.
+# A finished step is never rerun; `skip_if` makes a rerun safe after a crash.
+#
+# Context: yolov8s/yolov8m/yolo11s at 960 were queued earlier by a shell loop; the first step
+# below waits for that loop to go quiet before using the GPU.
+steps:
+  - name: kakadu-prepare
+    # The full archive is placed at data/raw/kakadu_training_data.zip (it cannot be fetched or uploaded fast
+    # enough here). prepare_kakadu.py reads each member with a CRC check, so a damaged file fails loudly.
+    wait_files: ["data/raw/kakadu_training_data.zip"]
+    skip_if: "data/processed/kakadu/prepare.json"
+    cmd: ["{python}", "scripts/prepare_kakadu.py", "--max-per-group", "15", "--max-side", "960"]
+  - name: kakadu-check
+    wait_files: ["data/processed/kakadu/prepare.json"]
+    cmd: ["{python}", "-c", "import json,pathlib as P; r=P.Path('data/processed/kakadu'); j=json.loads((r/'prepare.json').read_text()); n=len(list((r/'images/train').iterdir())); l=len(list((r/'labels/train').glob('*.txt'))); assert n==l==j['images']['train'], (n,l,j['images']); print('kakadu ok', n, 'images', j['boxes']['train'], 'boxes')"]
+  - name: gpu-free
+    wait_idle: ["scripts/train.py --config"]
+    idle_seconds: 180
+    cmd: ["{python}", "-c", "print('GPU queue idle, starting the Kakadu comparison')"]
+  # YOLOv8s crashed at epoch 50 when data/processed was deleted by someone working on the server; the
+  # datasets were rebuilt from data/raw and data/interim (same split, verified). Resume, then the two
+  # bigger models whose queued runs failed for the same reason.
+  - name: v8s-resume
+    skip_if: "runs/2026100[4-9]-yolov8s-960-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8s_960", "--seed", "0", "--resume"]
+  - name: v8m
+    skip_if: "runs/2026100[4-9]-yolov8m-960-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8m_960", "--seed", "0", "--resume"]
+  - name: v11s
+    skip_if: "runs/2026100[4-9]-yolo11s-960-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolo11s_960", "--seed", "0", "--resume"]
+  - name: kakadu-s0
+    skip_if: "runs/*-yolov8n-960-kakadu-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8n_960_kakadu", "--seed", "0", "--resume"]
+  - name: control-s1
+    skip_if: "runs/2026100[4-9]-yolov8n-960-s1/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8n_960", "--seed", "1", "--resume"]
+  - name: kakadu-s1
+    skip_if: "runs/*-yolov8n-960-kakadu-s1/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8n_960_kakadu", "--seed", "1", "--resume"]
+  - name: control-s2
+    skip_if: "runs/2026100[4-9]-yolov8n-960-s2/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8n_960", "--seed", "2", "--resume"]
+  - name: kakadu-s2
+    skip_if: "runs/*-yolov8n-960-kakadu-s2/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8n_960_kakadu", "--seed", "2", "--resume"]
