@@ -44,6 +44,11 @@ Last updated: 2026-10-04.
 - `scripts/bootstrap.py`, `check_env.py` — right torch wheel per machine; diagnose a machine that cannot train.
   Picks `cu128` for drivers reporting CUDA 12.8 or newer: RTX 50-series (Blackwell) GPUs have no kernels in older
   wheels. Also reads the `CUDA UMD Version:` header label newer drivers print (`tests/test_bootstrap.py`).
+- `scripts/error_analysis.py` — Step 0 of the improvement plan: splits every ground-truth box and prediction on the
+  DeepFish **validation** split (refuses `ozfish_eval`) into outcomes at IoU 0.5 — missed fish (no prediction /
+  found but under the threshold / badly placed), false alarms (duplicate / badly placed / background), recall by box
+  size, and a precision-recall-F1 sweep over thresholds — and draws the worst frames. Writes
+  `runs/analysis-<date>-<model>/analysis.json`.
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -93,7 +98,7 @@ Last updated: 2026-10-04.
   state is recorded in the first line. Ambient temperature cannot be read and is added by hand.
 
 ### Safety net
-- 171 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
+- 175 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
   `__main__` guards, and `tests/test_docs.py`, which fails if a committed result run or a script
   is not named in this file — the mechanical half of the documentation rule in `CLAUDE.md`.
 
@@ -322,6 +327,43 @@ duty cycle (the GPU idles for part of each frame), so a heavier pipeline, MAXN_S
 differently. Mean detections per frame is about 1.5, so NMS load is trivial. Not repeated, so run-to-run spread is
 unknown.
 
+### F10. Missing fish, not wrong boxes or the threshold, is what limits the detector (descriptive, one seed per size)
+`scripts/error_analysis.py` on all 1,339 DeepFish validation frames (1,385 labelled fish), checkpoints
+`20260923-yolov8n-960-s2` and `20260922-yolov8n-640-s2`, operating threshold 0.25, IoU 0.5. Runs:
+`runs/analysis-20261004-20260923-yolov8n-960-s2`, `runs/analysis-20261004-20260922-yolov8n-640-s2`.
+
+| At conf 0.25 | 960 | 640 |
+|---|---|---|
+| Fish found / missed | 697 / 688 (recall 0.503) | 638 / 747 (recall 0.461) |
+| Missed: no prediction at all | 523 | 543 |
+| Missed: found, but under 0.25 | 161 | 195 |
+| Missed: found, but badly placed | 4 | 9 |
+| False alarms (total) | 365 | 443 |
+| False alarms on background / duplicate / badly placed | 321 / 12 / 32 | 395 / 18 / 30 |
+| False alarms on the 464 empty frames | 89 (0.19 per frame) | 158 (0.34 per frame) |
+| Recall, boxes 16-32 px (n=273) | 3.3% | 1.1% |
+| Recall, boxes 32-96 px (n=746) | 48.9% | 42.5% |
+| Recall, boxes over 96 px (n=356) | 90.7% | 89.3% |
+
+- **About three quarters of the misses (523 of 688 at 960) have no prediction at all**, so lowering the threshold
+  recovers at most the 161 found-but-under-threshold ones. Even at conf 0.05 recall at 960 is only 0.542.
+- **Placement is not the problem.** 4 of 688 misses at 960 are found but badly placed.
+- **Nearly all the misses are small fish**: of 688 missed at 960, 264 are 16-32 px and 381 are 32-96 px, against
+  33 over 96 px. This is close to F3's 3-seed means (for example 48.9% against 44.5% for 32-96 px at 960); one seed, so a few points of difference are expected. It is also the check that the script is correct.
+- **Raising the threshold helps precision and costs little recall.** Best F1 at 960 is 0.60 at conf 0.5-0.6
+  (precision 0.83, recall 0.47) against 0.57 at 0.25. A threshold change is a deployment choice, not a fix for
+  missed fish. It was selected on this validation split; the sealed set was not touched.
+- **Most false alarms are on background** (321 of 365 at 960). 960 has 44% fewer empty-frame false alarms than 640 (89 vs 158).
+- **What the worst frames show (viewed: 2 of 24 drawn, so this is an observation and not a finding).** All 12 worst
+  frames at 960 come from one clip (`7398_F1`, mangrove roots). Labelled fish there are small and camouflaged
+  against the roots, and at least one labelled box shows almost no visible fish. Some "background" false alarms may
+  be unlabelled fish. Label quality has **not** been audited; that is the next step before blaming the model.
+
+**Limits.** One seed per resolution (seed 2), one validation split of near-duplicate video frames: the counts are
+descriptive, not independent samples. Outcome categories depend on the thresholds in the script (IoU 0.5 match,
+0.1 for "badly placed"). 'No prediction' means no prediction with IoU of at least 0.5 under the threshold and none of at
+least 0.1 above it, with predictions kept down to conf 0.001.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
@@ -381,6 +423,8 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
 - **No hue-augmentation retraining** (F4 hypothesis).
+- **Label quality is unaudited.** F10 shows the failures are mostly small, camouflaged fish and that some labelled boxes and some "background" false alarms may be label noise. A systematic review of the worst clips is needed before more training.
+- **Error analysis covers one seed per size and DeepFish validation only.** It has not been run on the OzFish set (sealed; would need a decision about analysing without tuning).
 - **No ONNX / TensorRT export or parity check.**
 - **No trivial baselines** (predict-nothing, zero-shot COCO, frame differencing).
 - **Licence position undecided.** Ultralytics and the COCO-pretrained weights are AGPL-3.0; weights are published
@@ -401,6 +445,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | ONNX export manifest | `docs/onnx_manifest.json` |
 | End-to-end per-stage timing logs | `runs/device-20261004/e2e_*.log` |
 | 30-minute sustained run (F9) | `runs/device-20261004/sustained_960.jsonl` |
+| Error analysis (F10) | `runs/analysis-20261004-*/analysis.json` and the worst-frame images beside it |
 | Weights | GitHub release `v0.1.0-models` (not in git) |
 | Checksums | `docs/model_manifest.json` |
 | Evaluation contract | `docs/eval_protocol.md` |
