@@ -1,0 +1,8 @@
+# FD-135. Kakadu fish dataset (CC BY 4.0, doi 10.5281/zenodo.7250921), 23 species merged to one class.
+# Train only: a held-out split inside Kakadu leaks same-scene frames (PROGRESS F13). Built by
+# scripts/prepare_kakadu.py. Do not use this as a validation set.
+path: processed/kakadu
+train: images/train
+val: images/train   # placeholder only so Ultralytics can load the file; never use it to judge a model
+names:
+  0: fish

@@ -1,0 +1,10 @@
+# FD-135. DeepFish train + Kakadu train for training; validation stays the DeepFish val split so
+# results remain comparable with every earlier run. Kakadu shares no frames with DeepFish or with
+# the sealed OzFish set (different sources), so neither judge is contaminated.
+path: processed
+train:
+  - deepfish/images/train
+  - kakadu/images/train
+val: deepfish/images/val
+names:
+  0: fish

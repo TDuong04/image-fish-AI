@@ -58,6 +58,16 @@ Last updated: 2026-10-04.
 - `configs/train/yolov8s_960.yaml`, `yolov8m_960.yaml`, `yolo11s_960.yaml` — FD-134 larger-model screens: default
   augmentation, 960 px, patience 30, everything else as `yolov8n_960`. Queued on `ai-gpu` behind the FD-129 runs, seed 0
   only; auto batch is 6, 3 and 5. **No result yet.**
+- `scripts/fetch_url.py` — resumable multi-connection download with Range requests and MD5 verification, stdlib
+  only. Added because Zenodo gave one connection about 82 KB/s (the 5.9 GB Kakadu zip would take about 20 hours);
+  it refuses without free disk and refuses a server that ignores Range. Progress is kept in `<file>.parts`.
+- `src/fish/zip64.py` — reads zip members compressed with Deflate64 (method 9), which Python's `zipfile` cannot;
+  every member is checked against the archive's CRC-32 and size. Needs `inflate64`.
+- `scripts/prepare_kakadu.py` — FD-135. Converts the Kakadu archive to a single-class YOLO dataset: merges 23 species
+  into `fish`, groups frames into scenes by picture similarity (the data has no video or site field), keeps at most 15
+  frames per group, and writes **train only** by default. Saves the grouping to `splits/kakadu_groups.json`. See F13.
+- `configs/data/kakadu.yaml`, `configs/data/deepfish_kakadu.yaml`, `configs/train/yolov8n_960_kakadu.yaml` —
+  DeepFish train + Kakadu train, validated on the DeepFish val split so numbers stay comparable. **Not run yet.**
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -430,6 +440,35 @@ Error analysis: `runs/analysis-20261004-20261004-yolov8n-960-p2-s0`, `runs/analy
 mAP@50-95, so only the mAP@50-95 gap is clearly outside it. Not tested on the sealed OzFish set and not timed on the
 Orin (the P2 head adds compute at 960).
 
+### F13. Kakadu cannot be split into train and val without leaking, so it is train-only data
+Archive: Jansen et al. 2022, doi 10.5281/zenodo.7250921, CC BY 4.0, md5 verified (`c282e3f0...`). Contents: 44,112
+frames (43,715 JPEG, 397 PNG, 1920x1080 except 12), 82,904 boxes, 23 species, COCO format, compressed with
+Deflate64. Examined on the workstation copy; figures below are from the archive itself, not a summary.
+
+- **No grouping information.** The COCO images carry only `id`, `width`, `height`, `file_name` (a bare number) and
+  `license`. **Consecutive ids are not neighbouring frames**: thumbnail distance between consecutive ids is 26.6,
+  the same as between random pairs (26.7). Yet near-duplicates are everywhere: among 6,000 frames the median
+  nearest-neighbour distance is 1.5, and viewed pairs are the same static camera scene.
+- **Similarity grouping works only partly.** Single-linkage clustering of mean-removed 48x27 grayscale thumbnails
+  (L1) gives, over all 44,112 frames: threshold 4.0 -> 2,296 groups, largest 4.4%; 5.0 -> 1,454 groups, largest 9.8%;
+  6.0 -> 988 groups, **largest 33% (unrelated scenes merging)**. 4.0 was chosen as the last safe value.
+- **A split on those groups still leaks.** At 4.0 the closest val/train pairs (distance 4.02) were looked at and are
+  the **same scene** (same plants and branches, small camera or lighting change). Val-to-train nearest distances
+  (median 6.32, 1st percentile 4.26) match the distances between different train groups (6.42, 4.13), so the groups
+  are fragments of larger scenes, and 14.9% of val frames have a train frame within 5.0. Looser thresholds merge
+  unrelated scenes first, so a better threshold does not exist for this feature. A distance check is necessary but
+  not sufficient; the check in `prepare_kakadu.py` passes while the split still leaks.
+- **Consequence.** Kakadu is used as **training data only**, capped at 15 frames per group (the pipeline
+  default), and no model is judged on a Kakadu split. Judges stay the DeepFish val split and the sealed OzFish set.
+  Better scene identity (a learned image embedding, or the authors' deployment records) could allow a Kakadu test
+  set later.
+- **No empty frames**: every image has at least one fish, so Kakadu cannot measure false alarms.
+- Box sizes (native 1080p): median 150 px, 10th percentile 78 px; at 640 input that is about 50 px and 26 px, mostly
+  the 32-96 px range where F3 and F10 show the models fail.
+
+**Limits.** Grouping validated by eye on 3 pairs and by distance statistics, not exhaustively. 23 species merged to
+one class without checking whether any species labels cover non-fish objects.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
@@ -516,6 +555,10 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
   **PomerFish** (Zenodo, CC BY 4.0), **OBSEA** (Zenodo, CC BY 4.0), **Brackish** (Kaggle, CC BY-SA 4.0, share-alike).
   Excluded by licence: TORSI (CC BY-NC-SA). Whatever is used needs the same site/video-level split and leakage check as
   DeepFish, because all of it is video frames.
+- **Kakadu is downloading to `ai-gpu`** (about 0.4 MB/s from that host, roughly 4 hours, started 2026-10-04; the PC
+  copy exists and is verified). Uploading from the PC measured 0.09 MB/s, so the server fetches it itself. After it is
+  verified there: run `prepare_kakadu.py`, then the `yolov8n_960_kakadu` screen. The PC copy is to be deleted once the
+  server copy's md5 matches (user's instruction).
 - **Label audit is one reviewer's sample** (F11: 48 missed, 24 found, 36 false alarms). A second reviewer, and a larger sample outside site 7398, would firm it up; it is not a blocker for the small-fish experiments.
 - **Error analysis covers one seed per size and DeepFish validation only.** It has not been run on the OzFish set (sealed; would need a decision about analysing without tuning).
 - **No ONNX / TensorRT export or parity check.**
