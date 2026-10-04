@@ -476,6 +476,36 @@ Deflate64. Examined on the workstation copy; figures below are from the archive 
 **Limits.** Grouping validated by eye on 3 pairs and by distance statistics, not exhaustively. 23 species merged to
 one class without checking whether any species labels cover non-fish objects.
 
+### F14. Against a same-machine control, stronger augmentation and a larger model both help in-domain (one seed each)
+All seed 0, 960 px, DeepFish validation split, conf 0.25 for the counts (1,385 labelled fish, 464 empty frames).
+Server runs on `ai-gpu` (RTX 5060, Ultralytics 8.4.172); the Kaggle baseline is the earlier T4 run (8.4.130, batch 23).
+Run folders `runs/<name>/`, analyses `runs/analysis-20261004-<name>/`.
+
+| Run | Batch | mAP@50 | mAP@50-95 | Fish found / missed | False alarms (empty frames) | Recall 16-32 / 32-96 px |
+|---|---|---|---|---|---|---|
+| Kaggle baseline `20260922-yolov8n-960-s0` | 23 | 0.4876 | 0.3124 | 664 / 721 | 659 (207) | 1.5% / 44.5% |
+| **Control** `20261004-yolov8n-960-s0` (server) | 10 | 0.4562 | 0.2957 | 648 / 737 | 531 (150) | 2.6% / 42.2% |
+| P2 head `20261004-yolov8n-960-p2-s0` | 5 | 0.5075 | 0.2830 | 673 / 712 | 364 (115) | 3.7% / 45.3% |
+| Aug (scale 0.9, hue 0.05) `20261004-yolov8n-960-aug-s0` | 10 | 0.5427 | 0.3285 | 729 / 656 | 474 (152) | 6.2% / 50.7% |
+| YOLOv8s `20261004-yolov8s-960-s0` | 5-6, resumed | 0.5846 | 0.3588 | 741 / 644 | 396 (80) | 5.9% / 53.9% |
+
+- **The machine matters as much as the seed spread.** The same seed on the server (control) scores 0.031 mAP@50 and
+  0.017 mAP@50-95 below the Kaggle run, under the whole Kaggle 3-seed range (0.4876 to 0.5220). Batch size, Ultralytics
+  version and the GPU all differ. Comparisons across machines are not trustworthy; only the same-machine control is.
+- **Aug vs control (same machine, same batch, same seed): +0.087 mAP@50, +0.033 mAP@50-95, 81 more fish found
+  (648 to 729), 57 fewer false alarms.** Recall rises at 16-32 px (2.6% to 6.2%) and at 32-96 px (42.2% to 50.7%). This
+  is the largest gain of the cheap changes, about 2.5 times the 0.034 Kaggle seed spread, but it is **one seed**
+  and a **bundle** (scale and hue changed together), so it is a candidate and not a result.
+- **YOLOv8s vs control: +0.128 mAP@50, +0.063 mAP@50-95, 93 more fish found, empty-frame false alarms 150 to 80.** The
+  largest single-seed effect so far. Caveats: it is about 3 times the compute (Orin latency not measured), its batch
+  differs (5-6 against 10), and it was interrupted at epoch 50 by the data deletion in section 7 and resumed from
+  `last.pt`, early-stopping at epoch 66. Its epoch time in `results.csv` restarts at the resume and is not comparable.
+- **Small fish stay hard for every variant.** Even the best run finds 6% of 16-32 px fish and 54% of 32-96 px fish.
+
+**Limits.** n=1 seed per row; seed spread on this machine is unknown. Batch sizes differ between rows, so only
+control, aug (both batch 10) are a clean pair. One validation split of near-duplicate frames. Not tested on the sealed
+OzFish set. 3 seeds on the winning ideas are the next step (queued as the Kakadu comparison for the control).
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
@@ -523,6 +553,8 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Parity results held numpy `float32` values | A passing check printed PASS, then crashed writing its result, leaving no record | The first real engine run |
 | `trtexec --warmUp=0` intermittently exports no output | Looked like per-frame failures (1 of 12, then 10 of 12, succeeded); the same frame worked on re-run | Re-running a "failing" frame by hand |
 | Parity-set label counted OzFish frames by an `A0` filename prefix | Reported 1 OzFish frame when 4 were used (OzFish names also start with E and G) | Listing the actual frames |
+| Aug "looks barely better" (said in conversation: +0.04 mAP@50, +0.012 mAP@50-95 against the Kaggle baseline mean) | Against the same-machine control it is +0.087 and +0.033: the server control scores 0.031 below the Kaggle run at the same seed, so the Kaggle baseline was the wrong comparator. Still one seed and a bundle. | The control run finishing (F14) |
+| F12 compared the P2 head with the Kaggle baseline and called the batch difference "5 against 23" | The same-machine control used batch 10, and P2 used batch 5 (the automatic batch for `yolov8n-p2` differs from `yolov8n`). Against the control, P2 is +0.051 mAP@50 and -0.013 mAP@50-95, with 16-32 px recall 3.7% against 2.6%: mixed, and confounded by batch size, so "no small-fish gain" is weaker than F12 stated. | Reading the control's `args.yaml` (F14) |
 | `docs/hardware.md` said the board's firewall drops everything but SSH and documented the app as localhost-only | The code default is `--host 0.0.0.0`. The timeout was real at the time; `ufw` now lists allow rules for 7860 and 7861 (not added by this work), and direct access works. | A user could not reach the app on the board's address; `ufw status` |
 | `fish.parity.nms()` modified the array it was given | Ultralytics' NMS converts boxes xywh to xyxy in place and `torch.from_numpy` shares memory, so the caller's raw output was silently overwritten and a second decoder converted it twice (boxes like `[167, 52, 628, 248]`). Fixed with a copy and a regression test. | Cross-checking the edge decoder against it |
 | `cuda-python` pinned at 12.6.2 | That release was yanked by its maintainers. Replaced by 12.6.2.post1. | pip's yanked-version warning |
@@ -536,8 +568,8 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
 - **No hue-augmentation retraining** (F4 hypothesis).
-- **FD-129 screens on `ai-gpu`** (started 2026-10-04): one seed (0) each of `yolov8n-960-p2` (done, F12), then
-  `yolov8n-960-aug` (running) and a control rerun of `yolov8n-960` on the same machine (queued). About 65 s per epoch for the P2 run on
+- **FD-129 screens on `ai-gpu`** (started 2026-10-04): one seed (0) each of `yolov8n-960-p2`, `yolov8n-960-aug` and a
+  same-machine control, all done (F12, F14); the aug gain and the YOLOv8s gain need 3 seeds before they count. About 65 s per epoch for the P2 run on
   the RTX 5060 at batch 5 (the Kaggle T4 runs used batch 23 and about 115 s per epoch), so the control rerun exists to
   keep the comparison fair across machine, Ultralytics version (8.4.172 here, 8.4.130 on Kaggle) and batch size. One
   seed cannot decide anything: the 960 baseline seed spread is 0.034 mAP@50, so only a difference clearly larger than

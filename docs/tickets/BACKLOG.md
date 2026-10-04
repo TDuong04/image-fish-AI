@@ -818,12 +818,12 @@ nothing is compared on fewer than 3 seeds. The sealed OzFish set is used only fo
 
 | ID | Item | Status |
 |---|---|---|
-| FD-129 | **Small-fish experiments**: 960 with stronger scale/hue augmentation; a stride-4 (P2) head; tiled or crop training. Goal: recall on 16-96 px fish. | IN PROGRESS: P2 screen done and negative (PROGRESS F12); augmentation screen running and same-machine control queued on `ai-gpu`; tiled training not started |
+| FD-129 | **Small-fish experiments**: 960 with stronger scale/hue augmentation; a stride-4 (P2) head; tiled or crop training. Goal: recall on 16-96 px fish. | IN PROGRESS: screens done at seed 0 (PROGRESS F12, F14): P2 mixed, augmentation +0.087 mAP@50 over the same-machine control; needs 3 seeds; tiled training not started |
 | FD-130 | **Hard negatives**: add and weight mangrove-leaf and empty-water frames (44% and 33% of sampled false alarms, F11). Needs a source of empty frames; OzFish has none. | TODO |
 | FD-131 | Remote GPU server `ai-gpu` (RTX 5060 8 GB) as a training machine: environment ready (`configs/env/aigpu.yaml`), data fetched, smoke run passed, FD-129 screens running. Its repo copy is not synced by git (files were copied by hand because the work is unpushed) | DONE for now |
 | FD-132 | Second reviewer and a larger label-audit sample outside site 7398 | TODO |
 | FD-133 | Explain the 43 confident top-left-corner boxes at site 7398 (F11) | TODO |
-| FD-134 | Larger models (YOLOv8s/m, YOLO11) and non-AGPL models (YOLOX, NanoDet-Plus), after FD-129/130 and the FD-008 licence decision | IN PROGRESS: YOLOv8s, YOLOv8m, YOLO11s at 960, seed 0, queued on `ai-gpu` (started early at the user's request, because the FD-129 screens looked marginal); non-AGPL models not started |
+| FD-134 | Larger models (YOLOv8s/m, YOLO11) and non-AGPL models (YOLOX, NanoDet-Plus), after FD-129/130 and the FD-008 licence decision | IN PROGRESS: YOLOv8s, YOLOv8m, YOLO11s at 960, seed 0, queued on `ai-gpu` (started early at the user's request); YOLOv8s done (+0.128 mAP@50 over the control, F14), YOLOv8m running, YOLO11s queued; non-AGPL models not started |
 | FD-113 | Full OzFish training set: needs a person to open the portal in a browser | BLOCKED on the user |
 | FD-135 | **Kakadu dataset as extra training data** (Zenodo 7250921, CC BY 4.0, 44k frames, 5.9 GB): download, collapse 23 species to one class, group frames by video, split by site/video, audit, then train. Replaces dependence on Pawsey for scene diversity. | IN PROGRESS: archive downloaded and verified on the PC; downloading to `ai-gpu`; converter, grouping and configs written (F13: train-only, no leak-free split exists); training screen not run |
 | FD-136 | **NOAA Puget Sound (LILA) empty frames** as hard negatives and an empty-frame false-alarm test (FD-024, FD-130). Check size first. | TODO |
