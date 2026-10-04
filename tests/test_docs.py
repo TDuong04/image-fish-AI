@@ -49,6 +49,7 @@ def test_every_result_run_is_documented(run, progress_text):
 
 def _entrypoints() -> list[str]:
     files = [p.name for p in (REPO / "scripts").glob("*.py")]
+    files += [f"edge/{p.name}" for p in (REPO / "edge").glob("*.py")]
     files += ["demo/app.py"] if (REPO / "demo" / "app.py").exists() else []
     return sorted(files)
 

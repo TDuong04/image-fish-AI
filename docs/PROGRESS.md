@@ -20,7 +20,7 @@ Last updated: 2026-10-04.
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
 | Automation | Crash-recovering supervisor and a Kaggle session runner. |
-| **Jetson Orin Nano** | **Not acquired. No device measurement exists.** The whole deployment half of the thesis is unanswered. |
+| **Jetson Orin Nano** | **In hand: 8 GB module, 6-core A78AE, no fan** (owner-reported; see `docs/hardware.md`). Super status, JetPack and TensorRT versions not yet recorded. **No device measurement exists yet.** The deployment half of the thesis is still unanswered. |
 | Report | `report_sections.md` still describes the older LCFCN *counting* experiment, not this work. Needs rewriting. |
 
 ---
@@ -53,8 +53,14 @@ Last updated: 2026-10-04.
 - `demo/app.py` — Gradio app: photo (640 vs 960 side by side) and video (annotated clip + MaxN).
 - `scripts/build_demo.py`, `scripts/build_device_demo.py` — data behind the two comparison pages.
 
+### Device
+- `edge/probe_board.py` — run on the Jetson; reports module, L4T, TensorRT, power modes (including
+  whether Super is present), memory, storage and thermal facts. Standard library only, Python 3.8-safe,
+  needs no sudo. Its power-mode parsing is tested against simulated files only, not a real board's.
+- `docs/hardware.md` — what is confirmed, what is documented but unverified, and what is unknown.
+
 ### Safety net
-- 104 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
+- 107 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
   `__main__` guards, and `tests/test_docs.py`, which fails if a committed result run or a script
   is not named in this file — the mechanical half of the documentation rule in `CLAUDE.md`.
 
@@ -217,7 +223,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 
 ## 8. Not done / open
 
-- **No Jetson measurements.** FPS, latency, power mode, sustained throughput, memory — all unmeasured.
+- **No Jetson measurements.** The board is in hand, but FPS, latency, power mode, sustained throughput and memory are all unmeasured, and Super status / JetPack / TensorRT are unrecorded (`docs/hardware.md`).
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
 - **No hue-augmentation retraining** (F4 hypothesis).
@@ -236,6 +242,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | What | Where |
 |---|---|
 | Run metrics, configs, epoch curves | `runs/<run>/` (tracked) |
+| Board facts | `docs/hardware.md` |
 | Weights | GitHub release `v0.1.0-models` (not in git) |
 | Checksums | `docs/model_manifest.json` |
 | Evaluation contract | `docs/eval_protocol.md` |

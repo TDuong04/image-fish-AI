@@ -3,7 +3,7 @@
 ## What this project is
 
 Train a fish **object detector** (bounding boxes, underwater/BRUVS footage) that runs on a
-**Jetson Orin Nano (4GB or 8GB)**, and write an academic report whose performance claims are
+**Jetson Orin Nano (8GB module, in hand)**, and write an academic report whose performance claims are
 validated on the real board — not extrapolated from desktop numbers.
 
 Two deliverables, both required:
@@ -15,19 +15,25 @@ Deployment mode: **offline batch on recorded video first**, real-time camera as 
 ## Hard constraints (do not design around these being false)
 
 ### Target hardware
-- **Jetson Orin Nano**, Ampere, JetPack 5.1.x or 6.x. Confirm the exact JetPack/L4T version
-  before writing any export code — it pins TensorRT, which pins the usable ONNX opset.
-- **4GB vs 8GB matters.** *All* Jetsons use unified memory — the 8GB module is not "8GB of
-  dedicated VRAM." The difference is quantity, not architecture, and JetPack plus a desktop
-  session consumes ~1.5–2 GB before your process starts. Assume 4GB until confirmed.
+- **Jetson Orin Nano 8GB**, Ampere, 6-core Cortex-A78AE, passively cooled (no fan). The facts
+  that are still unknown — Super mode, JetPack/L4T, TensorRT, storage — are listed in
+  `docs/hardware.md`. Run `edge/probe_board.py` on the board and record them before writing any
+  export code: the JetPack version pins TensorRT, which pins the usable ONNX opset.
+- **Memory is unified.** *All* Jetsons share one pool between CPU and GPU — the 8GB module is
+  not "8GB of dedicated VRAM", and JetPack plus a desktop session consumes ~1.5–2 GB before your
+  process starts. Even so, YOLOv8n is ~6 MB in FP16, so memory is not the constraint here and
+  INT8 is a research question about accuracy cost, not a deployment necessity.
+- **No fan means thermal throttling is the main threat to measurement integrity.** A burst
+  benchmark overstates a passively cooled module. Sustained (30+ min) numbers are the real ones,
+  and ambient temperature, clocks and temperature are logged with every one.
 - **No DLA and no NVENC.** Orin Nano is the Orin module without the hardware video encoder, and
   without a DLA (Orin NX and AGX Orin have both). Decode is accelerated (NVDEC); *encoding*
   annotated video is CPU x264 and will dominate any pipeline that does it. Everything infers on
   the one 1024-core Ampere GPU — nothing to offload to.
 - **Every FPS number MUST cite its `nvpmodel` mode** and `jetson_clocks` state. Do not assert a
-  magnitude for the mode-to-mode swing before measuring it: the 4GB module's modes are 7W/10W
-  (a 1.43× envelope), and the large swings quoted online are 8GB-under-JetPack-6.2-Super
-  figures. Measure it on the board (FD-044); do not inherit it from a memo.
+  magnitude for the mode-to-mode swing before measuring it. The modes this board offers depend
+  on whether Super (JetPack 6.2+) is present, which `edge/probe_board.py` reports from
+  `/etc/nvpmodel.conf`. Measure the swing on the board (FD-044); do not inherit it from a memo.
 - **TensorRT engines are not portable.** They are specific to GPU arch + TensorRT version +
   driver. You cannot build a `.engine` on the x86 dev box and ship it. Build ONNX on x86,
   build the engine **on the Orin**.
