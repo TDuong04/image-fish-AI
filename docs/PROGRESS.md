@@ -473,6 +473,8 @@ Deflate64. Examined on the workstation copy; figures below are from the archive 
 - Box sizes (native 1080p): median 150 px, 10th percentile 78 px; at 640 input that is about 50 px and 26 px, mostly
   the 32-96 px range where F3 and F10 show the models fail.
 
+- **Leak check against the DeepFish validation split (2026-10-04, while the first Kakadu run was training).** The run's early scores (best 0.721 mAP@50 at epoch 29, against 0.456 for the control) were far above any earlier run, so the split was checked before anything was reported. On the exact 7,318 frames trained on, using the same thumbnail distance: nearest Kakadu frame to any of the 1,339 val frames is 5.65, none under 4.0, and the two datasets share no file names. Viewed closest pairs are unrelated scenes. **No leak was found.** Kakadu frames are, however, closer to the val frames than DeepFish's own train frames are (median 13.6 against 15.7; minimum 5.65 against 9.83), because the DeepFish split is by site. A large gain on this val split is therefore partly 'training data that looks like the validation sites' and is not evidence of a general improvement; the sealed OzFish set, used once at the end, is the test of that.
+
 **Limits.** Grouping validated by eye on 3 pairs and by distance statistics, not exhaustively. 23 species merged to
 one class without checking whether any species labels cover non-fish objects.
 
