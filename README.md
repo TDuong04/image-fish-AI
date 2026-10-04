@@ -1,8 +1,10 @@
 # Fish Detection for Jetson Orin Nano
 
 Finds fish in underwater video with a box around each one, using a model small enough
-for a Jetson Orin Nano. **Status:** trained and evaluated on a desktop GPU. Nothing has
-run on the Jetson yet; the board is not in hand.
+for a Jetson Orin Nano. **Status:** trained and evaluated on a desktop GPU, and running on
+a Jetson Orin Nano (8 GB) as TensorRT FP16 engines. End to end, a simple serial pipeline
+takes about 33 ms per frame at 640 px and 41 ms at 960 px. Sustained load, the hardware
+video decoder and INT8 are not measured yet. Details: `docs/PROGRESS.md`.
 
 ## 1. Set up (once)
 
@@ -29,9 +31,14 @@ Don't `pip install torch` yourself: on Windows it silently gives a CPU-only buil
 
 Upload a photo or a clip and see the detections.
 
-1. Get the trained `.pt` model files from a teammate (they are not stored in git).
-2. Put them in the `models/` folder.
-3. Run:
+1. Download the trained models. They are not stored in git; this fetches them from the
+   GitHub release and checks each one against a checksum:
+
+```bash
+python scripts/fetch_models.py
+```
+
+2. Run:
 
 ```bash
 python demo/app.py
@@ -41,6 +48,26 @@ It opens in your browser. Add `--share` to get a temporary public link (~72 hour
 send someone.
 
 The timings it shows are for **your** machine, not a Jetson.
+
+## 2b. Run it on the Jetson
+
+`demo/app.py` needs PyTorch, which the Jetson does not have. The Jetson runs a separate
+app, `edge/app.py`, that uses the TensorRT engines directly. Engines only work on the
+board they were built on, so they are built there (`edge/build_engines.py`); setup is in
+`docs/hardware.md`.
+
+```bash
+# on the Jetson
+python3 edge/app.py --engines-dir engines        # serves 127.0.0.1:7860 only
+
+# on your computer
+ssh -N -L 7861:127.0.0.1:7860 <user>@<jetson-address>
+# then open http://127.0.0.1:7861
+```
+
+It is reached through an SSH tunnel on purpose: the app has no login, so it is not
+exposed to the network. Timings shown there are measured on the board, with its power
+mode and temperature displayed next to them.
 
 ## 3. Train
 
@@ -59,7 +86,7 @@ Results go to `runs/<date>-<name>/`. **No `metrics.json` means the run did not f
 | `Python 3.x is not supported` | Wrong Python. Recreate the venv with `py -3.11`. |
 | `Refusing to install into the system Python` | You skipped `activate`. |
 | `no GPU available ... CPU-only build` | Run the `pip install` command it prints. |
-| `No model files found in models/` | Step 2 above: get the `.pt` files. |
+| `No model files found in models/` | `python scripts/fetch_models.py` |
 | `Dataset ... does not exist` | `python scripts/get_data.py` |
 | Download stopped halfway | Run `python scripts/get_data.py` again. |
 

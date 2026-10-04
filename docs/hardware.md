@@ -83,11 +83,37 @@ as results**, because the `trtexec` log and engine hashes behind them have not b
 Everything this project put on the board lives in one directory, `~/fish-detection/`: `onnx/`,
 `engines/`, `parity/`, `logs/`, plus a clone of the public repository. A directory left by an earlier
 on-board session (`~/deploy/`) was read and not modified. Nothing outside these two directories was
-changed: no `sudo`, no power-mode or clock change, no package installs, no JetPack change.
+changed: no `sudo`, no power-mode or clock change, no system package installs, no JetPack change. Python libraries went into two self-contained folders under `~/fish-detection/` (see below), which can be deleted to undo them.
 
 Engines built there are recorded in `runs/device-20261004/engine_registry.json` (hashes, source
 checkpoint, TensorRT and L4T versions, flags). They are not in git: they are tied to this board's GPU
 and TensorRT version and cannot be built elsewhere.
+
+## Running the web app on the board
+
+`edge/app.py` serves the TensorRT engines. Its Python dependencies are in two folders, so nothing system-wide
+was touched and deleting them undoes it:
+
+| Folder | Contents | Why |
+|---|---|---|
+| `~/fish-detection/pylibs` | `cuda-python` **12.6.2.post1** | Device memory for the engine. 12.6.2 was yanked by its maintainers; the `.post1` release replaces it. |
+| `~/fish-detection/pylibs-ui` | `gradio` 6.29.1 and **`numpy` 1.26.4** | The UI. It brings its own numpy, which shadows the board's 1.21.5 *only when this folder is on `PYTHONPATH`*. OpenCV 4.8.0 and TensorRT 10.3.0 were re-verified under it: the engine still reproduces its saved reference. |
+
+```bash
+cd ~/fish-detection
+PYTHONPATH=$HOME/fish-detection/pylibs:$HOME/fish-detection/pylibs-ui:$HOME/fish-detection \
+  python3 app.py --engines-dir engines          # binds 127.0.0.1:7860
+# from your computer:
+ssh -N -L 7861:127.0.0.1:7860 <user>@<board-address>     # then open http://127.0.0.1:7861
+```
+
+**Why a tunnel and not the network address.** The app listens on localhost only. When it was bound to all
+interfaces, connections from another machine on the network **silently timed out** on port 7860 while SSH
+(port 22) worked, which points to a firewall on the board dropping everything but SSH. That was not changed:
+opening the port would expose an app with no login to the whole network. `--host 0.0.0.0` exists as an opt-in.
+
+**Do not kill processes by name on this board.** NVIDIA's own system services (`nvpmodel_indicator`,
+`nvidiaPvaAllowd`) run as `python3`. Find the PID from the port owner (`ss -ltnp | grep :7860`) and kill that.
 
 ## Re-running the probe
 

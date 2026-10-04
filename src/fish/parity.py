@@ -51,8 +51,12 @@ def nms(raw: np.ndarray, conf: float = CONF, iou: float = NMS_IOU) -> np.ndarray
         from ultralytics.utils.nms import non_max_suppression   # recent releases
     except ImportError:
         from ultralytics.utils.ops import non_max_suppression   # older releases
-    out = non_max_suppression(torch.from_numpy(np.ascontiguousarray(raw, dtype=np.float32)),
-                              conf_thres=conf, iou_thres=iou, max_det=300, nc=1)[0]
+    # COPY. torch.from_numpy shares memory with the array, and Ultralytics' NMS converts
+    # boxes xywh -> xyxy IN PLACE, so without a copy this silently overwrote the caller's
+    # raw output. Anything that read the array afterwards (a raw-tensor diff, or a second
+    # decoder in a cross-check) saw already-converted boxes and converted them again.
+    x = torch.from_numpy(np.array(raw, dtype=np.float32, copy=True))
+    out = non_max_suppression(x, conf_thres=conf, iou_thres=iou, max_det=300, nc=1)[0]
     return out.cpu().numpy()
 
 

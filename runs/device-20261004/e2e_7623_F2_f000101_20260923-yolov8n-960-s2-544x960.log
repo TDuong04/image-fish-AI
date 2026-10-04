@@ -1,0 +1,18 @@
+cat: /sys/class/thermal/thermal_zone2/temp: Resource temporarily unavailable
+cat: /sys/class/thermal/thermal_zone3/temp: Resource temporarily unavailable
+cat: /sys/class/thermal/thermal_zone4/temp: Resource temporarily unavailable
+# image: 7623_F2_f000101   engine: 20260923-yolov8n-960-s2-544x960-fp16   power mode: NV Power Mode: 25W 1    junction before: 49000 mC
+engine 20260923-yolov8n-960-s2-544x960-fp16.engine   input 544x960   output (1, 5, 10710)
+2 detection(s) on a 1920x1080 frame
+  [0, 468, 149, 639]  conf 0.871
+  [1200, 10, 1920, 449]  conf 0.839
+
+per-stage over 200 runs, each a separate wall-clock figure:
+  jpeg_decode_ms  median   17.47   p95   17.60   mean   17.52
+  preprocess_ms   median    8.01   p95    8.27   mean    7.92
+  gpu_ms          median   14.42   p95   17.48   mean   14.83
+  postprocess_ms  median    0.91   p95    1.11   mean    0.94
+  frame_total_ms  median   40.83   p95   44.23   mean   41.22
+  (gpu_ms = host-to-device + GPU forward + device-to-host, one sync. It is larger
+   than trtexec's kernel-only figure because the copies are included.)
+# junction after: 49500 mC   fan: 1423 rpm

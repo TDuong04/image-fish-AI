@@ -20,7 +20,7 @@ Last updated: 2026-10-04.
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
 | Automation | Crash-recovering supervisor and a Kaggle session runner. |
-| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** Not yet measured: end-to-end latency, sustained throughput, INT8, on-device mAP. The deployment half of the thesis is only partly answered. |
+| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** **End to end, a serial pipeline takes about 33 ms per frame at 640 and 41 ms at 960 (about 30 and 24 fps), and a web app runs on the board** (`edge/app.py`). Not yet measured: sustained throughput, hardware video decode, INT8, on-device mAP. The deployment half of the thesis is only partly answered. |
 | Report | `report_sections.md` still describes the older LCFCN *counting* experiment, not this work. Needs rewriting. |
 
 ---
@@ -70,9 +70,19 @@ Last updated: 2026-10-04.
 - `src/fish/parity.py` — the shared comparison (used by the ONNX and engine checks). Detections within 0.03 of
   the confidence threshold are reported as *borderline* and not held against an FP16 engine; a confident
   detection that goes missing or appears from nowhere fails the check.
+- `edge/trt_runner.py` — runs on the board; the real on-device inference path (letterbox, host-to-device, GPU
+  forward, device-to-host, threshold + NMS, map back to the frame) with a per-stage timing breakdown. Needs only
+  what the board has (TensorRT, numpy, OpenCV) plus `cuda-python`; no torch, no Ultralytics. Its letterbox is
+  bit-identical to Ultralytics' on 14 source/target size combinations and its decode selects the same detections
+  as Ultralytics' NMS (`tests/test_edge_runner.py`). It reproduces `trtexec` outputs to within 5e-4, which is
+  `trtexec`'s own text rounding.
+- `edge/app.py` — the web app for the board: photo tab (640 vs 960, median of 7 warm runs, stage timings) and
+  video tab (MaxN, per-frame CSV, the frame with the most fish). It deliberately writes **no annotated video**,
+  because the Orin Nano has no hardware encoder. Shows the board's power mode, temperature and fan next to every
+  timing. Reached through an SSH tunnel; setup is in `docs/hardware.md`.
 
 ### Safety net
-- 134 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
+- 161 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
   `__main__` guards, and `tests/test_docs.py`, which fails if a committed result run or a script
   is not named in this file — the mechanical half of the documentation rule in `CLAUDE.md`.
 
@@ -236,6 +246,40 @@ measurement on the device. Raw tensor differences reach 3.1 px (640) and 15.2 px
 frames with no or few detections; detection-level agreement is what is judged, and the raw figure is recorded
 so it is not hidden.
 
+### F8. End to end on the Orin Nano, the GPU kernel is under 11% of a frame
+`edge/trt_runner.py --bench 200` on the board: the same two FP16 engines, 25 W mode, clocks not locked, fan on.
+Median of 200 runs per case; logs in `runs/device-20261004/e2e_*.log`. Frame `7623_F2_f000101` (DeepFish, 2 fish).
+
+| Stage | 640 · 384x640 | 960 · 544x960 |
+|---|---|---|
+| JPEG decode (CPU) | 17.3 ms | 17.5 ms |
+| Letterbox + normalise (CPU) | 4.7 ms | 8.0 ms |
+| Copy in + GPU forward + copy out | 9.8 ms | 14.4 ms |
+| Threshold + NMS (CPU) | 0.85 ms | 0.91 ms |
+| **Total, serial** | **32.8 ms** (p95 33.4) | **40.8 ms** (p95 44.2) |
+| Frames per second, serial | 30.5 | 24.5 |
+| *Kernel-only time from F6, for scale* | *2.56 ms* | *4.37 ms* |
+
+A crowded OzFish frame (7 and 10 detections) totals 32.4 ms and 40.9 ms, within 0.5 ms of the above.
+
+- **The GPU kernel is 8% (640) and 11% (960) of the frame.** The Arm cores and memory traffic dominate, which
+  `trtexec` cannot show. A kernel-only number is not a frame rate (F6 said so; this puts a number on it).
+- **960 costs +8.1 ms (+25%) per frame over 640 end to end**, not the 2.25x the pixel count suggests. About three
+  quarters of that extra is CPU resize plus data movement (letterbox +3.3 ms, copy+GPU +4.6 ms of which only
+  1.8 ms is the kernel), not convolution. NMS differs by 0.06 ms.
+- **CPU NMS is cheap here (about 0.9 ms)**, which is not the bottleneck FD-034 worried about. That is on sparse
+  output: the most detections tested were 10.
+- **Copy in + GPU + copy out is 9.8 ms against a 2.56 ms kernel.** About 7 ms goes to host/device copies and
+  synchronisation with ordinary (pageable) host memory. Pinned memory or normalising on the GPU would likely
+  shrink it, but that is a hypothesis and has not been tried.
+
+**Limits.** Serial: stages run one after another with no overlap, so this is a simple pipeline and not the best
+the hardware can do. JPEG decode is not video decode; the app's video tab uses software H.264 decode (it
+reported about 8.6 ms per frame on the sample clip) and the board's hardware decoder (NVDEC) is **not used**, so
+real video throughput could be better. One image per case, warm in the page cache. Junction temperature stayed at
+49 to 50 C because the GPU is idle most of each frame, so this is **not** a sustained-load test. Both engines are
+from seed 2.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
@@ -258,6 +302,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | `fan_interface_present` implies a fan | It only shows the kernel driver exists. The tachometer is the evidence. | Checking the tach after the probe contradicted the owner |
 | The 960 px engine costs 7.1 ms on the Orin | That engine was built for a 960x960 square. At the evaluated shape (544x960) the measured GPU time is 4.37 ms. | Reading the engine's input binding in the build log |
 | The board log dated 14 May 2026 was a May measurement | The model was trained in September, so the board's clock was stale when it was written. NTP is now synchronised and new logs carry the right date. Trust hashes, not timestamps. | The date predating the model |
+| The model fits comfortably: ~7 ms of GPU against ~14 ms per frame at 60 fps (on-board report) | The 60 fps budget is 16.7 ms, not 14. More importantly the GPU kernel is only a small part of a frame: the serial end-to-end pipeline is 40.8 ms (24.5 fps) at 960, so 60 fps is not reachable serially, and "leaving the CPU free" was an untested hypothesis that the CPU is in fact the bottleneck. | Building the end-to-end runner |
 
 ---
 
@@ -279,12 +324,15 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Parity results held numpy `float32` values | A passing check printed PASS, then crashed writing its result, leaving no record | The first real engine run |
 | `trtexec --warmUp=0` intermittently exports no output | Looked like per-frame failures (1 of 12, then 10 of 12, succeeded); the same frame worked on re-run | Re-running a "failing" frame by hand |
 | Parity-set label counted OzFish frames by an `A0` filename prefix | Reported 1 OzFish frame when 4 were used (OzFish names also start with E and G) | Listing the actual frames |
+| `fish.parity.nms()` modified the array it was given | Ultralytics' NMS converts boxes xywh to xyxy in place and `torch.from_numpy` shares memory, so the caller's raw output was silently overwritten and a second decoder converted it twice (boxes like `[167, 52, 628, 248]`). Fixed with a copy and a regression test. | Cross-checking the edge decoder against it |
+| `cuda-python` pinned at 12.6.2 | That release was yanked by its maintainers. Replaced by 12.6.2.post1. | pip's yanked-version warning |
+| `pkill -f "python3 app.py"` run over SSH | It matched the SSH session's own command line and killed it (exit 255). The bracket trick fails too when the pattern also appears elsewhere in the command. Kill by PID found from the port owner, never by name: NVIDIA's system services also run as `python3`. | Two failed launches |
 
 ---
 
 ## 8. Not done / open
 
-- **Device measurement is only partly done.** GPU kernel time is measured for both engines (F6) and parity holds on 12 frames (F7). Still unmeasured: **end-to-end latency** (decode, letterbox, NMS, postprocess), **sustained throughput and thermals** over 30+ minutes, memory under a real pipeline, INT8, NMS placement, and **mAP on the device**. Engines exist only for seed 2, and the board boots from an SD card with about 8 GB free.
+- **Device measurement is only partly done.** GPU kernel time is measured for both engines (F6) and parity holds on 12 frames (F7). End-to-end latency is measured for a serial pipeline (F8). Still unmeasured: **sustained throughput and thermals** over 30+ minutes, **hardware video decode (NVDEC)**, memory under a real pipeline, any **overlap or pinned-memory optimisation** of the CPU stages that dominate, INT8, and **mAP on the device**. Engines exist only for seed 2, and the board boots from an SD card with about 8 GB free.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
 - **No hue-augmentation retraining** (F4 hypothesis).
@@ -306,6 +354,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Board facts | `docs/hardware.md`, raw probe output `docs/board_probe_20261004.json` |
 | Engine provenance, build and benchmark logs, parity results | `runs/device-20261004/` (`engine_registry.json` links each engine to its ONNX, checkpoint, TensorRT and L4T) |
 | ONNX export manifest | `docs/onnx_manifest.json` |
+| End-to-end per-stage timing logs | `runs/device-20261004/e2e_*.log` |
 | Weights | GitHub release `v0.1.0-models` (not in git) |
 | Checksums | `docs/model_manifest.json` |
 | Evaluation contract | `docs/eval_protocol.md` |

@@ -15,7 +15,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from fish.parity import BORDERLINE, CONF, box_iou, compare_detections, verdict  # noqa: E402
+from fish.parity import BORDERLINE, CONF, box_iou, compare_detections, nms, verdict  # noqa: E402
 
 
 def det(x1, y1, x2, y2, conf):
@@ -106,3 +106,14 @@ def test_results_are_json_serialisable_with_float32_detections():
     got = np.stack([det(0, 0, 11, 10, 0.88)]).astype(np.float32)
     r = compare_detections(ref, got)
     json.dumps({"row": r, "verdict": verdict([r])})        # raises TypeError if not
+
+
+def test_nms_does_not_modify_its_input():
+    """Ultralytics' NMS converts boxes xywh -> xyxy in place, and torch.from_numpy shares
+    memory. Without a copy the caller's raw output was silently overwritten, so a later
+    reader (or a second decoder) saw already-converted boxes and converted them again."""
+    raw = np.zeros((1, 5, 6), dtype=np.float32)
+    raw[0, :, 0] = [100, 80, 40, 30, 0.9]          # cx, cy, w, h, score
+    before = raw.copy()
+    nms(raw)
+    assert np.array_equal(raw, before), "nms() overwrote the array it was given"

@@ -1,0 +1,23 @@
+cat: /sys/class/thermal/thermal_zone2/temp: Resource temporarily unavailable
+cat: /sys/class/thermal/thermal_zone3/temp: Resource temporarily unavailable
+cat: /sys/class/thermal/thermal_zone4/temp: Resource temporarily unavailable
+# image: E000141_R-MP4-30988   engine: 20260922-yolov8n-640-s2-384x640-fp16   power mode: NV Power Mode: 25W 1    junction before: 49375 mC
+engine 20260922-yolov8n-640-s2-384x640-fp16.engine   input 384x640   output (1, 5, 5040)
+7 detection(s) on a 1920x1080 frame
+  [1628, 6, 1920, 134]  conf 0.882
+  [433, 6, 761, 143]  conf 0.841
+  [1200, 396, 1578, 643]  conf 0.619
+  [1144, 56, 1264, 162]  conf 0.521
+  [0, 550, 626, 1037]  conf 0.402
+  [1674, 269, 1919, 792]  conf 0.322
+  [1137, 467, 1920, 1080]  conf 0.307
+
+per-stage over 200 runs, each a separate wall-clock figure:
+  jpeg_decode_ms  median   17.09   p95   17.20   mean   17.15
+  preprocess_ms   median    4.68   p95    4.95   mean    4.68
+  gpu_ms          median    9.76   p95   10.02   mean    9.77
+  postprocess_ms  median    0.86   p95    0.97   mean    0.86
+  frame_total_ms  median   32.41   p95   32.83   mean   32.46
+  (gpu_ms = host-to-device + GPU forward + device-to-host, one sync. It is larger
+   than trtexec's kernel-only figure because the copies are included.)
+# junction after: 49593 mC   fan: 1455 rpm

@@ -17,7 +17,7 @@ FD-001 repo · FD-002 environment · FD-005 eval protocol · FD-006 portability 
 FD-013 leakage-free splits · FD-014 dataset audit · FD-015 smoke subset ·
 FD-020 YOLOv8n baseline (converged, 3 seeds) · FD-022 resolution comparison (640 vs 960) ·
 FD-026 cross-dataset evaluation (sealed OzFish) · FD-103 multi-seed rule (3 seeds throughout) ·
-FD-110 regression tests (134 checks, including documentation checks) ·
+FD-110 regression tests (161 checks, including documentation checks) ·
 FD-003 board specification (probe output committed: Super present, L4T 36.4.7, TensorRT 10.3.0, active fan) ·
 FD-118 board acquired (8 GB Super dev kit) ·
 FD-030 ONNX export with parity check (at the evaluated shapes; both pass) ·
@@ -29,13 +29,16 @@ FD-007 machine profiles (written; `docs/environments.md` not yet) ·
 FD-010 / FD-113 OzFish acquisition (DeepFish + OzFish *test* set obtained via the YOLO-Fish Drive
 archives; the full ~45k-box OzFish set is still not acquired) ·
 FD-102 backup (weights published as a release; data and Kaggle outputs still unbacked-up) ·
+FD-050 benchmark harness (a per-stage breakdown exists in `edge/trt_runner.py`; no sustained, multi-config harness yet) ·
+FD-034 NMS placement (CPU NMS measured at about 0.9 ms on sparse output, so not the bottleneck feared; GPU NMS not compared) ·
+FD-042 decode (software JPEG and H.264 decode timed; the hardware decoder is not used) ·
 FD-114 artefact registry (done for these two engines in `runs/device-20261004/engine_registry.json`; not yet a general mechanism) ·
 FD-127 trivial baselines (not started; COCO zero-shot and predict-nothing still missing)
 
 **Not started — and blocking the deployment half of the thesis**
 FD-040 provisioning (the board is already set up; swap and SSH details were not recorded) ·
 E3 beyond FP16 (INT8 with explicit quantisation, NMS placement) ·
-E4 beyond a kernel-time benchmark (end-to-end latency, FD-044 sustained throughput and thermals, FD-045 memory, FD-042 decode, FD-050 benchmark harness) ·
+E4 beyond a serial end-to-end measurement (FD-044 sustained throughput and thermals, FD-045 memory, NVDEC decode, optimising the CPU stages that dominate a frame) ·
 FD-008 licence decision · FD-024 false-alarm rate on empty frames · FD-105 annotation-quality audit
 
 **New since the plan was written, not ticketed originally**
