@@ -506,6 +506,28 @@ Run folders `runs/<name>/`, analyses `runs/analysis-20261004-<name>/`.
 control, aug (both batch 10) are a clean pair. One validation split of near-duplicate frames. Not tested on the sealed
 OzFish set. 3 seeds on the winning ideas are the next step (queued as the Kakadu comparison for the control).
 
+### F15. YOLOv8m has the best strict score and far fewer false alarms, but finds no more fish than YOLOv8s (one seed)
+`20261004-yolov8m-960-s0` on `ai-gpu` (RTX 5060, Ultralytics 8.4.172), seed 0, 960 px, **batch 3**, early-stopped at
+epoch 107 (best epoch 77) after 4.96 h. Validation split, conf 0.25 for the counts. Analysis:
+`runs/analysis-20261004-20261004-yolov8m-960-s0`. Compared with the same-machine control and YOLOv8s from F14.
+
+| Run | mAP@50 | mAP@50-95 | Precision / recall (final eval) | Fish found (of 1,385) | False alarms (empty frames) | Recall 32-96 px |
+|---|---|---|---|---|---|---|
+| Control YOLOv8n (batch 10) | 0.4562 | 0.2957 | 0.569 / 0.460 | 648 | 531 (150) | 42.2% |
+| YOLOv8s (batch 5-6, resumed) | 0.5846 | 0.3588 | 0.824 / 0.518 | 741 | 396 (80) | 53.9% |
+| **YOLOv8m (batch 3)** | **0.5774** | **0.3914** | **0.921 / 0.515** | 714 | **224 (42)** | 51.5% |
+
+- **Against the control: +0.121 mAP@50 and +0.096 mAP@50-95, 66 more fish found, 307 fewer false alarms.**
+- **Against YOLOv8s: mAP@50 level (-0.007), mAP@50-95 higher (+0.033), precision higher, false alarms down from 396 to
+  224, but 27 fewer fish found.** Going from small to medium buys cleaner, better-placed boxes, not more recall.
+- **Small fish are still missed**: 6 of 273 at 16-32 px (2.2%), 51.5% at 32-96 px.
+- **Cost.** It is by far the largest model so far (about 26 million parameters against 3 million, per Ultralytics'
+  published figures) and the slowest to train (2.8 minutes an epoch against 0.6). Its speed on the Orin is **not
+  measured**; a model that cannot hold the frame rate at 960 px does not count as a result for this project.
+
+**Limits.** One seed. Batch sizes differ (3, 5-6, 10), so the gaps mix model size with batch size; the seed spread
+on this machine is unknown. One validation split of near-duplicate frames. Not tested on the sealed OzFish set.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
