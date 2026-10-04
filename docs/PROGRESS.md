@@ -55,6 +55,9 @@ Last updated: 2026-10-04.
 - `configs/train/yolov8n_960_aug.yaml`, `yolov8n_960_p2.yaml` — FD-129 small-fish screens at 960: stronger scale and hue
   augmentation (bundled, so a win does not say which half helped), and a stride-4 (P2) head initialised from COCO
   weights wherever the layer shapes match. **Running, no result yet** (see section 8).
+- `configs/train/yolov8s_960.yaml`, `yolov8m_960.yaml`, `yolo11s_960.yaml` — FD-134 larger-model screens: default
+  augmentation, 960 px, patience 30, everything else as `yolov8n_960`. Queued on `ai-gpu` behind the FD-129 runs, seed 0
+  only; auto batch is 6, 3 and 5. **No result yet.**
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).

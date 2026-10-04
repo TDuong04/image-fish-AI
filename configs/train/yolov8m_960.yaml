@@ -1,0 +1,21 @@
+# FD-134 screen: a larger model than yolov8n_960, everything else identical (default augmentation,
+# 960 px, patience 30). One seed first; only a clear gain over a SAME-MACHINE yolov8n control earns
+# 3 seeds. A bigger model costs Orin latency, so a winner must be re-timed on the board before any
+# claim (CLAUDE.md measurement rules).
+name: yolov8m-960
+model: yolov8m.pt   # NOTE (FD-008): COCO weights are AGPL-3.0; see yolov8n_960.yaml.
+data: deepfish
+
+imgsz: 960
+epochs: 150
+patience: 30
+seeds: [0, 1, 2]
+batch: null
+workers: null
+amp: null
+close_mosaic: 10
+
+val_conf: 0.001
+val_iou: 0.7
+extra:
+  plots: true
