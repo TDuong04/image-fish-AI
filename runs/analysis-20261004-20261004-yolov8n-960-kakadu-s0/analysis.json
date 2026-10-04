@@ -1,0 +1,135 @@
+{
+  "model": "20261004-yolov8n-960-kakadu-s0.pt",
+  "imgsz": 960,
+  "data": "deepfish",
+  "split": "val",
+  "images": 1339,
+  "gt_boxes": 1385,
+  "iou_match": 0.5,
+  "operating_conf": 0.25,
+  "device": "cuda (NVIDIA GeForce RTX 4060 Laptop GPU, 8.0 GB)",
+  "date_utc": "2026-10-04T23:15:59+00:00",
+  "sweep": [
+    {
+      "conf": 0.05,
+      "precision": 0.6413,
+      "recall": 0.7112,
+      "f1": 0.6744,
+      "tp": 985,
+      "fp": 551,
+      "fn": 400
+    },
+    {
+      "conf": 0.1,
+      "precision": 0.744,
+      "recall": 0.6758,
+      "f1": 0.7083,
+      "tp": 936,
+      "fp": 322,
+      "fn": 449
+    },
+    {
+      "conf": 0.15,
+      "precision": 0.7991,
+      "recall": 0.652,
+      "f1": 0.7181,
+      "tp": 903,
+      "fp": 227,
+      "fn": 482
+    },
+    {
+      "conf": 0.2,
+      "precision": 0.8434,
+      "recall": 0.6339,
+      "f1": 0.7238,
+      "tp": 878,
+      "fp": 163,
+      "fn": 507
+    },
+    {
+      "conf": 0.25,
+      "precision": 0.8667,
+      "recall": 0.6152,
+      "f1": 0.7196,
+      "tp": 852,
+      "fp": 131,
+      "fn": 533
+    },
+    {
+      "conf": 0.3,
+      "precision": 0.8838,
+      "recall": 0.5986,
+      "f1": 0.7137,
+      "tp": 829,
+      "fp": 109,
+      "fn": 556
+    },
+    {
+      "conf": 0.4,
+      "precision": 0.9107,
+      "recall": 0.574,
+      "f1": 0.7042,
+      "tp": 795,
+      "fp": 78,
+      "fn": 590
+    },
+    {
+      "conf": 0.5,
+      "precision": 0.928,
+      "recall": 0.5394,
+      "f1": 0.6822,
+      "tp": 747,
+      "fp": 58,
+      "fn": 638
+    },
+    {
+      "conf": 0.6,
+      "precision": 0.9606,
+      "recall": 0.4924,
+      "f1": 0.6511,
+      "tp": 682,
+      "fp": 28,
+      "fn": 703
+    }
+  ],
+  "best_f1_threshold": 0.2,
+  "missed_fish": {
+    "total": 533,
+    "no prediction": 219,
+    "found but under threshold": 313,
+    "badly placed": 1
+  },
+  "false_alarms": {
+    "total": 131,
+    "duplicate": 2,
+    "badly placed": 7,
+    "background": 122
+  },
+  "recall_by_size_at_640_input": {
+    "<16": {
+      "found": 0,
+      "total": 10,
+      "recall": 0.0
+    },
+    "16-32": {
+      "found": 54,
+      "total": 273,
+      "recall": 0.1978
+    },
+    "32-96": {
+      "found": 458,
+      "total": 746,
+      "recall": 0.6139
+    },
+    ">96": {
+      "found": 340,
+      "total": 356,
+      "recall": 0.9551
+    }
+  },
+  "empty_frames": {
+    "frames": 464,
+    "false_alarms": 70
+  },
+  "note": "single split of near-duplicate video frames: counts are descriptive, not independent samples"
+}

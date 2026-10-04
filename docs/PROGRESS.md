@@ -554,6 +554,40 @@ seed spread on this machine unknown. One validation split of near-duplicate fram
 OzFish set; Orin speed not measured. The mAP gain over the control is a precision effect and should not be read as the
 detector finding more fish.
 
+### F17. Adding Kakadu to the training data raises the DeepFish-val score a great deal and finds many more small fish (one seed)
+`20261004-yolov8n-960-kakadu-s0`: YOLOv8n, seed 0, 960 px, **batch 10** (same as the control), trained on DeepFish
+train (5,178) plus Kakadu (7,318 frames, one class, max 15 per scene group, 960 px wide) = 12,496 images, validated on
+the unchanged DeepFish val split (1,339). `ai-gpu`, Ultralytics 8.4.172, early-stopped at epoch 89 (best epoch 59) after
+2.12 h. Analysis: `runs/analysis-20261004-20261004-yolov8n-960-kakadu-s0`. Control: `20261004-yolov8n-960-s0`.
+
+| | Control (DeepFish only) | **DeepFish + Kakadu** |
+|---|---|---|
+| mAP@50 | 0.4562 | **0.7088** |
+| mAP@50-95 | 0.2957 | **0.4781** |
+| Precision / recall (final eval) | 0.569 / 0.460 | 0.840 / 0.622 |
+| Fish found (of 1,385) at conf 0.25 | 648 | **852** |
+| False alarms (empty frames) | 531 (150) | **131** (70) |
+| Recall at 16-32 px (n=273) | 2.6% | **19.8%** |
+| Recall at 32-96 px (n=746) | 42.2% | **61.4%** |
+| Recall above 96 px (n=356) | 91.6% | 95.5% |
+
+- **Difference: +0.253 mAP@50 and +0.182 mAP@50-95, 204 more fish found, 400 fewer false alarms.** Every size
+  bucket improves, and the 16-32 px fish, which no earlier variant found, go from 2.6% to 19.8%. This is about
+  seven times the 0.034 mAP@50 seed spread measured on Kaggle and far above any other change tried.
+- **Why this needs care.** (1) One seed; the seed spread on this machine is not known yet (the control runs for seeds 1 and
+  2 are in the queue). (2) The leak check found no near-duplicates between Kakadu and the val frames (F13), but Kakadu
+  frames look **more like the val frames than DeepFish's own train frames do** (median distance 13.6 against 15.7),
+  because DeepFish is split by site. So much of the gain is "training data that resembles the validation sites"; it
+  does not show the model generalises. (3) The comparison is on DeepFish val only. The sealed OzFish set, which
+  Kakadu shares no scenes with, is the test of generalisation and has **not** been run (it is used once, at the end).
+- **The confidence threshold is no longer well placed.** 313 of the 533 missed fish were found but scored under 0.25, and the
+  best-F1 threshold on val is 0.2 (it was 0.4 to 0.6 for earlier runs). A lower operating threshold would recover
+  fish; that is a deployment setting chosen on val, not on the sealed set.
+
+**Limits.** n=1 seed for both rows. Same machine and batch size for the pair, so that confound is removed. One
+validation split of near-duplicate frames. Kakadu labels were merged from 23 species and only lightly audited (F13).
+Not tested on the sealed OzFish set; Orin speed unchanged from YOLOv8n (same model).
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
