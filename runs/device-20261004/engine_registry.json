@@ -1,0 +1,109 @@
+{
+  "note": "Provenance for each engine built on the Orin Nano on 2026-10-04. Wall-clock timestamps on the board were unreliable before NTP synced; trust the hashes.",
+  "board": {
+    "module": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super",
+    "l4t": "36.4.7",
+    "tensorrt": "10.3.0",
+    "cuda": "12.6"
+  },
+  "engines": [
+    {
+      "engine": "20260922-yolov8n-640-s2-384x640-fp16.engine",
+      "engine_sha256": "1d6c95853aa4de66a0023554c3576523bb32b0802c391b2e02cc451da3f4cf68",
+      "onnx": "20260922-yolov8n-640-s2-384x640.onnx",
+      "onnx_sha256": "3e95d0fbc8894ea51c5f7db11037d6b2d5f22452c83d333b5c37da251e176d56",
+      "source_pt": "20260922-yolov8n-640-s2.pt",
+      "source_pt_sha256": "07742d2e29a08954506ae22e9e0bd8d8cacf2e56a3cc0bb643face1248d06d63",
+      "input_hw": [
+        384,
+        640
+      ],
+      "precision": "fp16",
+      "nms_in_graph": false,
+      "tensorrt": "10.3.0",
+      "l4t": "36.4.7",
+      "build_flags": "--fp16 --skipInference",
+      "build_seconds": 498.015,
+      "onnx_parity_vs_pytorch": {
+        "pass": true,
+        "frames": 12
+      },
+      "engine_parity_vs_pytorch": {
+        "pass": true,
+        "frames": 12,
+        "confident_miss": 0,
+        "confident_extra": 0,
+        "worst_iou": 0.9927283525466919,
+        "worst_conf_drift": 0.006206929683685303
+      },
+      "benchmark": {
+        "tool": "trtexec --duration=20 --warmUp=500 --avgRuns=10",
+        "scope": "GPU kernel time on a static input; no decode, letterbox, NMS or postprocessing, so NOT an end-to-end frame rate",
+        "power_mode": "25W (id 1), not MAXN_SUPER",
+        "clocks": "not locked (governor-managed)",
+        "fan": "active",
+        "duration_is_a_burst": true,
+        "gpu_compute_ms": {
+          "min": 2.51562,
+          "max": 2.5957,
+          "mean": 2.55911,
+          "median": 2.55957,
+          "p90": 2.56543,
+          "p95": 2.56689,
+          "p99": 2.57007
+        },
+        "throughput_qps": 390.282,
+        "wall_seconds": 20.006
+      }
+    },
+    {
+      "engine": "20260923-yolov8n-960-s2-544x960-fp16.engine",
+      "engine_sha256": "a3372343c365e537495e715d164371f98469d805f0858085904f507b151dc219",
+      "onnx": "20260923-yolov8n-960-s2-544x960.onnx",
+      "onnx_sha256": "4e8a8befd0b957728045a457da29c52bd5f90fd324e19eee0e187de615d5637e",
+      "source_pt": "20260923-yolov8n-960-s2.pt",
+      "source_pt_sha256": "5ebbe273cf2dcf9d023b2e2bd82a268da007b4e318e2f4d3b84e2bad01bb5350",
+      "input_hw": [
+        544,
+        960
+      ],
+      "precision": "fp16",
+      "nms_in_graph": false,
+      "tensorrt": "10.3.0",
+      "l4t": "36.4.7",
+      "build_flags": "--fp16 --skipInference",
+      "build_seconds": 566.347,
+      "onnx_parity_vs_pytorch": {
+        "pass": true,
+        "frames": 12
+      },
+      "engine_parity_vs_pytorch": {
+        "pass": true,
+        "frames": 12,
+        "confident_miss": 0,
+        "confident_extra": 0,
+        "worst_iou": 0.949381411075592,
+        "worst_conf_drift": 0.016887634992599487
+      },
+      "benchmark": {
+        "tool": "trtexec --duration=20 --warmUp=500 --avgRuns=10",
+        "scope": "GPU kernel time on a static input; no decode, letterbox, NMS or postprocessing, so NOT an end-to-end frame rate",
+        "power_mode": "25W (id 1), not MAXN_SUPER",
+        "clocks": "not locked (governor-managed)",
+        "fan": "active",
+        "duration_is_a_burst": true,
+        "gpu_compute_ms": {
+          "min": 4.30078,
+          "max": 4.43964,
+          "mean": 4.37045,
+          "median": 4.37061,
+          "p90": 4.37646,
+          "p95": 4.37866,
+          "p99": 4.38184
+        },
+        "throughput_qps": 228.611,
+        "wall_seconds": 20.0122
+      }
+    }
+  ]
+}

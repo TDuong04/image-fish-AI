@@ -78,6 +78,17 @@ An on-board benchmark report received on 2026-10-04 states 25 W mode, L4T 36.4.7
 10.3.0. The probe independently shows the same three facts. **Its timing figures are not recorded
 as results**, because the `trtexec` log and engine hashes behind them have not been committed.
 
+## Workspace on the board
+
+Everything this project put on the board lives in one directory, `~/fish-detection/`: `onnx/`,
+`engines/`, `parity/`, `logs/`, plus a clone of the public repository. A directory left by an earlier
+on-board session (`~/deploy/`) was read and not modified. Nothing outside these two directories was
+changed: no `sudo`, no power-mode or clock change, no package installs, no JetPack change.
+
+Engines built there are recorded in `runs/device-20261004/engine_registry.json` (hashes, source
+checkpoint, TensorRT and L4T versions, flags). They are not in git: they are tied to this board's GPU
+and TensorRT version and cannot be built elsewhere.
+
 ## Re-running the probe
 
 ```bash

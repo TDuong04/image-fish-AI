@@ -20,7 +20,7 @@ Last updated: 2026-10-04.
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
 | Automation | Crash-recovering supervisor and a Kaggle session runner. |
-| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). An on-board `trtexec` benchmark has been *reported* but its log and engine hashes are not committed, so **no device measurement is recorded as a result yet.** The deployment half of the thesis is still unanswered. |
+| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** Not yet measured: end-to-end latency, sustained throughput, INT8, on-device mAP. The deployment half of the thesis is only partly answered. |
 | Report | `report_sections.md` still describes the older LCFCN *counting* experiment, not this work. Needs rewriting. |
 
 ---
@@ -59,9 +59,20 @@ Last updated: 2026-10-04.
   only, Python 3.8-safe, needs no sudo, and can be streamed over SSH without installing anything.
   Validated on the real board on 2026-10-04; output committed as `docs/board_probe_20261004.json`.
 - `docs/hardware.md` — what is confirmed, what is documented but unverified, and what is unknown.
+- `scripts/export_onnx.py` — exports checkpoints to static-shape ONNX **at the shapes they were evaluated at**
+  (384x640 and 544x960, not square), then proves parity against PyTorch on real frames and saves the
+  preprocessed inputs and PyTorch reference outputs for the engine check. NMS is deliberately not in the graph.
+- `edge/build_engines.py` — runs on the board; builds FP16 TensorRT engines one at a time with `trtexec`
+  (identical flags for every model). Its commands were checked against the real build log.
+- `edge/engine_dump.py` — runs on the board; feeds saved frames through an engine via `trtexec` and writes the raw
+  outputs. Uses `trtexec` rather than a Python runner so the engine is the only thing under test.
+- `scripts/engine_parity.py` — compares the engine's outputs with the PyTorch reference on identical inputs.
+- `src/fish/parity.py` — the shared comparison (used by the ONNX and engine checks). Detections within 0.03 of
+  the confidence threshold are reported as *borderline* and not held against an FP16 engine; a confident
+  detection that goes missing or appears from nowhere fails the check.
 
 ### Safety net
-- 107 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
+- 134 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
   `__main__` guards, and `tests/test_docs.py`, which fails if a committed result run or a script
   is not named in this file — the mechanical half of the documentation rule in `CLAUDE.md`.
 
@@ -184,6 +195,47 @@ letterboxing and NMS dominate rather than the network. On one measured clip, 57%
 non-network overhead (GPU forward 10.3 ms of 23.9 ms end to end). On a board with a fraction of the
 GPU those proportions would shift, so neither figure scales to a device number.
 
+### F6. On the Orin Nano the GPU cost of 960 over 640 is small, because both run at the evaluated shapes
+Engines built on the board (FP16, seed 2, L4T 36.4.7, TensorRT 10.3.0), 25 W mode, `jetson_clocks` not applied,
+active fan, `trtexec --duration=20`. Source: `runs/device-20261004/`.
+
+| Engine | Input (HxW) | GPU compute median | p95 | Throughput |
+|---|---|---|---|---|
+| 640 | 384x640 | **2.560 ms** | 2.567 ms | 390.3 qps |
+| 960 | 544x960 | **4.371 ms** | 4.379 ms | 228.6 qps |
+| 960, square (earlier report; 3 s run) | 960x960 | 7.098 ms | 8.238 ms | 135.6 qps |
+
+960 costs **1.71x** the 640 engine on the GPU, although it carries 2.12x the pixels: part of each frame's cost
+is fixed. Extrapolating by pixel count before measuring predicted 4.0 ms (measured 4.37) and 1.9 ms
+(measured 2.56), so it under-predicted the smaller model by about a third.
+
+**What this measures and what it does not.** GPU kernel time on a static input. There is no decode, letterbox,
+NMS or postprocessing, so it is **not an end-to-end frame rate**. It is a 20 s burst: temperatures rose from
+roughly 49 to 54 C during the 640 run and 54 to 57 C during the 960 run while the fan ramped from 1,627 to
+2,280 RPM, and were still climbing, so sustained behaviour is unknown. (The temperatures are approximate: the
+logging helper mishandled the board's decimal-comma locale and they are read from its error output.) One engine
+per resolution, both from seed 2, the best seed of each group; latency does not depend on the seed, but any
+on-device accuracy comparison must account for it.
+
+**Why the shapes matter.** The first engine reported from the board was built for a 960x960 square. Ultralytics
+evaluates a 1080p frame at 544x960 (and 640 at 384x640), so that engine ran 1.76x the pixels of the geometry
+the accuracy numbers describe. Latency and accuracy must describe the same workload.
+
+### F7. Both FP16 engines match PyTorch on real frames
+12 frames each (8 DeepFish including empty-water frames, 4 OzFish including crowded ones), same preprocessed
+input through PyTorch FP32 and the engine.
+
+| Engine | Confident misses | Confident extras | Borderline | Worst matched IoU | Worst confidence drift |
+|---|---|---|---|---|---|
+| 640 · 384x640 | 0 | 0 | 0 | 0.993 | 0.006 |
+| 960 · 544x960 | 0 | 0 | 0 | 0.949 | 0.017 |
+
+The ONNX stage also passes (raw output within about 3e-3 pixels of PyTorch, identical detections). **Limits:**
+12 frames, one seed per resolution, FP16 only. This is agreement with PyTorch on a small sample, **not** an mAP
+measurement on the device. Raw tensor differences reach 3.1 px (640) and 15.2 px (960) on some frames, mostly in
+frames with no or few detections; detection-level agreement is what is judged, and the raw figure is recorded
+so it is not hidden.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
@@ -204,6 +256,8 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Two seeds looked tight (spread 0.008) | Third seed landed 0.055 above the first. Two seeds hid the true spread. | Running seed 2 |
 | The board has no cooling fan (owner-reported; then assumed throughout `CLAUDE.md` and `docs/hardware.md`) | A fan is fitted and spinning: tachometer 1,411 RPM, PWM 68/255. The dev kit ships with one. | Reading the fan tach over sysfs |
 | `fan_interface_present` implies a fan | It only shows the kernel driver exists. The tachometer is the evidence. | Checking the tach after the probe contradicted the owner |
+| The 960 px engine costs 7.1 ms on the Orin | That engine was built for a 960x960 square. At the evaluated shape (544x960) the measured GPU time is 4.37 ms. | Reading the engine's input binding in the build log |
+| The board log dated 14 May 2026 was a May measurement | The model was trained in September, so the board's clock was stale when it was written. NTP is now synchronised and new logs carry the right date. Trust hashes, not timestamps. | The date predating the model |
 
 ---
 
@@ -222,12 +276,15 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Training results lived only in git-ignored scratch | Reported numbers had no committed provenance | Asked where results were saved |
 | A personal file swept in by `git add -A` | Private document pushed to a team repo (removed from HEAD; still in history) | Noticing the filename |
 | `probe_board.py` returned a command's error text as if it were a value | `libnvinfer` reported "no packages found" and the fallback to `libnvinfer10` never ran | First run on the real board |
+| Parity results held numpy `float32` values | A passing check printed PASS, then crashed writing its result, leaving no record | The first real engine run |
+| `trtexec --warmUp=0` intermittently exports no output | Looked like per-frame failures (1 of 12, then 10 of 12, succeeded); the same frame worked on re-run | Re-running a "failing" frame by hand |
+| Parity-set label counted OzFish frames by an `A0` filename prefix | Reported 1 OzFish frame when 4 were used (OzFish names also start with E and G) | Listing the actual frames |
 
 ---
 
 ## 8. Not done / open
 
-- **No recorded Jetson measurements.** The board is probed and its facts are in `docs/hardware.md`. A `trtexec` benchmark has been reported (960 px FP16, 25 W mode) but the log and engine hashes are not committed, so it is not yet a result. Sustained throughput, thermals, end-to-end latency, the 640 engine and engine-versus-PyTorch parity are all unmeasured.
+- **Device measurement is only partly done.** GPU kernel time is measured for both engines (F6) and parity holds on 12 frames (F7). Still unmeasured: **end-to-end latency** (decode, letterbox, NMS, postprocess), **sustained throughput and thermals** over 30+ minutes, memory under a real pipeline, INT8, NMS placement, and **mAP on the device**. Engines exist only for seed 2, and the board boots from an SD card with about 8 GB free.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
 - **No hue-augmentation retraining** (F4 hypothesis).
@@ -247,6 +304,8 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 |---|---|
 | Run metrics, configs, epoch curves | `runs/<run>/` (tracked) |
 | Board facts | `docs/hardware.md`, raw probe output `docs/board_probe_20261004.json` |
+| Engine provenance, build and benchmark logs, parity results | `runs/device-20261004/` (`engine_registry.json` links each engine to its ONNX, checkpoint, TensorRT and L4T) |
+| ONNX export manifest | `docs/onnx_manifest.json` |
 | Weights | GitHub release `v0.1.0-models` (not in git) |
 | Checksums | `docs/model_manifest.json` |
 | Evaluation contract | `docs/eval_protocol.md` |

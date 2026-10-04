@@ -168,6 +168,12 @@ data for domain-adaptation work, but it is not extra training data for an optica
 - Every latency number is **end-to-end**: decode → preprocess → inference → NMS → postprocess.
   GPU-kernel-only timing is not a deployment result and must never be reported as one.
 - Discard warm-up iterations. Report median and p95, not just mean.
+- **Build and time engines at the shape the accuracy was evaluated at.** Ultralytics evaluates a 1080p
+  frame at 544x960 (imgsz 960) and 384x640 (imgsz 640), not at a square. A static 960x960 engine runs
+  1.76x the pixels of the geometry behind the reported mAP, so its latency would describe a different
+  workload than its accuracy does. A figure from the wrong shape is not comparable.
+- **A kernel-time benchmark is not a frame rate.** `trtexec` reports GPU time on a static input. Say
+  so in the same sentence as the number, and never call it FPS without decode, letterbox and NMS.
 - The chain PyTorch FP32 → ONNX → TensorRT FP16 → INT8 is a **parity check** — run it to catch
   silent export corruption. It is *not* a results-table axis: TensorRT FP32 on an Orin Nano is
   not a configuration anyone deploys, and measuring it burns board time on a cell no one reads.
