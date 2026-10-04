@@ -67,6 +67,7 @@ Results go to `runs/<date>-<name>/`. **No `metrics.json` means the run did not f
 
 | File | Read it when |
 |---|---|
+| `docs/PROGRESS.md` | **Start here** — what was built, every result, every correction, what is open |
 | `docs/TRAINING.md` | You want the long version of training |
 | `docs/eval_protocol.md` | **Before quoting any number** |
 | `docs/data_audit.md` | You want to know what is in the data |

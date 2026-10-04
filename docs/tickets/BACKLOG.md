@@ -8,6 +8,33 @@ Revision 2 — reconciled against an adversarial review. Corrections from that r
 **[corrected]**; tickets it added are marked **[added]**; tickets it argued to drop are marked
 `CUT` with the reason kept rather than deleted.
 
+## Status snapshot — 2026-10-04
+
+Authoritative detail is in `docs/PROGRESS.md`; this is the ticket-level view.
+
+**Done**
+FD-001 repo · FD-002 environment · FD-005 eval protocol · FD-006 portability layer ·
+FD-013 leakage-free splits · FD-014 dataset audit · FD-015 smoke subset ·
+FD-020 YOLOv8n baseline (converged, 3 seeds) · FD-022 resolution comparison (640 vs 960) ·
+FD-026 cross-dataset evaluation (sealed OzFish) · FD-103 multi-seed rule (3 seeds throughout) ·
+FD-110 regression tests (104 checks, including documentation checks)
+
+**Partly done**
+FD-007 machine profiles (written; `docs/environments.md` not yet) ·
+FD-010 / FD-113 OzFish acquisition (DeepFish + OzFish *test* set obtained via the YOLO-Fish Drive
+archives; the full ~45k-box OzFish set is still not acquired) ·
+FD-102 backup (weights published as a release; data and Kaggle outputs still unbacked-up) ·
+FD-127 trivial baselines (not started; COCO zero-shot and predict-nothing still missing)
+
+**Not started — and blocking the deployment half of the thesis**
+FD-118 acquire the Jetson Orin Nano · FD-003 / FD-040 board specification and provisioning ·
+all of E3 (ONNX/TensorRT export, parity, INT8) · all of E4 (on-device measurement) ·
+FD-008 licence decision · FD-024 false-alarm rate on empty frames · FD-105 annotation-quality audit
+
+**New since the plan was written, not ticketed originally**
+Colour-sensitivity study (finding F4 in `PROGRESS.md`) and its follow-up hypothesis: stronger hue
+augmentation (`hsv_h` is 0.015) as a free-at-inference robustness gain.
+
 **Rules of order:** FD-113 starts before anything else. E2 needs E0 done. E3 needs FD-020's
 checkpoint. E4 needs the board. **E6 does not wait for anything — start FD-060/FD-061 now.**
 

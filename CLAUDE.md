@@ -86,10 +86,11 @@ Recorded in `docs/environments.md`, not assumed in code. Current entries:
 | `colab` / `kaggle` | Linux x86 | T4 16 GB | Used for the earlier LCFCN run. Ephemeral — nothing persists. |
 | `jetson` | Linux ARM64 | Orin Nano | Inference only. Never train here. |
 
-**Current workstation state — fix before training (see FD-002):** installed torch is a
-**CPU-only build** (`2.12.1+cpu`, `cuda.is_available() == False`), so training would silently
-run on CPU; and system Python is **3.14**, which Ultralytics and CUDA torch wheels do not
-support. Use a dedicated Python 3.10/3.11 environment.
+**Workstation state (verified):** Python 3.11 venv at `.venv/`, torch 2.6.0+cu124 with
+`cuda.is_available() == True` on the RTX 4060, ultralytics 8.4.130. The system Python is 3.14,
+which Ultralytics and CUDA torch wheels do not support — never run the project outside the venv.
+A plain `pip install torch` on Windows installs a **CPU-only build** without any error, so always
+install through `scripts/bootstrap.py` and confirm with `scripts/check_env.py`.
 
 ### Disk
 - Full CFC v1.1 is ~132 GB and is **out of scope** (sonar modality, and it does not fit).
@@ -123,22 +124,29 @@ reason to keep paths out of scripts entirely — it is not a rule for the code t
 
 | Source | Boxes? | On disk | Notes |
 |---|---|---|---|
-| DeepFish | Main split is points; **box derivatives exist** | No | FishLoc (3,200) is points only. Seg split (620) yields boxes from masks — but check `deepfish_darknet.zip` (gdown ID already in `fish-research/README.md`) first, and the ~4.5k-image detection set cited in the literature |
-| OzFish | **Yes, ~45k boxes, already single-class** | No | Acquisition unresolved — see below |
+| DeepFish | **Yes** — darknet export, 6,517 images, 15,463 boxes | **Yes** | From the YOLO-Fish authors' Drive archive. Training + validation, split by site. The original FishLoc split is points only. |
+| OzFish | **Yes, single-class** | **Test set only** (352 images, 8,329 boxes) | Sealed cross-dataset test. The full ~45k-box set is still not acquired. |
 | CFC | Yes, sonar | Labels yes (~206 MB), images no | **Sonar, not optical.** Different modality — do not mix into an optical training set |
 | YOLO-Fish | Weights only | 10 darknet `.weights` (~2.37 GB) | Baseline comparison point; darknet, not PyTorch |
 
-**The single most important data fact:** OzFish is the only real box source, **and it is not yet
-acquired.** Everything in E2–E5 blocks on it. The previously-recorded acquisition routes do not
-hold up: the HuggingFace "mirror" is a 3-file *model* repo (a 74.7 MB `.pt`), not a dataset; and
-"Pawsey URLs are 404" is unsupported — every FDFML path returns HTTP 200, but so does a
-nonsense path, serving a 1.7 KB HTML shell. It is a JS portal with a catch-all route, so **curl
-can prove neither presence nor absence.** Someone must open it in a real browser. See FD-113.
+**The most important data fact:** DeepFish and the OzFish test set came from the YOLO-Fish authors'
+Google Drive archives (IDs were in `fish-research/README.md` all along), which removed the OzFish
+acquisition blocker for training. The full OzFish training set is still unacquired. Two earlier
+claims about it were wrong and are recorded in `docs/PROGRESS.md` §6: the HuggingFace "mirror" is a
+3-file *model* repo, not a dataset, and "Pawsey URLs are 404" is unsupported — every FDFML path
+returns HTTP 200, but so does a nonsense path (JS portal with a catch-all route), so **curl can
+prove neither presence nor absence.**
+
+**Frames from one video are near-duplicates.** DeepFish clips run to 462 consecutive frames. Splits
+are made over whole capture *sites*, never per image, and `prepare_dataset.py` asserts no site
+appears on both sides. If a new dataset's filenames match no pattern in `src/fish/datasets.py`,
+every frame becomes its own group and the leakage check passes while protecting nothing — verify
+the grouping yields far fewer groups than frames before trusting any split.
 
 **OzFish boxes are already single-class.** Per `fish-research/ozfish/README.md` line 57: the box
 annotations are *"fish/no-fish only and have no species/genus/family labels."* The 507-species
 figure belongs to the ~80k **crops**, a different artefact. There is no species collapse to
-perform — and `report_sections.md` §2.2 currently states this incorrectly.
+perform. (`report_sections.md` §2.2 was corrected; the file as a whole is still stale.)
 
 **Sonar ≠ optical.** CFC is sonar imagery. It is a valid separate benchmark and the right
 data for domain-adaptation work, but it is not extra training data for an optical detector.
@@ -177,19 +185,20 @@ data for domain-adaptation work, but it is not extra training data for an optica
 - **Never inherit a hardware number from a memo, a blog, or this file.** Power-mode swings, FPS,
   TOPS and quantization deltas get measured on the board and cited to the run that produced them.
 
-## Prior work in this repo (state as of 2026-08-27)
+## Project state
 
-- `report_sections.md` — draft Related Work + Results. Describes an **LCFCN point-supervised
-  counting** run (val MAE 0.3375 @ 10 epochs, Kaggle T4). That is a *counting* experiment on a
-  different task from this project's detection goal. It is prior context and possibly a report
-  section, **not** the baseline for the Jetson detector.
-- `fish-research/` — 5 cloned repos + downloaded label archives and weights (~4 GB).
-- `fish_download_links.md`, `fish-research/README.md` — provisioning notes and download URLs.
-- **The project is not a git repository.** Nothing above is version-controlled.
-- **Neither the board nor the dataset is in hand.** Both are on the critical path (FD-113,
-  FD-118). Until they are, prioritise work that needs neither: E6 report tickets, the portability
-  layer, and the desktop-TensorRT dry-run track (FD-119) — the RTX 4060 is also Ampere and runs
-  TensorRT, so the whole export/quantise/benchmark chain can be debugged before the Orin arrives.
+The authoritative, current account is **`docs/PROGRESS.md`** — what was built, every result,
+every correction, every open item. Read it before starting work; do not rely on this file for
+status, because this file holds rules and constraints, not results.
+
+Headline, as of 2026-10-04: six converged YOLOv8n runs (3 seeds x 640/960 px) on DeepFish;
+960 beats 640 by +0.087 mAP@50 in-domain but only +0.013 on the sealed OzFish set; the detector
+tolerates missing colour (−7 to −9%) but not wrong colour (up to −49%). **No Jetson Orin Nano
+exists in this project, so there is no device measurement of any kind.**
+
+Still-stale artefacts: `report_sections.md` describes the older LCFCN counting experiment
+(val MAE 0.3375 @ 10 epochs, Kaggle T4) — a different task, not the baseline for this work.
+`fish-research/` holds 5 cloned repos and ~4 GB of labels and weights, git-ignored.
 
 ## Conventions
 
@@ -206,6 +215,41 @@ data for domain-adaptation work, but it is not extra training data for an optica
 - Jetson-side code lives in `edge/` and must not import training-only dependencies
   (no `ultralytics`, no `torch` at inference time — TensorRT + numpy + the decode path only).
 
+## Documentation is part of the work
+
+**A finding or a code change is not finished until it is in the docs.** This is a rule, not a
+courtesy. Results that live only in a chat, a terminal scrollback or a Kaggle output store are
+lost, and this project has already been bitten by exactly that (see `docs/PROGRESS.md` §7).
+
+Update the docs **in the same change** as the work, and commit them together:
+
+| You did this | Update this, in the same commit |
+|---|---|
+| Produced or revised any **result** (a metric, an experiment, a measurement) | `docs/PROGRESS.md` §4/§5 — the number, how it was measured, how many seeds, the committed run it came from |
+| Changed **code** (a script, a module, a config, a pipeline stage) | `docs/PROGRESS.md` §2 — what it is and what it does; plus the doc that explains how to use it |
+| Changed **how to set up, train or run** | `docs/TRAINING.md` and `README.md` |
+| Changed **metrics, thresholds, splits or the sealed-set rule** | `docs/eval_protocol.md` — and say in `PROGRESS.md` that the contract changed and why |
+| Changed or added **data** | `docs/data_audit.md` and `PROGRESS.md` §3 |
+| Finished, started or reshaped a **ticket** | `docs/tickets/BACKLOG.md` — status in place |
+| Found a bug | `docs/PROGRESS.md` §7 — the bug, its effect, and how it was caught |
+| Added an **open question or a known gap** | `docs/PROGRESS.md` §8 |
+
+**When a finding is overturned, record the correction — do not quietly overwrite it.** Add a row to
+`PROGRESS.md` §6 stating the earlier claim, what replaced it, and what exposed it. A correction
+deleted is a mistake someone repeats.
+
+**What a result entry must contain.** The number alone is not a result. Include: the metric and
+split, `n` (seeds or samples), the spread, the committed run directory, and anything that limits
+the claim. If you cannot name the run a number came from, it does not go in the docs as a result.
+
+**Before saying a task is done**, check the table above against what you changed and confirm each
+row was handled. If a row applied and you skipped it, the task is not done — say so rather than
+reporting completion.
+
+**Keep claims calibrated to the evidence.** Do not write "confirmed", "converged" or "robust" into
+a doc unless the evidence in the same entry supports the word. One frame, one seed or one dataset
+supports "observed", not "found".
+
 ## Before calling any script done
 
 Ask: *would this run unchanged on a fresh Linux box with a different GPU and no dataset yet?*
@@ -217,5 +261,8 @@ it is not done.
 - Check `docs/tickets/` before starting; work the ticket, update its status.
 - Don't download a multi-GB dataset without confirming free disk first and asking.
 - Don't claim a training run succeeded without showing the metric output.
+- Update the docs in the same change as the work — see "Documentation is part of the work".
+- Check `docs/PROGRESS.md` before starting, so you do not redo a finished experiment or repeat a
+  claim already recorded as wrong in its corrections table.
 - Don't write TensorRT/JetPack-version-specific code before the board's JetPack version is
   confirmed and recorded in `docs/hardware.md`.
