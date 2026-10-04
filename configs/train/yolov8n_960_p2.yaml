@@ -1,0 +1,24 @@
+# FD-129 screen B. YOLOv8n with an added stride-4 (P2) detection head, at 960.
+# A stride-8 head cannot resolve boxes under about 16 px and is weak below 32 px, where this model
+# finds almost nothing (F3, F10). P2 adds a finer output grid. It costs extra compute at the highest
+# resolution, so the Orin latency must be re-measured before any claim (CLAUDE.md measurement rules).
+# The COCO weights are loaded into every layer whose shape still matches; the new P2 layers start
+# from scratch, so this also trains from a less-initialised state than yolov8n_960.
+name: yolov8n-960-p2
+model: yolov8n-p2.yaml
+data: deepfish
+
+imgsz: 960
+epochs: 150
+patience: 30
+seeds: [0, 1, 2]
+batch: null
+workers: null
+amp: null
+close_mosaic: 10
+
+val_conf: 0.001
+val_iou: 0.7
+extra:
+  plots: true
+  pretrained: yolov8n.pt

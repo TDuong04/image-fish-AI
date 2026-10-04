@@ -1,0 +1,26 @@
+# FD-129 screen A. Same as yolov8n_960 except stronger scale and colour augmentation.
+# Scale 0.9 (default 0.5) shows the network fish at more sizes, including smaller ones
+# (F3: recall is lowest for 16-96 px fish). hsv_h 0.05 (default 0.015) tests the F4 hypothesis
+# that stronger hue augmentation recovers colour robustness. These two changes are bundled, so a
+# win says "this bundle helps", not which half did it. Compare with yolov8n_960 on 3 seeds.
+name: yolov8n-960-aug
+model: yolov8n.pt   # NOTE (FD-008): COCO weights are AGPL-3.0; see yolov8n_960.yaml.
+data: deepfish
+
+imgsz: 960
+epochs: 150
+patience: 30
+seeds: [0, 1, 2]
+batch: null
+workers: null
+amp: null
+close_mosaic: 10
+
+val_conf: 0.001
+val_iou: 0.7
+extra:
+  plots: true
+  scale: 0.9
+  hsv_h: 0.05
+  hsv_s: 0.8
+  hsv_v: 0.5

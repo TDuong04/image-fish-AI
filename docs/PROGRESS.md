@@ -52,6 +52,9 @@ Last updated: 2026-10-04.
 - `scripts/label_audit.py` — FD-105. Draws a seeded random sample of missed fish (M##), found fish (F##, the control)
   and background false alarms (B##) as zoomed contact sheets for a person to review; verdicts are recorded in
   `verdicts.json` and `--summarise` turns them into counts. Validation split only; refuses `ozfish_eval`.
+- `configs/train/yolov8n_960_aug.yaml`, `yolov8n_960_p2.yaml` — FD-129 small-fish screens at 960: stronger scale and hue
+  augmentation (bundled, so a win does not say which half helped), and a stride-4 (P2) head initialised from COCO
+  weights wherever the layer shapes match. **Running, no result yet** (see section 8).
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -453,6 +456,12 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
 - **No hue-augmentation retraining** (F4 hypothesis).
+- **FD-129 screens are running on `ai-gpu`** (started 2026-10-04): one seed (0) each of `yolov8n-960-p2`, then
+  `yolov8n-960-aug`, then a control rerun of `yolov8n-960` on the same machine. About 65 s per epoch for the P2 run on
+  the RTX 5060 at batch 5 (the Kaggle T4 runs used batch 23 and about 115 s per epoch), so the control rerun exists to
+  keep the comparison fair across machine, Ultralytics version (8.4.172 here, 8.4.130 on Kaggle) and batch size. One
+  seed cannot decide anything: the 960 baseline seed spread is 0.034 mAP@50, so only a difference clearly larger than
+  that justifies 3 seeds. Logs are on the server (`~/workspace/train_*.log`) until copied into `runs/`.
 - **Label audit is one reviewer's sample** (F11: 48 missed, 24 found, 36 false alarms). A second reviewer, and a larger sample outside site 7398, would firm it up; it is not a blocker for the small-fish experiments.
 - **Error analysis covers one seed per size and DeepFish validation only.** It has not been run on the OzFish set (sealed; would need a decision about analysing without tuning).
 - **No ONNX / TensorRT export or parity check.**
