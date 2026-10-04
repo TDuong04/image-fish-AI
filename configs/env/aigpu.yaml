@@ -1,0 +1,15 @@
+# Shared remote Linux GPU server reached over SSH (Cloudflare Access tunnel).
+# Headless container: no display libraries, so OpenCV must be the headless wheel.
+name: aigpu
+description: Linux x86 container, RTX 5060 (Blackwell) 8 GB, 20 cores, 30 GB RAM, shared host
+
+device: cuda
+workers: 8            # many cores, but the host is shared; raise only after measuring
+batch: null           # auto-scaled from free VRAM
+amp: true
+
+env:
+  HF_HOME: ${DATA_ROOT}/.cache/huggingface
+  TORCH_HOME: ${DATA_ROOT}/.cache/torch
+  ULTRALYTICS_DIR: ${DATA_ROOT}/.cache/ultralytics
+  YOLO_CONFIG_DIR: ${DATA_ROOT}/.cache/ultralytics

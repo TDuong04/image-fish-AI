@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import os
 import platform
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -27,6 +28,7 @@ CUDA_INDEX = {
     "cu121": "https://download.pytorch.org/whl/cu121",
     "cu124": "https://download.pytorch.org/whl/cu124",
     "cu126": "https://download.pytorch.org/whl/cu126",
+    "cu128": "https://download.pytorch.org/whl/cu128",
     "cpu": "https://download.pytorch.org/whl/cpu",
 }
 
@@ -80,16 +82,17 @@ def detect_cuda_tag() -> str | None:
         return None
     if out.returncode != 0:
         return None
-    # "CUDA Version: 12.4" appears in the nvidia-smi header
-    text = out.stdout
-    if "CUDA Version:" not in text:
+    # The header says "CUDA Version: 12.4" on most drivers and "CUDA UMD Version: 13.3"
+    # on newer ones; reading only the first form made a CUDA 13 driver fall back to cu124.
+    match = re.search(r"CUDA (?:UMD )?Version:\s*(\d+)\.(\d+)", out.stdout)
+    if not match:
         return "cu124"
-    try:
-        ver = text.split("CUDA Version:")[1].split()[0]
-        major, minor = (int(x) for x in ver.split(".")[:2])
-    except (ValueError, IndexError):
-        return "cu124"
-    # Driver CUDA is backward compatible: pick the newest wheel it supports.
+    major, minor = int(match.group(1)), int(match.group(2))
+    # Driver CUDA is backward compatible: pick the newest wheel it supports. RTX 50-series
+    # (Blackwell) GPUs need cu128 or newer: older wheels have no kernels for them and fail
+    # only when the first CUDA op runs.
+    if (major, minor) >= (12, 8):
+        return "cu128"
     if (major, minor) >= (12, 6):
         return "cu126"
     if (major, minor) >= (12, 4):

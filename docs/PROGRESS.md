@@ -42,6 +42,11 @@ Last updated: 2026-10-04.
   rest, writes structured failure JSON.
 - `scripts/kaggle_runner.py`, `kaggle/` — drives multi-session training on Kaggle from a plan file.
 - `scripts/bootstrap.py`, `check_env.py` — right torch wheel per machine; diagnose a machine that cannot train.
+  Picks `cu128` for drivers reporting CUDA 12.8 or newer: RTX 50-series (Blackwell) GPUs have no kernels in older
+  wheels. Also reads the `CUDA UMD Version:` header label newer drivers print (`tests/test_bootstrap.py`).
+- `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
+  with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
+  ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
 
 ### Evaluation and analysis
 - `scripts/evaluate.py` — scores checkpoints on any dataset, each **at the resolution it was trained at**.
@@ -88,7 +93,7 @@ Last updated: 2026-10-04.
   state is recorded in the first line. Ambient temperature cannot be read and is added by hand.
 
 ### Safety net
-- 164 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
+- 171 pytest checks: frame grouping, label parsing, no absolute paths, no hardcoded `cuda`,
   `__main__` guards, and `tests/test_docs.py`, which fails if a committed result run or a script
   is not named in this file — the mechanical half of the documentation rule in `CLAUDE.md`.
 
@@ -350,6 +355,8 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | `configs/data/*.yaml` written with an absolute drive path | Every teammate's config pointed at one machine | `test_no_absolute_paths` |
 | `.gitignore` `data/` matched `configs/data/` | Dataset configs silently excluded from the repo | Reviewing staged files |
 | `runs/_kaggle` and `runs/_supervisor` committed | Clone shipped old failures; reports showed phantom failures | Reading a failed Kaggle report |
+| `bootstrap.py` chose the `cu124` wheel on a CUDA 13 driver | RTX 5060 (compute capability 12.0) needs cu128; cu124 would fail only at the first CUDA op. The driver header said `CUDA UMD Version`, which the parser did not read, so it fell back to cu124. | Reading the dry-run output on the new server |
+| `import cv2` fails on the remote server (`libxcb.so.1`) | The headless container has no display libraries, so `opencv-python` cannot load and `check_env.py` reported ultralytics missing. Fixed there by swapping in `opencv-python-headless` (no sudo needed). Not yet automated in `bootstrap.py`. | `check_env.py --require-gpu` |
 | `bootstrap.py` refused to install outside a venv | Kaggle run died on `import ultralytics` after downloading data | Reading the supervisor log |
 | Inherited-run filter matched on name only | A real smoke result was dropped as "inherited" | Empty metrics on a finished session |
 | `train.py` indexed optional config keys directly | Missing `patience` raised a KeyError traceback | Testing the failure path |
