@@ -528,6 +528,30 @@ epoch 107 (best epoch 77) after 4.96 h. Validation split, conf 0.25 for the coun
 **Limits.** One seed. Batch sizes differ (3, 5-6, 10), so the gaps mix model size with batch size; the seed spread
 on this machine is unknown. One validation split of near-duplicate frames. Not tested on the sealed OzFish set.
 
+### F16. YOLO11s raises the scores by cutting false alarms, not by finding more fish (one seed)
+`20261004-yolo11s-960-s0` on `ai-gpu` (RTX 5060, Ultralytics 8.4.172), seed 0, 960 px, **batch 5**, early-stopped at
+epoch 73 (best epoch 43) after 1.53 h. Validation split, conf 0.25 for the counts. Analysis:
+`runs/analysis-20261004-20261004-yolo11s-960-s0`. Compared with the same-machine control and the earlier models.
+
+| Run | mAP@50 | mAP@50-95 | Precision / recall (final eval) | Fish found (of 1,385) | False alarms (empty frames) | Recall 32-96 px |
+|---|---|---|---|---|---|---|
+| Control YOLOv8n (batch 10) | 0.4562 | 0.2957 | 0.569 / 0.460 | 648 | 531 (150) | 42.2% |
+| YOLOv8s (batch 5-6, resumed) | 0.5846 | 0.3588 | 0.824 / 0.518 | 741 | 396 (80) | 53.9% |
+| YOLOv8m (batch 3) | 0.5774 | 0.3914 | 0.921 / 0.515 | 714 | 224 (42) | 51.5% |
+| **YOLO11s (batch 5)** | **0.5172** | **0.3336** | **0.833 / 0.470** | **640** | **161 (40)** | **41.0%** |
+
+- **Against the control: +0.061 mAP@50 and +0.038 mAP@50-95, but 8 fewer fish found (640 against 648) and 370 fewer
+  false alarms (161 against 531).** The whole gain comes from fewer false alarms and better-placed boxes; recall at
+  conf 0.25 is unchanged (46.2% against 46.8%) and 32-96 px recall is slightly lower (41.0% against 42.2%).
+- **It is below YOLOv8s and YOLOv8m on every score here**, with the fewest false alarms of any run. At this seed and
+  this recipe the newer architecture does not help recall over YOLOv8n, which is what the project needs most.
+- **Small fish are still missed**: 3 of 273 at 16-32 px (1.1%).
+
+**Limits.** One seed; batch sizes differ between rows (3, 5, 5-6, 10), so the gaps mix architecture with batch size;
+seed spread on this machine unknown. One validation split of near-duplicate frames. Not tested on the sealed
+OzFish set; Orin speed not measured. The mAP gain over the control is a precision effect and should not be read as the
+detector finding more fish.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
