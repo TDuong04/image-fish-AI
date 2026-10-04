@@ -3,16 +3,38 @@
 The record of what the deployment board actually is. **Nothing in the export or benchmark
 chain should be written to depend on a fact that is not recorded here as confirmed.**
 
-Last updated: 2026-10-04. Status: **partly known. Probe output pending.**
+Last updated: 2026-10-04. Status: **verified by `edge/probe_board.py` on the real board.**
+Raw output is committed verbatim at `docs/board_probe_20261004.json`.
 
-## Confirmed (reported by the project owner, not yet measured by a script)
+## Verified on the board
 
 | Item | Value |
 |---|---|
-| Module | **Orin Nano, 8 GB** |
-| CPU | 6-core Arm Cortex-A78AE (Armv8.2-A) |
-| Memory | 8 GB, 128-bit LPDDR5, **unified** (CPU and GPU share it) |
-| Cooling | **No cooling fan** (passive) |
+| Module | **NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super** (device-tree string) |
+| **Super mode** | **Available.** Power modes: `0` 15W, `1` 25W, `2` MAXN_SUPER, `3` 7W. Currently in `25W` (id 1). |
+| L4T | **36.4.7** (R36, revision 4.7) |
+| CUDA | 12.6 |
+| TensorRT | **10.3.0** (Python module 10.3.0, libnvinfer 10.3.0.30, `trtexec` at `/usr/src/tensorrt/bin/trtexec`) |
+| Python / arch | 3.10.12, aarch64 |
+| CPU | 6-core Arm Cortex-A78AE (owner-reported) |
+| Memory | 7.44 GB visible, **unified** with the GPU; 4.77 GB available at idle; 3.72 GB swap |
+| **Storage** | **SD card** (`/dev/mmcblk0p1`), 32 GB, **about 8 GB free** (74% used) |
+| **Cooling** | **Active fan, spinning.** Tachometer 1,411–1,412 RPM at PWM duty 68/255 at idle |
+| Idle temperature | 47–48 degrees C across all thermal zones |
+
+The `nvidia-jetpack` metapackage is **not installed**, so the JetPack release name is not
+recorded by the probe. L4T 36.4.7 is what identifies the software stack.
+
+## Corrections to what was assumed or reported earlier
+
+| Earlier statement | Reality | How it was found |
+|---|---|---|
+| "No cooling fan" (owner-reported) | A fan **is** fitted and spinning (about 1,411 RPM). The dev kit ships with one. | Reading the fan tachometer over sysfs. An interface existing proves nothing; a non-zero tach does. |
+| "Unclear on Super" | **Super is present.** MAXN_SUPER and 25W are both listed. | The probe, reading `/etc/nvpmodel.conf` |
+| Board assumed passively cooled throughout CLAUDE.md and the first version of this file | Wrong, for the fan reason above. Thermal risk is lower than assumed, not zero. | Same |
+
+The owner-reported "no cooling fan" may have meant "no extra cooler beyond the stock one". Either
+way, the tachometer is the evidence, and it says a fan is running.
 
 ## Documented by NVIDIA, not verified on this unit
 
@@ -23,56 +45,51 @@ Last updated: 2026-10-04. Status: **partly known. Probe output pending.**
 | Hardware video encoder (NVENC) | None | Annotated video output falls to CPU x264 |
 | Hardware video decode (NVDEC) | Present | Decode path can be accelerated |
 
-## Unknown. These decide the plan.
+## Still unknown
 
-| Item | Why it matters | How to find out |
-|---|---|---|
-| **Super mode available?** | Changes the power modes and the throughput ceiling | Run `edge/probe_board.py`: a `MAXN_SUPER` mode in the list means yes |
-| JetPack / L4T version | Pins TensorRT, which pins the usable ONNX opset | Same probe (`/etc/nv_tegra_release`) |
-| TensorRT version | Decides whether INT8 uses the deprecated calibrator or explicit Q/DQ | Same probe |
-| Boot storage (SD vs NVMe) | SD card will bottleneck video decode | Same probe |
-| Heatsink present? | "No fan" can mean a passive heatsink or a bare module | Visual check |
-| PSU rating | Limits which power modes are usable | Check the adapter label |
-| Ambient temperature | Throttling depends on it; must be logged with every sustained run | Measure |
-
-**About Super.** The specs above (6-core A78AE, 8 GB 128-bit LPDDR5, 1024-core GPU) are
-**identical with and without Super**. Super is a software and firmware change delivered by
-JetPack 6.2 or later, not different silicon, so the hardware description alone cannot answer it.
-The authoritative answer is the list of power modes the board offers.
+| Item | Why it matters |
+|---|---|
+| PSU rating | Limits which power modes can be sustained |
+| Ambient temperature | Throttling depends on it; log it with every sustained run |
+| SD card speed class | Decides how badly storage limits video decode |
+| Whether `jetson_clocks` is applied | Unlocked clocks make short benchmarks variable |
 
 ## What this implies for the plan
 
-- **Memory is not the constraint.** YOLOv8n is about 6 MB of weights in FP16. With 8 GB unified and
-  roughly 1.5 to 2 GB used by the OS before any process starts, there is ample room for the engine,
-  buffers and decode pipeline. **INT8 is therefore a research question about accuracy cost, not a
-  deployment necessity.**
-- **Cooling is the main risk to measurement integrity.** A passively cooled module will throttle
-  under sustained load, so a burst benchmark overstates what the unit can do. The 30-minute
-  sustained-load test is essential, and the higher power modes may throttle quickly. Record ambient
-  temperature, clocks and junction temperature alongside every sustained number.
-- **Power modes are not assumed.** Published information says the original 8 GB module offers 7 W
-  and 15 W, and that Super adds 25 W and MAXN_SUPER. That is *published*, not measured here, and the
-  magnitude of any mode-to-mode swing is an output of the benchmark, not an input to it.
-- **No hardware encoder.** Detections and counts are the unit's output. Any annotated video is
+- **Storage is now the practical constraint.** About 8 GB free on an SD card has to hold engines,
+  swap, any video being processed and benchmark logs. Video decode from an SD card will likely be
+  storage-limited, so note that before blaming the model. An NVMe drive (or at least an external
+  SSD for the footage) is the fix.
+- **Memory is not the constraint.** YOLOv8n is about 6 MB in FP16. **INT8 is a research question
+  about accuracy cost, not a deployment necessity.**
+- **TensorRT 10.3 changes how INT8 would be done.** The implicit calibrator
+  (`IInt8EntropyCalibrator2`) is deprecated there; explicit quantisation (Q/DQ nodes) is the
+  supported route. Do not write against the deprecated path.
+- **Thermal behaviour is still unmeasured.** The fan lowers throttling risk, but a short benchmark
+  on a cold board proves nothing about sustained load, and 25 W and MAXN_SUPER draw the most. The
+  30-minute sustained test remains essential, with temperature and clocks logged.
+- **Power-mode swings are not assumed.** Their size is an output of the benchmark, not an input.
+- **No hardware encoder.** Detections and counts are the unit's output; any annotated video is
   rendered off-board.
 
-## How to fill in the unknowns
+## Corroboration
 
-On the board:
+An on-board benchmark report received on 2026-10-04 states 25 W mode, L4T 36.4.7 and TensorRT
+10.3.0. The probe independently shows the same three facts. **Its timing figures are not recorded
+as results**, because the `trtexec` log and engine hashes behind them have not been committed.
+
+## Re-running the probe
 
 ```bash
 python3 edge/probe_board.py          # human-readable, with a plain-language reading
 python3 edge/probe_board.py --json   # machine-readable
 ```
 
-It needs no sudo and only the standard library. Paste the output back and this file gets updated
-from it. One limit to know about: the probe reads power-mode names from `/etc/nvpmodel.conf`. That
-parsing was tested against simulated files, not a real board's, so if it reports "could not read"
-the fallback is `sudo nvpmodel -q --verbose`. Do not guess.
+Standard library only, no sudo. Over SSH without copying anything onto the board:
+`ssh user@board "python3 - --json" < edge/probe_board.py`.
 
 ## Freeze rule
 
-Once JetPack is recorded, **do not upgrade it for the duration of the study.** A JetPack change
-invalidates every TensorRT engine and every latency number collected with it. If an upgrade becomes
-unavoidable, every measurement is re-taken and the old ones are marked superseded in
-`docs/PROGRESS.md`.
+Do not upgrade JetPack/L4T for the duration of the study. A change invalidates every TensorRT
+engine and every latency number collected with it. If an upgrade becomes unavoidable, every
+measurement is re-taken and the old ones are marked superseded in `docs/PROGRESS.md`.

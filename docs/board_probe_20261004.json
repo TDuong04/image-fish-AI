@@ -1,0 +1,77 @@
+{
+  "python": "3.10.12",
+  "machine": "aarch64",
+  "module": {
+    "device_tree_model": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super",
+    "is_jetson": true
+  },
+  "l4t": {
+    "raw": "# R36 (release), REVISION: 4.7, GCID: 42132812, BOARD: generic, EABI: aarch64, DATE: Thu Sep 18 22:54:44 UTC 2025\n# KERNEL_VARIANT: oot\nTARGET_USERSPACE_LIB_DIR=nvidia\nTARGET_USERSPACE_LIB_DIR_PATH=usr/lib/aarch64-linux-gnu/nvidia",
+    "l4t": "36.4.7"
+  },
+  "jetpack": {
+    "nvidia_jetpack_package": null
+  },
+  "tensorrt": {
+    "python_module": "10.3.0",
+    "libnvinfer_package": "10.3.0.30-1+cuda12.5",
+    "trtexec": "/usr/src/tensorrt/bin/trtexec"
+  },
+  "cuda": {
+    "nvcc": "12.6",
+    "cuda_version_json": "{\n   \"cuda\" : {\n      \"name\" : \"CUDA SDK\",\n      \"version\" : \"12.6.11\"\n   },\n   \"cuda_cccl\" : {\n      \"name\" : \"CUDA C++ Core Compute Libraries\",\n      \"version\" : \"12.6.37\"\n   },\n   \"cuda_compat\" : {\n      \"name\" : \"CUDA Specific Libraries\",\n      \"version\" : \"12.6.36890662\"\n   },\n   \"cuda_cudart\" : {\n      \"name\" : \"CUDA Runtime (cudart)\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_cuobjdump\" : {\n      \"name\" : \"cuobjdump\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_cupti\" : {\n      \"name\" : \"CUPTI\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_cuxxfilt\" : {\n      \"name\" : \"CUDA cu++ filt\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_gdb\" : {\n      \"name\" : \"CUDA GDB\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_nvcc\" : {\n      \"name\" : \"CUDA NVCC\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_nvdisasm\" : {\n      \"name\" : \"CUDA nvdisasm\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_nvml_dev\" : {\n      \"name\" : \"CUDA NVML Headers\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_nvprune\" : {\n      \"name\" : \"CUDA nvprune\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_nvrtc\" : {\n      \"name\" : \"CUDA NVRTC\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_nvtx\" : {\n      \"name\" : \"CUDA NVTX\",\n      \"version\" : \"12.6.68\"\n   },\n   \"cuda_sanitizer_api\" : {\n      \"name\" : \"CUDA Compute Sanitizer API\",\n      \"version\" : \"12.6.68\"\n   },\n   \"libcublas\" : {\n      \"name\" : \"CUDA cuBLAS\",\n      \"version\" : \"12.6.1.4\"\n   },\n   \"libcudla\" : {\n      \"name\" : \"CUDA cuDLA\",\n      \"version\" : \"12.6.68\"\n   },\n   \"libcufft\" : {\n      \"name\" : \"CUDA cuFFT\",\n      \"version\" : \"11.2.6.59\"\n   },\n   \"libcufile\" : {\n      \"name\" : \"GPUDirect Storage (cufile)\",\n      \"version\" : \"1.11.1.6\"\n   },\n   \"libcurand\" : {\n      \"name\" : \"CUDA cuRAND\",\n      \"version\" : \"10.3.7.68\"\n   },\n   \"libcusolver\" : {\n      \"name\" : \"CUDA cuSOLVER\",\n      \"version\" : \"11.6.4.69\"\n   },\n   \"libcusparse\" : {\n      \"name\" : \"CUDA cuSPARSE\",\n      \"version\" : \"12.5.3.3\"\n   },\n   \"libnpp\" : {\n      \"name\" : \"CUDA NPP\",\n      \"version\" : \"12.3.1.54\"\n   },\n   \"libnvfatbin\" : {\n      \"name\" : \"Fatbin interaction library\",\n      \"version\" : \"12.6.68\"\n   },\n   \"libnvjitlink\" : {\n      \"name\" : \"JIT Linker Library\",\n      \"version\" : \"12.6.68\"\n   },\n   \"libnvjpeg\" : {\n      \"name\" : \"CUDA nvJPEG\",\n      \"version\" : \"12.3.3.54\"\n   },\n   \"nsight_compute\" : {\n      \"name\" : \"Nsight Compute\",\n      \"version\" : \"2024.3.1.2\"\n   },\n   \"nvidia_fs\" : {\n      \"name\" : \"NVIDIA file-system\",\n      \"version\" : \"2.22.3\"\n   }\n}"
+  },
+  "power_modes": {
+    "modes": [
+      {
+        "id": 0,
+        "name": "15W"
+      },
+      {
+        "id": 1,
+        "name": "25W"
+      },
+      {
+        "id": 2,
+        "name": "MAXN_SUPER"
+      },
+      {
+        "id": 3,
+        "name": "7W"
+      }
+    ],
+    "current_query": "NV Power Mode: 25W\n1",
+    "has_maxn_super": true,
+    "has_25w": true
+  },
+  "memory": {
+    "mem_total_gb": 7.44,
+    "mem_available_gb": 4.77,
+    "swap_total_gb": 3.72,
+    "unified_memory_note": "CPU and GPU share this pool; the OS and desktop use some before any process starts."
+  },
+  "storage": {
+    "root_device": "/dev/mmcblk0p1",
+    "kind": "SD card / eMMC",
+    "usage": {
+      "total_gb": 33.7,
+      "free_gb": 8.5
+    },
+    "note": "SD-card boot will bottleneck video decode; prefer NVMe."
+  },
+  "thermal": {
+    "zones_c": {
+      "cpu-thermal": 47.7,
+      "gpu-thermal": 47.1,
+      "soc0-thermal": 47.6,
+      "soc1-thermal": 46.9,
+      "soc2-thermal": 47.9,
+      "tj-thermal": 47.9
+    },
+    "fan_interface_present": true,
+    "fan_rpm": 1411,
+    "fan_pwm_duty_of_255": 68,
+    "fan_spinning": true,
+    "note": "Record AMBIENT temperature yourself. Even with an active fan, burst FPS is not deployment FPS: log temperature and clocks on every sustained run."
+  }
+}

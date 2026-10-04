@@ -15,25 +15,30 @@ Deployment mode: **offline batch on recorded video first**, real-time camera as 
 ## Hard constraints (do not design around these being false)
 
 ### Target hardware
-- **Jetson Orin Nano 8GB**, Ampere, 6-core Cortex-A78AE, passively cooled (no fan). The facts
-  that are still unknown — Super mode, JetPack/L4T, TensorRT, storage — are listed in
-  `docs/hardware.md`. Run `edge/probe_board.py` on the board and record them before writing any
-  export code: the JetPack version pins TensorRT, which pins the usable ONNX opset.
+- **Jetson Orin Nano 8GB Super (dev kit)**, Ampere, 6-core Cortex-A78AE, **active fan**, L4T
+  36.4.7, CUDA 12.6, TensorRT 10.3.0, booting from a 32 GB SD card with ~8 GB free. Verified by
+  `edge/probe_board.py`; raw output in `docs/board_probe_20261004.json`, summary and open items in
+  `docs/hardware.md`. TensorRT 10.3 means INT8 goes through explicit quantisation (Q/DQ): the
+  implicit calibrator is deprecated there.
 - **Memory is unified.** *All* Jetsons share one pool between CPU and GPU — the 8GB module is
   not "8GB of dedicated VRAM", and JetPack plus a desktop session consumes ~1.5–2 GB before your
   process starts. Even so, YOLOv8n is ~6 MB in FP16, so memory is not the constraint here and
   INT8 is a research question about accuracy cost, not a deployment necessity.
-- **No fan means thermal throttling is the main threat to measurement integrity.** A burst
-  benchmark overstates a passively cooled module. Sustained (30+ min) numbers are the real ones,
-  and ambient temperature, clocks and temperature are logged with every one.
+- **Thermal behaviour is still unmeasured.** The board has an active fan (probe: ~1,410 RPM at
+  idle), which lowers throttling risk but does not remove it, and a short benchmark on a cold
+  board proves nothing about sustained load. Sustained (30+ min) numbers are the real ones, with
+  ambient temperature, clocks and temperature logged on every one. An earlier version of this
+  file said the board was passively cooled; that was wrong (`docs/PROGRESS.md` §6).
+- **Boot storage is a 32 GB SD card with ~8 GB free.** Expect video decode to be storage-limited
+  and keep large artefacts off it; note this before blaming the model for a slow pipeline.
 - **No DLA and no NVENC.** Orin Nano is the Orin module without the hardware video encoder, and
   without a DLA (Orin NX and AGX Orin have both). Decode is accelerated (NVDEC); *encoding*
   annotated video is CPU x264 and will dominate any pipeline that does it. Everything infers on
   the one 1024-core Ampere GPU — nothing to offload to.
 - **Every FPS number MUST cite its `nvpmodel` mode** and `jetson_clocks` state. Do not assert a
-  magnitude for the mode-to-mode swing before measuring it. The modes this board offers depend
-  on whether Super (JetPack 6.2+) is present, which `edge/probe_board.py` reports from
-  `/etc/nvpmodel.conf`. Measure the swing on the board (FD-044); do not inherit it from a memo.
+  magnitude for the mode-to-mode swing before measuring it. This board offers 7W, 15W, 25W and
+  MAXN_SUPER (Super is present; see `docs/hardware.md`). Measure the swing on the board (FD-044);
+  do not inherit it from a memo.
 - **TensorRT engines are not portable.** They are specific to GPU arch + TensorRT version +
   driver. You cannot build a `.engine` on the x86 dev box and ship it. Build ONNX on x86,
   build the engine **on the Orin**.

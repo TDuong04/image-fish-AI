@@ -35,7 +35,12 @@ def sh(cmd, timeout=15):
     try:
         out = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              universal_newlines=True, timeout=timeout)
-        return out.stdout.strip() or out.stderr.strip() or None
+        # A failed command must read as "nothing", never as its error text. Returning
+        # stderr made `dpkg-query ... libnvinfer8` look like a value, so the `or`
+        # fallback to libnvinfer10 never ran -- found only by running on a real board.
+        if out.returncode != 0:
+            return None
+        return out.stdout.strip() or None
     except Exception:
         return None
 
@@ -150,9 +155,28 @@ def probe_thermal():
         if name and temp and temp.lstrip("-").isdigit():
             zones[name] = round(int(temp) / 1000.0, 1)
     fan = bool(glob.glob("/sys/devices/platform/pwm-fan*") or glob.glob("/sys/class/hwmon/*/pwm1"))
+
+    # An interface existing does not mean a fan is fitted: the kernel driver is present
+    # on boards with no fan connected. The tachometer is the evidence -- it reads zero
+    # when nothing is spinning. Report both so neither is mistaken for the other.
+    rpm = None
+    for f in glob.glob("/sys/class/hwmon/hwmon*/rpm"):
+        val = read(f)
+        if val and val.isdigit():
+            rpm = int(val)
+            break
+    duty = None
+    for f in glob.glob("/sys/devices/platform/pwm-fan/hwmon/hwmon*/pwm1"):
+        val = read(f)
+        if val and val.isdigit():
+            duty = int(val)
+            break
     return {"zones_c": zones, "fan_interface_present": fan,
-            "note": "Record AMBIENT temperature yourself. A passively cooled module will "
-                    "throttle under sustained load, so burst FPS is not deployment FPS."}
+            "fan_rpm": rpm, "fan_pwm_duty_of_255": duty,
+            "fan_spinning": bool(rpm and rpm > 0),
+            "note": "Record AMBIENT temperature yourself. Even with an active fan, burst "
+                    "FPS is not deployment FPS: log temperature and clocks on every "
+                    "sustained run."}
 
 
 def collect():
@@ -205,7 +229,17 @@ def verdict(d):
     if st["kind"] and "SD" in st["kind"]:
         lines.append("STORAGE: booting from an SD card. Expect video decode to be "
                      "storage-limited; note this before blaming the model.")
-    if not d["thermal"]["fan_interface_present"]:
+    th = d["thermal"]
+    if th["fan_spinning"]:
+        lines.append("COOLING: active fan, spinning at %s RPM (PWM duty %s/255). Sustained "
+                     "load is still the real test: the fan curve and heatsink decide "
+                     "whether higher modes throttle." % (th["fan_rpm"], th["fan_pwm_duty_of_255"]))
+    elif th["fan_interface_present"]:
+        lines.append("COOLING: a fan driver exists but the tachometer reads %s, so no fan "
+                     "is confirmed spinning. Treat the board as passively cooled until "
+                     "proven otherwise: the 30-minute sustained-load test is essential."
+                     % th["fan_rpm"])
+    else:
         lines.append("COOLING: no fan interface found. Treat the board as passively "
                      "cooled: the 30-minute sustained-load test is essential, and the "
                      "higher power modes may throttle quickly.")

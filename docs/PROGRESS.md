@@ -20,7 +20,7 @@ Last updated: 2026-10-04.
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
 | Automation | Crash-recovering supervisor and a Kaggle session runner. |
-| **Jetson Orin Nano** | **In hand: 8 GB module, 6-core A78AE, no fan** (owner-reported; see `docs/hardware.md`). Super status, JetPack and TensorRT versions not yet recorded. **No device measurement exists yet.** The deployment half of the thesis is still unanswered. |
+| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). An on-board `trtexec` benchmark has been *reported* but its log and engine hashes are not committed, so **no device measurement is recorded as a result yet.** The deployment half of the thesis is still unanswered. |
 | Report | `report_sections.md` still describes the older LCFCN *counting* experiment, not this work. Needs rewriting. |
 
 ---
@@ -55,8 +55,9 @@ Last updated: 2026-10-04.
 
 ### Device
 - `edge/probe_board.py` — run on the Jetson; reports module, L4T, TensorRT, power modes (including
-  whether Super is present), memory, storage and thermal facts. Standard library only, Python 3.8-safe,
-  needs no sudo. Its power-mode parsing is tested against simulated files only, not a real board's.
+  whether Super is present), memory, storage, temperatures and the fan tachometer. Standard library
+  only, Python 3.8-safe, needs no sudo, and can be streamed over SSH without installing anything.
+  Validated on the real board on 2026-10-04; output committed as `docs/board_probe_20261004.json`.
 - `docs/hardware.md` — what is confirmed, what is documented but unverified, and what is unknown.
 
 ### Safety net
@@ -201,6 +202,8 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Pixel buckets "under 16 px" | Audit figures are at *model input*; first bucketing used native pixels (3x off at 640). | Frame selection returned zero matches |
 | "Best epoch" from a mAP@50 scan | `best.pt` is selected by fitness; e.g. 960 seed 0 best is epoch 89, not 18. Metrics were right; the epoch attribution was not. | Cross-checking against fitness |
 | Two seeds looked tight (spread 0.008) | Third seed landed 0.055 above the first. Two seeds hid the true spread. | Running seed 2 |
+| The board has no cooling fan (owner-reported; then assumed throughout `CLAUDE.md` and `docs/hardware.md`) | A fan is fitted and spinning: tachometer 1,411 RPM, PWM 68/255. The dev kit ships with one. | Reading the fan tach over sysfs |
+| `fan_interface_present` implies a fan | It only shows the kernel driver exists. The tachometer is the evidence. | Checking the tach after the probe contradicted the owner |
 
 ---
 
@@ -218,12 +221,13 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | `cv2.VideoWriter` `mp4v` output | Saved fine, would not play in browsers | User report |
 | Training results lived only in git-ignored scratch | Reported numbers had no committed provenance | Asked where results were saved |
 | A personal file swept in by `git add -A` | Private document pushed to a team repo (removed from HEAD; still in history) | Noticing the filename |
+| `probe_board.py` returned a command's error text as if it were a value | `libnvinfer` reported "no packages found" and the fallback to `libnvinfer10` never ran | First run on the real board |
 
 ---
 
 ## 8. Not done / open
 
-- **No Jetson measurements.** The board is in hand, but FPS, latency, power mode, sustained throughput and memory are all unmeasured, and Super status / JetPack / TensorRT are unrecorded (`docs/hardware.md`).
+- **No recorded Jetson measurements.** The board is probed and its facts are in `docs/hardware.md`. A `trtexec` benchmark has been reported (960 px FP16, 25 W mode) but the log and engine hashes are not committed, so it is not yet a result. Sustained throughput, thermals, end-to-end latency, the 640 engine and engine-versus-PyTorch parity are all unmeasured.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
 - **No hue-augmentation retraining** (F4 hypothesis).
@@ -242,7 +246,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | What | Where |
 |---|---|
 | Run metrics, configs, epoch curves | `runs/<run>/` (tracked) |
-| Board facts | `docs/hardware.md` |
+| Board facts | `docs/hardware.md`, raw probe output `docs/board_probe_20261004.json` |
 | Weights | GitHub release `v0.1.0-models` (not in git) |
 | Checksums | `docs/model_manifest.json` |
 | Evaluation contract | `docs/eval_protocol.md` |
