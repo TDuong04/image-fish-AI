@@ -79,6 +79,7 @@ Last updated: 2026-10-04.
 - `scripts/audit_ozfish_overlap.py` — compares the sealed OzFish test names with the 1,758 labelled OzFish frames by video, frame and stereo deployment, and reports how many frames remain usable for training (794). Reads file names only. See `docs/data_audit.md`.
 - `scripts/prepare_ozfish_train.py` — converts the OzFish labelled frames (SageMaker Ground Truth boxes) to a one-class YOLO set at `data/processed/ozfish_train`, keeps only frames of deployments absent from the sealed test, drops frames within thumbnail distance 4.0 of a test frame, and writes a leak report. `--report-only` writes nothing. Result: 779 images, 17,564 boxes (`docs/data_audit.md`).
 - `scripts/prepare_random_split.py`, `configs/train/yolov8n_{640,960}_randomsplit.yaml`, `configs/plan_randomsplit.yaml` — a **deliberately leaky** random per-image split of the 4,505 fish-containing DeepFish images (15,463 boxes: the published set's size), used only as a diagnostic of how much of the gap to published numbers is the split. Nothing trained on it may be reported as a result.
+- `scripts/eval_ozfish_val.py` — scores checkpoints on the held-out OzFish deployments (`ozfish_train/images/val`); refuses `ozfish_eval`. `configs/data/deepfish_kakadu_ozfish.yaml`, `configs/train/yolov8n_960_all.yaml`, `configs/plan_allin.yaml` — the combined-recipe screen (DeepFish + Kakadu + OzFish train, stronger augmentation, one seed, validated on DeepFish val); queued, no result yet.
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -686,6 +687,24 @@ images that contain fish: **4,505 images and 15,463 boxes, the size of the publi
   1,339), so the comparison is a diagnostic and not a like-for-like pair; one seed and one random split.
 - **Consequence for the report.** Numbers from random-split DeepFish results should not be compared with ours, and a high published DeepFish score says little about performance on a new site.
   Our site-split score is the more honest estimate for a new deployment; the sealed OzFish set is the stricter one.
+
+### F21. On OzFish deployments no model trained on, the Kakadu gain holds: about +0.10 mAP@50 (3 seeds each, a decision-only check)
+`scripts/prepare_ozfish_train.py --val-frac 0.2` holds out whole OzFish deployments (stereo pairs together) from the 779 trainable frames:
+**622 training images (14,072 boxes) and 157 held-out images (3,492 boxes) from 79 deployments**; none of the 352 sealed-test deployments is in either part.
+`scripts/eval_ozfish_val.py` scores the existing checkpoints (960 px, conf 0.001, IoU 0.7, `ai-gpu`) on the 157 held-out images. None of these models
+saw any OzFish frame. The sealed OzFish test set was **not** used.
+
+| Training data | Seed 0 | Seed 1 | Seed 2 | Mean mAP@50 | Mean mAP@50-95 | Mean recall |
+|---|---|---|---|---|---|---|
+| DeepFish only (controls) | 0.2653 | 0.2720 | 0.2313 | **0.2562** | 0.1219 | 0.257 |
+| DeepFish + Kakadu | 0.3483 | 0.3677 | 0.3548 | **0.3569** | 0.1848 | 0.317 |
+
+- **The weakest Kakadu seed (0.3483) is above the best control seed (0.2720)**: a difference of +0.101 mAP@50 and +0.063 mAP@50-95 on average, with the spread inside each arm
+  at most 0.041. So the benefit of Kakadu data is not confined to the DeepFish val sites; it carries to a different dataset of crowded BRUVS footage that neither arm trained on.
+- **The absolute level is low** (0.26 to 0.37 mAP@50, recall 0.26 to 0.33): OzFish frames hold about 22 fish each, many only 6 to 12 px wide at native size,
+  and none of these models saw any BRUVS footage in training. This is the baseline against which adding OzFish training data (`ozfish_train/images/train`) is judged.
+- **Limits.** The held-out deployments are disjoint from the training deployments but one reef can span deployments, so numbers are for decisions only. 157 images; same
+  seeds as F18; the OzFish-style crowded scenes differ a lot from DeepFish, so this says the gain transfers, not by how much to a new site. Not the sealed test.
 
 ---
 

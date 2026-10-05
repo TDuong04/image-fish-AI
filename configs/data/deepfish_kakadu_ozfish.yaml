@@ -1,0 +1,11 @@
+# DeepFish train + Kakadu train + OzFish train. Validation stays the DeepFish val split so the checkpoint choice and the
+# number remain comparable with every earlier run; the effect of OzFish is measured separately on the held-out OzFish
+# deployments (data/processed/ozfish_train/images/val) with scripts/eval_ozfish_val.py. The sealed OzFish test is not used.
+path: processed
+train:
+  - deepfish/images/train
+  - kakadu/images/train
+  - ozfish_train/images/train
+val: deepfish/images/val
+names:
+  0: fish

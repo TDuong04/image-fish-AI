@@ -1,9 +1,9 @@
-# OzFish labelled frames that are NOT in the sealed test set or in any test deployment (779 images, 17,564 boxes),
-# built by scripts/prepare_ozfish_train.py. Train only; the val entry is a placeholder so Ultralytics can load the file.
-# Do not use this as a validation set, and do not train on it for a reported result without the user's go-ahead
-# (training on it changes what the sealed OzFish test measures; see docs/data_audit.md).
+# OzFish labelled frames that are NOT in the sealed test set or in any test deployment, built by
+# scripts/prepare_ozfish_train.py --val-frac 0.2 --drop-below 4.0. images/train is for training; images/val holds out whole
+# deployments as a decision-only validation set (not perfectly leak-free: one reef can span deployments).
+# Training on this changes what the sealed OzFish test measures; see docs/data_audit.md.
 path: processed/ozfish_train
 train: images/train
-val: images/train
+val: images/val
 names:
   0: fish

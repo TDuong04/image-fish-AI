@@ -1,0 +1,13 @@
+# Combined-recipe screen. Run with: FISH_ENV=aigpu python scripts/queue_runner.py configs/plan_allin.yaml
+steps:
+  - name: ozfish-split
+    cmd: ["{python}", "scripts/prepare_ozfish_train.py", "--val-frac", "0.2", "--drop-below", "4.0", "--seed", "0"]
+    env: {CUDA_VISIBLE_DEVICES: ""}
+  - name: gpu-free-2
+    wait_idle: ["scripts/train.py --config"]
+    idle_seconds: 60
+    cmd: ["{python}", "-c", "print('GPU idle, starting the combined-recipe screen')"]
+  - name: all-s0
+    skip_if: "runs/2026100[5-9]-yolov8n-960-all-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8n_960_all", "--seed", "0", "--resume"]

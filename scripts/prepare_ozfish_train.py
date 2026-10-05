@@ -11,6 +11,9 @@ YOLO labels (one class, `fish`), resizes frames to --max-side (default 960, the 
 each kept frame is to the sealed test frames and to the DeepFish validation frames (thumbnail distance, as in the
 Kakadu check) and writes the figures to prepare.json. Frames closer than --drop-below to a test frame are dropped.
 
+With --val-frac, whole deployments are held out as a decision-only validation set (images/val). It is not perfectly leak-free: one reef can appear
+in several deployments.
+
 Training on these frames changes what the sealed OzFish test measures (new deployments of the same collections, not an
 unseen kind of footage); see docs/data_audit.md. Nothing here reads or evaluates the sealed images' labels.
 """
@@ -74,6 +77,9 @@ def main() -> int:
     ap.add_argument("--max-side", type=int, default=960)
     ap.add_argument("--drop-below", type=float, default=3.0,
                     help="drop a kept frame whose thumbnail distance to any sealed-test frame is below this")
+    ap.add_argument("--val-frac", type=float, default=0.0,
+                    help="hold out about this fraction of the kept FRAMES as a validation set, by whole deployments (stereo pairs stay together)")
+    ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--report-only", action="store_true")
     args = ap.parse_args()
 
@@ -129,8 +135,28 @@ def main() -> int:
         return 0
 
     keep_mask = d_test >= args.drop_below
+    # Hold out whole deployments (a deployment's frames, including its stereo partner, never straddle the split).
+    import random
+    dep_frames = {}
+    for (key, path), ok in zip(kept, keep_mask):
+        if ok:
+            dep_frames.setdefault(parse(path.name)[1], []).append(key)
+    order = sorted(dep_frames)
+    random.Random(args.seed).shuffle(order)
+    val_deps, got, target = set(), 0, args.val_frac * sum(len(v) for v in dep_frames.values())
+    for d in order:
+        if got >= target:
+            break
+        val_deps.add(d)
+        got += len(dep_frames[d])
+    if args.val_frac <= 0:
+        val_deps = set()
+    if args.out.exists() and (args.out / 'prepare.json').exists():
+        import shutil
+        shutil.rmtree(args.out)            # our own earlier output of this script, rebuilt so train and val cannot mix
     dropped = [kept[i][1].name for i in np.where(~keep_mask)[0]]
-    n_img = n_box = 0
+    n_img = {'train': 0, 'val': 0}
+    n_box = {'train': 0, 'val': 0}
     for (key, path), ok in zip(kept, keep_mask):
         if not ok:
             continue
@@ -145,20 +171,22 @@ def main() -> int:
         scale = args.max_side / max(img.shape[:2])
         if scale < 1:
             img = cv2.resize(img, (round(img.shape[1] * scale), round(img.shape[0] * scale)), interpolation=cv2.INTER_AREA)
-        (args.out / "images" / "train").mkdir(parents=True, exist_ok=True)
-        (args.out / "labels" / "train").mkdir(parents=True, exist_ok=True)
-        (args.out / "images" / "train" / f"{stem}.jpg").write_bytes(cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 92])[1].tobytes())
-        (args.out / "labels" / "train" / f"{stem}.txt").write_text("\n".join(rows) + ("\n" if rows else ""))
-        n_img += 1
-        n_box += len(rows)
+        split = "val" if parse(path.name)[1] in val_deps else "train"
+        (args.out / "images" / split).mkdir(parents=True, exist_ok=True)
+        (args.out / "labels" / split).mkdir(parents=True, exist_ok=True)
+        (args.out / "images" / split / f"{stem}.jpg").write_bytes(cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 92])[1].tobytes())
+        (args.out / "labels" / split / f"{stem}.txt").write_text("\n".join(rows) + ("\n" if rows else ""))
+        n_img[split] += 1
+        n_box[split] += len(rows)
 
     (args.out / "prepare.json").write_text(json.dumps({
         "name": "ozfish_train", "source": "OzFish labelled frames, doi:10.25845/5e28f062c5097, CC BY 3.0 AU",
         "grouping": "deployment (stereo _L/_R pairs merged); frames of every sealed-test deployment excluded",
         "max_side": args.max_side, "drop_below": args.drop_below, "dropped_for_closeness": dropped,
-        "images": {"train": n_img}, "boxes": {"train": n_box}, "leak_report": report,
+        "images": n_img, "boxes": n_box, "val_frac": args.val_frac, "seed": args.seed,
+        "val_deployments": sorted(val_deps), "leak_report": report,
         "note": "train only; training on it changes what the sealed OzFish test measures"}, indent=2))
-    print(f"wrote {paths.rel(args.out)}: {n_img} images, {n_box} boxes; dropped {len(dropped)} for closeness to a test frame")
+    print(f"wrote {paths.rel(args.out)}: images {n_img}, boxes {n_box}; val deployments {len(val_deps)}; dropped {len(dropped)} for closeness to a test frame")
     return 0
 
 
