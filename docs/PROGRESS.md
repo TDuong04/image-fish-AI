@@ -75,6 +75,7 @@ Last updated: 2026-10-04.
 - `scripts/upload_parts.py`, `scripts/assemble_parts.py` — resumable upload of a folder of parts over ssh with a
   checksum check, and the matching reassembly. Built for the 60 KB/s link; the full archive then reached the server
   another way, so they are unused for now.
+- `scripts/eval_positive_only.py` — re-scores checkpoints on the validation images that contain at least one fish (875 of 1,339), to test how much of the gap to published DeepFish numbers the empty-frame convention explains. Refuses `ozfish_eval`; workers off, so safe on Windows. See F19.
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -632,6 +633,33 @@ should be run once, on the final candidate. (3) Kakadu's labels were lightly che
 one validation split of near-duplicate frames. (5) The augmentation and larger-model gains (F14, F15) were measured on one seed and
 have not been combined with Kakadu or repeated. (6) The best operating threshold on val moved to 0.2-0.25 for Kakadu models (0.5 for
 the controls); a deployment threshold must be chosen on val, not on the sealed set.
+
+### F19. Empty frames explain less than 0.03 of mAP@50, so they are not why our scores sit far below published DeepFish numbers
+Published DeepFish detection results (for example YOLOv8 at about 0.92 mAP@50) use 4,505 images with 15k boxes. Our export has 6,517
+images, and 6,517 minus our 2,012 empty frames is exactly 4,505, so the published set is very probably the fish-containing images only.
+Our validation split keeps its 464 empty frames, where any detection is a false alarm. `scripts/eval_positive_only.py` re-scores
+the same checkpoints on the 875 validation images that contain fish (960 px, conf 0.001, IoU 0.7), single run each:
+
+| Checkpoint | mAP@50, full val (1,339) | mAP@50, fish-only (875) | mAP@50-95, fish-only |
+|---|---|---|---|
+| Control seed 0 | 0.4562 | 0.4794 | 0.3078 |
+| Control seed 1 | 0.4970 | 0.5147 | 0.3046 |
+| Kakadu seed 0 | 0.7088 | 0.7351 | 0.4911 |
+| YOLOv8s | 0.5846 | 0.5941 | 0.3635 |
+| YOLOv8m | 0.5774 | 0.5835 | 0.3940 |
+
+- **Dropping the empty frames adds 0.006 to 0.026 mAP@50.** The convention explains a small part of the gap, not the 0.4 to 0.45 between our
+  controls (0.46 to 0.50) and 0.92.
+- **The remaining candidates, none yet tested:** (1) the split. Published results I could read split frames at random, which
+  puts near-identical frames of one clip on both sides; ours is by site, and val frames are far from train frames (nearest-neighbour
+  distance median 15.7 against about 1 inside a clip, F13). (2) The val sites are hard: small, camouflaged fish (F10, F11).
+  (3) A small, narrow training set (F18). The test that separates (1) from the rest is a model trained on DeepFish with a random
+  per-image split, clearly labelled as inflated; it has **not** been run.
+- **Not a sign of an evaluation fault**: the checkpoints reproduce their recorded scores and the full-val numbers here agree with `metrics.json`.
+
+**Limits.** Single evaluations of saved checkpoints; the subset, not the models, changed. I could not open the DeepFish papers' own
+split descriptions (one page refused access), so the "random split" point rests on the OzFish study I could read and on the standard
+practice of that literature, not on those specific papers.
 
 ---
 
