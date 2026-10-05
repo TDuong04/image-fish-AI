@@ -15,7 +15,7 @@ Last updated: 2026-10-04.
 |---|---|
 | Environment | Working. Python 3.11 venv, torch 2.6.0+cu124, ultralytics 8.4.130, RTX 4060 Laptop 8 GB. |
 | Data | **In hand.** DeepFish (train/val), Kakadu (extra train only, F13) and an OzFish test set (sealed). The OzFish training set is reachable at a direct link (about 2.9 GB, 1,800 frames, 45k boxes) and not yet downloaded. |
-| Training | **Planned grid done** (6 runs: 3 seeds x {640, 960} px), then an improvement programme (F12 to F18): the strongest result is adding Kakadu training data, **mean mAP@50 0.698 against 0.473 for a same-machine control, 3 seeds each, on the DeepFish val split (F18)**. Not yet confirmed on the sealed OzFish set. Larger models and stronger augmentation help on one seed each (F14, F15), and one seed of the combined recipe (Kakadu + OzFish data + augmentation) reaches 0.755 mAP@50 on the same split (F22, a screen). |
+| Training | **Planned grid done** (6 runs: 3 seeds x {640, 960} px), then an improvement programme (F12 to F18): the strongest result is adding Kakadu training data, **mean mAP@50 0.698 against 0.473 for a same-machine control, 3 seeds each, on the DeepFish val split (F18)**. Not yet confirmed on the sealed OzFish set. Larger models and stronger augmentation help on one seed each (F14, F15), and one seed of the combined recipe (Kakadu + OzFish data + augmentation) reaches 0.755 mAP@50 on the same split (F22, a screen); the split test (F23) attributes that gain to the OzFish data, not the augmentation (0.764 with default augmentation, 0.698 for augmentation alone, one seed each). |
 | Evaluation | In-domain, cross-dataset (sealed OzFish), size-stratified recall, and a colour-perturbation study. |
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
@@ -738,6 +738,32 @@ can stack, not which one helped. **One seed: a screen, not a result.**
 
 **Limits.** n=1 seed for the all-in arm, batch 10, one machine. DeepFish val resembles Kakadu (F13). The sealed OzFish test has **not** been run; training on OzFish changes what it measures
 (`docs/data_audit.md`). The two-model plan (a separate generalisation model without OzFish) has not been approved.
+
+### F23. Split test: the OzFish training data accounts for the gain of the combined recipe; the stronger augmentation adds nothing measurable (one seed per new arm)
+Four training recipes on the same machine and batch (`ai-gpu`, batch 10, YOLOv8n, 960 px, validated on the DeepFish val split), differing in only the stated parts. Kakadu-only is the 3-seed arm of F18; the others are **one seed
+each, so screens**. New runs: `20261005-yolov8n-960-kakadu-ozfish-s0` (arm A, OzFish train data, default augmentation), `20261005-yolov8n-960-kakadu-aug-s0` (arm B, stronger augmentation, no OzFish; 150 epochs, hit the cap, best 138, 3.59 h);
+combined recipe `20261005-yolov8n-960-all-s0` (F22). Analyses in `runs/analysis-20261005-<run>/`.
+
+| | Kakadu-only (3 seeds) | **A: + OzFish data** | **B: + strong augmentation** | Both (all-in) |
+|---|---|---|---|---|
+| DeepFish val mAP@50 | 0.6978 (0.6844 to 0.7088) | **0.7640** | 0.6976 | 0.7551 |
+| DeepFish val mAP@50-95 | 0.4711 (0.4640 to 0.4781) | **0.5260** | 0.4732 | 0.5228 |
+| Fish found, of 1,385 (conf 0.25) | 861 (839 to 891) | 928 | 822 | **952** |
+| False alarms (on 464 empty frames) | 180 (131 to 254) (70, 47, 88) | **155 (57)** | 195 (91) | 508 (187) |
+| Recall 16-32 px | 19.7% (14.3 to 24.9) | 18.7% | 14.6% | **27.5%** |
+| Recall 32-96 px | 62.4% (61.0 to 64.9) | 70.4% | 59.0% | **70.8%** |
+| Best-F1 confidence on val | 0.2 to 0.25 | 0.2 | 0.2 | **0.6** |
+| Held-out OzFish deployments mAP@50 / mAP@50-95 | 0.3569 / 0.1848 (0.3483 to 0.3677) | 0.6860 / 0.3738 | 0.3655 / 0.1906 | **0.7071 / 0.3868** |
+
+- **The OzFish data accounts for the gain.** Adding it alone gives +0.066 mAP@50 and +0.055 mAP@50-95 over the Kakadu-only mean on DeepFish val, 2.7 and 3.9 times that arm's seed range (0.024 and 0.014), and +0.055 over the best Kakadu-only seed. It is the
+  only change that moves the held-out OzFish score (0.357 to 0.686).
+- **The stronger augmentation alone does nothing measurable.** Arm B equals the Kakadu-only mean on DeepFish val (0.6976 against 0.6978; mAP@50-95 +0.002) and on held-out OzFish (0.3655 against 0.3569, within the arm's 0.019 range).
+  On top of OzFish data it does not help either: the combined recipe is 0.009 below arm A on mAP@50 (inside the seed spread), and it makes **353 more false alarms at conf 0.25** (508 against 155) and pushes the best threshold to 0.6.
+  Its one possible benefit, more fish at 16-32 px (27.5% against 18.7%), is one seed and inside the 10.6-point range seen across the Kakadu-only seeds.
+- **Best of these by evidence: arm A** (DeepFish + Kakadu + OzFish train data, default augmentation): the highest DeepFish val mAP@50-95, few false alarms, and a normal 0.2 threshold.
+
+**Limits.** One seed for arms A and B and the combined recipe; the effects are large against the Kakadu-only spread (OzFish) or zero (augmentation), but each new arm has no seed spread of its own. Held-out OzFish deployments may share reefs with
+training deployments, so those scores are optimistic. DeepFish val resembles Kakadu (F13), although OzFish train frames are far from it (nearest distance 7.15). The sealed OzFish test has **not** been run.
 
 ---
 
