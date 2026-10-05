@@ -734,6 +734,8 @@ can stack, not which one helped. **One seed: a screen, not a result.**
 - **Not separated:** the OzFish data and the augmentation (bundled); seed spread of this recipe (n=1); the benefit of OzFish on DeepFish val specifically (OzFish looks very different, so
   the DeepFish-val gain probably comes mostly from the augmentation, which is untested).
 
+- **Split test, arm A finished (interim; the full comparison F23 follows when arm B finishes).** `20261005-yolov8n-960-kakadu-ozfish-s0` (DeepFish + Kakadu + OzFish train data, DEFAULT augmentation, batch 10, seed 0, early-stopped at epoch 65, best 35, 1.65 h; analysis `runs/analysis-20261005-20261005-yolov8n-960-kakadu-ozfish-s0`): DeepFish val **0.7640 mAP@50 and 0.5260 mAP@50-95**, 928 fish found, **155 false alarms** (57 on empty frames), recall 18.7% at 16-32 px and 70.4% at 32-96 px, best-F1 threshold 0.2; held-out OzFish deployments **0.6860 / 0.3738**. So OzFish data alone matches or beats the combined recipe on DeepFish val (0.764 against 0.755) with far fewer false alarms (155 against 508), and reaches most of the held-out OzFish score (0.686 against 0.707). The stronger augmentation added no clear gain on top; its own effect is arm B. One seed each, so a screen.
+
 **Limits.** n=1 seed for the all-in arm, batch 10, one machine. DeepFish val resembles Kakadu (F13). The sealed OzFish test has **not** been run; training on OzFish changes what it measures
 (`docs/data_audit.md`). The two-model plan (a separate generalisation model without OzFish) has not been approved.
 
