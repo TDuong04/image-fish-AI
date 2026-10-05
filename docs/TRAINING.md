@@ -193,6 +193,23 @@ comparison between two models.**
 
 ---
 
+## 5b. Optional: extra training data (Kakadu)
+
+Adds about 7,300 frames of tropical freshwater footage (CC BY 4.0, doi 10.5281/zenodo.7250921). It raised the DeepFish-val score a
+great deal in our runs (PROGRESS F17); read F13 and F17 for why that is not yet proof of better field performance.
+
+```bash
+pip install inflate64                              # already in requirements-train.txt
+python scripts/fetch_url.py "https://zenodo.org/records/7250921/files/202210-KakaduFishAI-TrainingData.zip?download=1" \
+    data/raw/kakadu_training_data.zip --md5 c282e3f00844a7a4eeab5a02fa005cfa
+python scripts/prepare_kakadu.py --max-per-group 15 --max-side 960     # about 7 minutes, writes data/processed/kakadu
+python scripts/train.py --config yolov8n_960_kakadu --seed 0           # DeepFish train + Kakadu, validated on DeepFish val
+```
+
+The archive is 5.9 GB. Some hosts are very slow to Zenodo (about 45 KB/s from our GPU server, about 4 MB/s from the workstation), so
+fetch it where the connection is good. `fetch_url.py` resumes and checks the MD5. Compare with the `yolov8n_960` control **on the same
+machine and batch size**, on 3 seeds. For unattended runs see `docs/OVERNIGHT.md` and `scripts/queue_runner.py`.
+
 ## 6. Before you trust a number
 
 Read `docs/eval_protocol.md`. It was written before any real training run, and it

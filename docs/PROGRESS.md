@@ -136,6 +136,7 @@ Last updated: 2026-10-04.
 |---|---|---|---|---|---|
 | DeepFish | train + val | 6,517 | 15,463 | 2,012 (30.9%) | 20 sites, 68 clips, median 73 consecutive frames per clip |
 | OzFish test | **sealed** cross-dataset test | 352 | 8,329 | 0 | 297 clips, mean 23.7 boxes/image, max 232 |
+| Kakadu | extra **train only** (added 2026-10-04) | 44,112 (7,318 kept) | 82,904 (11,695 kept) | 0 | 23 species merged to one class; no video/site field; a held-out split inside it leaks (F13); details in `docs/data_audit.md` |
 
 Split: **5,178 train / 1,339 val** (14 / 6 sites; val sites `7398, 7623, 9862, 9870, 9892, 9898`).
 
@@ -420,7 +421,7 @@ The sample is skewed to site 7398. Counts are descriptive and the proportions ca
 ### F12. A stride-4 (P2) head did not raise small-fish recall and scored lower on mAP@50-95 (one seed, a screen)
 FD-129 screen B: `yolov8n-960-p2`, seed 0, on `ai-gpu` (RTX 5060 8 GB, Ultralytics 8.4.172, **batch 5**), COCO weights
 loaded into every layer whose shape still matched. Early-stopped at epoch 80 (best epoch 50) after 1.42 h. Run:
-`runs/20261004-yolov8n-960-p2-s0`. Compared with the Kaggle baseline `20260922-yolov8n-960-s0` (T4, Ultralytics 8.4.130,
+`runs/20261004-yolov8n-960-p2-s0`. Compared with the Kaggle baseline `20260922-yolov8n-960-s0` (T4, Ultralytics 8.4.159,
 batch 23), validation split.
 
 | | P2 (seed 0) | Baseline 960 (seed 0) | Baseline 960 range, 3 seeds |
@@ -480,7 +481,7 @@ one class without checking whether any species labels cover non-fish objects.
 
 ### F14. Against a same-machine control, stronger augmentation and a larger model both help in-domain (one seed each)
 All seed 0, 960 px, DeepFish validation split, conf 0.25 for the counts (1,385 labelled fish, 464 empty frames).
-Server runs on `ai-gpu` (RTX 5060, Ultralytics 8.4.172); the Kaggle baseline is the earlier T4 run (8.4.130, batch 23).
+Server runs on `ai-gpu` (RTX 5060, Ultralytics 8.4.172); the Kaggle baseline is the earlier T4 run (Ultralytics 8.4.159, batch 23).
 Run folders `runs/<name>/`, analyses `runs/analysis-20261004-<name>/`.
 
 | Run | Batch | mAP@50 | mAP@50-95 | Fish found / missed | False alarms (empty frames) | Recall 16-32 / 32-96 px |
@@ -643,6 +644,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Parity-set label counted OzFish frames by an `A0` filename prefix | Reported 1 OzFish frame when 4 were used (OzFish names also start with E and G) | Listing the actual frames |
 | Aug "looks barely better" (said in conversation: +0.04 mAP@50, +0.012 mAP@50-95 against the Kaggle baseline mean) | Against the same-machine control it is +0.087 and +0.033: the server control scores 0.031 below the Kaggle run at the same seed, so the Kaggle baseline was the wrong comparator. Still one seed and a bundle. | The control run finishing (F14) |
 | F12 compared the P2 head with the Kaggle baseline and called the batch difference "5 against 23" | The same-machine control used batch 10, and P2 used batch 5 (the automatic batch for `yolov8n-p2` differs from `yolov8n`). Against the control, P2 is +0.051 mAP@50 and -0.013 mAP@50-95, with 16-32 px recall 3.7% against 2.6%: mixed, and confounded by batch size, so "no small-fish gain" is weaker than F12 stated. | Reading the control's `args.yaml` (F14) |
+| F12, F14 and section 8 gave the Kaggle runs' Ultralytics version as 8.4.130 | That is the workstation's version. The Kaggle runs' `env.txt` says **8.4.159** (torch 2.10.0+cu128, Tesla T4). The server runs use 8.4.172. The difference in library versions between Kaggle and the server is therefore 13 releases, not 42, which does not change any conclusion (the same-machine control is what the comparisons rest on). | Reading `runs/20260922-yolov8n-960-s0/env.txt` while writing the protocol rules |
 | `docs/hardware.md` said the board's firewall drops everything but SSH and documented the app as localhost-only | The code default is `--host 0.0.0.0`. The timeout was real at the time; `ufw` now lists allow rules for 7860 and 7861 (not added by this work), and direct access works. | A user could not reach the app on the board's address; `ufw status` |
 | `fish.parity.nms()` modified the array it was given | Ultralytics' NMS converts boxes xywh to xyxy in place and `torch.from_numpy` shares memory, so the caller's raw output was silently overwritten and a second decoder converted it twice (boxes like `[167, 52, 628, 248]`). Fixed with a copy and a regression test. | Cross-checking the edge decoder against it |
 | `cuda-python` pinned at 12.6.2 | That release was yanked by its maintainers. Replaced by 12.6.2.post1. | pip's yanked-version warning |
@@ -659,7 +661,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 - **FD-129 screens on `ai-gpu`** (started 2026-10-04): one seed (0) each of `yolov8n-960-p2`, `yolov8n-960-aug` and a
   same-machine control, all done (F12, F14); the aug gain and the YOLOv8s gain need 3 seeds before they count. About 65 s per epoch for the P2 run on
   the RTX 5060 at batch 5 (the Kaggle T4 runs used batch 23 and about 115 s per epoch), so the control rerun exists to
-  keep the comparison fair across machine, Ultralytics version (8.4.172 here, 8.4.130 on Kaggle) and batch size. One
+  keep the comparison fair across machine, Ultralytics version (8.4.172 here, 8.4.159 on Kaggle) and batch size. One
   seed cannot decide anything: the 960 baseline seed spread is 0.034 mAP@50, so only a difference clearly larger than
   that justifies 3 seeds. Logs are on the server (`~/workspace/train_*.log`) until copied into `runs/`.
 - **OzFish full training set: the route is real, and it is smaller than assumed (2026-10-04).** The official AIMS

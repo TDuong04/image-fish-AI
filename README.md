@@ -80,6 +80,9 @@ python scripts/train.py --config yolov8n_640      # real run, hours, 3 seeds
 
 Results go to `runs/<date>-<name>/`. **No `metrics.json` means the run did not finish.**
 
+Optional extra data (Kakadu, about 7,300 frames, CC BY 4.0) is described in `docs/TRAINING.md` section 5b. It raised the validation score a lot,
+but the validation split resembles it, so treat that as unproven until the sealed OzFish test has been run.
+
 ## If something breaks
 
 | It says | Do this |

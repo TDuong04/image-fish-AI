@@ -126,6 +126,28 @@ postprocess. GPU-kernel-only timing is not a deployment result.
 
 ---
 
+## 9. Rules added during the improvement programme (2026-10-04)
+
+These were applied from 2026-10-04 and are why some earlier numbers are not comparable with later ones.
+
+1. **Compare only against a same-machine, same-batch control.** The same seed on the Kaggle T4 (batch 23, Ultralytics 8.4.159, torch 2.10.0) and
+   on the GPU server (batch 10, 8.4.172) differs by 0.031 mAP@50 (PROGRESS F14). A comparison across machines, batch sizes or
+   library versions is not evidence. Record the machine, batch size and library version with every run (`env.txt`, `args.yaml`).
+2. **Seed spread is measured, not assumed.** Control (DeepFish only, server, batch 10): mAP@50 0.4562, 0.4970, 0.4669 (range 0.041,
+   against 0.034 on Kaggle); mAP@50-95 0.2957, 0.2966, 0.3106 (range 0.015). A difference below the spread is not a result.
+3. **One-seed runs are screens.** They can nominate an idea, not support a claim. An entry from one seed says "one seed" in its title.
+4. **A gain larger than about 0.05 mAP@50 triggers a leak check before it is reported.** Method: thumbnail nearest-neighbour distance
+   between the added training data and the validation split, plus a look at the closest pairs. It can rule out near-duplicates; it cannot
+   rule out shared scenes or sites, and it cannot show that a gain generalises (PROGRESS F13, F17).
+5. **Data added to training must be checked against both judges** (the DeepFish val split and the sealed OzFish set) for overlap, by
+   content and not only by file name.
+6. **The operating threshold and the checkpoint are chosen on the DeepFish val split only.** The best-F1 threshold moved from 0.4-0.6
+   (earlier runs) to 0.2-0.25 (Kakadu runs); a deployment threshold is a setting, not a property of the model.
+7. **Error analysis is part of a result**: `scripts/error_analysis.py` at IoU 0.5 and conf 0.25 (found and missed, false alarms by
+   cause, recall by box size), so a gain in mAP is attributed to finding more fish or to fewer false alarms (F16 is the example).
+8. **The sealed OzFish set is run once, at the end, on the final candidate, and not used to choose between candidates.** It has not
+   been run on any model as of this entry.
+
 ## Known limitations, declared up front
 
 1. `ozfish_eval` has no empty frames → no cross-dataset false-alarm measurement.

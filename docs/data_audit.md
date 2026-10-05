@@ -118,6 +118,36 @@ reporting it as one would overstate what was measured.
 
 ---
 
+## Kakadu — extra training data (added 2026-10-04)
+
+**Source.** Jansen A, Walden D, Walker S, Buccella C (2022), *A deep learning dataset for underwater object detection of
+tropical freshwater fish species in northern Australia*, Supervising Scientist, doi 10.5281/zenodo.7250921, **CC BY 4.0**
+(attribution required). Training archive: `202210-KakaduFishAI-TrainingData.zip`, 5,943,456,100 bytes, MD5
+`c282e3f00844a7a4eeab5a02fa005cfa`. Remote underwater video from billabongs in Kakadu National Park, dry seasons 2016-2018.
+
+| Property | Value (measured on the archive, not taken from the record) |
+|---|---|
+| Images | 44,112 (43,715 JPEG, 397 PNG); 44,100 at 1920x1080, 11 at 1600x900, 1 at 1600x898 |
+| Boxes | 82,904 over 23 species, COCO format; **merged to one class `fish`** |
+| Empty frames | **none**: every image has at least one box (at most 34), so false alarms cannot be measured here |
+| Box size (native 1080p) | median 150 px, 10th percentile 78 px, 90th percentile 304 px; about 50 px and 26 px at 640 input |
+| Compression | every member is Deflate64, which Python's `zipfile` cannot read (`src/fish/zip64.py` can) |
+| Grouping fields | **none**: the COCO file has only `id`, `width`, `height`, `file_name` (a bare number) and `license` |
+
+**No video or site information, and shuffled ids.** Thumbnail distance between consecutive ids equals that between random
+pairs (26.6 against 26.7), yet near-duplicates are common (median nearest-neighbour distance 1.5 among 6,000 frames).
+Frames were grouped by picture similarity (L1 distance of mean-removed 48x27 grayscale thumbnails, single linkage):
+threshold 4.0 gives 2,296 groups, the largest 4.4% of frames; 5.0 and 6.0 begin merging unrelated scenes (largest 9.8%
+and 33%). **A train/val split on these groups still leaks**: the closest cross-split pairs were the same scene (PROGRESS F13).
+So Kakadu is used as **training data only**, capped at 15 frames per group.
+
+**Processed set.** 7,318 images and 11,695 boxes at `data/processed/kakadu`, 960 px wide, built by
+`scripts/prepare_kakadu.py --max-per-group 15 --max-side 960` (grouping stored in `splits/kakadu_groups.json`).
+**Leak check against the DeepFish val split:** nearest Kakadu frame to any val frame is 5.65 (none under 4.0), no shared file
+names; Kakadu frames are, however, closer to the val frames than DeepFish train frames are (median 13.6 against 15.7).
+
+**Not done.** No manual label audit of Kakadu; the 23-species merge was not checked for non-fish objects.
+
 ## Open gaps
 
 - **Annotation quality is unmeasured** (FD-105). OzFish boxes came from
