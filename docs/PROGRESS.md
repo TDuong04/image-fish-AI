@@ -588,6 +588,8 @@ the unchanged DeepFish val split (1,339). `ai-gpu`, Ultralytics 8.4.172, early-s
 
 - **Kakadu seed 1 (`20261004-yolov8n-960-kakadu-s1`, batch 10, early-stopped at epoch 101, 2.42 h; analysis `runs/analysis-20261004-20261004-yolov8n-960-kakadu-s1`):** 0.6844 mAP@50, 0.4640 mAP@50-95, precision 0.776, recall 0.599. Found 839 fish (seed 0: 852), 155 false alarms (131), recall 14.3% at 16-32 px (19.8%) and 61.0% at 32-96 px (61.4%). So the Kakadu gain reproduces on a second seed: 0.684 against the matching control seed's 0.497 is +0.187 mAP@50. The 3-seed comparison follows when seed 2 of both arms finishes.
 
+- **Control seed 2 (`20261005-yolov8n-960-s2`, batch 10, 100 epochs):** run folder recorded here; its numbers go into the 3-seed entry once Kakadu seed 2 finishes.
+
 **Limits.** n=1 seed for both rows. Same machine and batch size for the pair, so that confound is removed. One
 validation split of near-duplicate frames. Kakadu labels were merged from 23 species and only lightly audited (F13).
 Not tested on the sealed OzFish set; Orin speed unchanged from YOLOv8n (same model).
