@@ -1,0 +1,19 @@
+# Split test, arm A: Kakadu-only recipe plus OzFish train data, with the DEFAULT augmentation (nothing else changed).
+# Compare with the Kakadu-only 3-seed arm (yolov8n_960_kakadu) and with the combined recipe (yolov8n_960_all). One seed: a screen.
+name: yolov8n-960-kakadu-ozfish
+model: yolov8n.pt   # NOTE (FD-008): COCO weights are AGPL-3.0; see yolov8n_960.yaml.
+data: deepfish_kakadu_ozfish
+
+imgsz: 960
+epochs: 150
+patience: 30
+seeds: [0]
+batch: null
+workers: null
+amp: null
+close_mosaic: 10
+
+val_conf: 0.001
+val_iou: 0.7
+extra:
+  plots: true
