@@ -76,6 +76,7 @@ Last updated: 2026-10-04.
   checksum check, and the matching reassembly. Built for the 60 KB/s link; the full archive then reached the server
   another way, so they are unused for now.
 - `scripts/eval_positive_only.py` — re-scores checkpoints on the validation images that contain at least one fish (875 of 1,339), to test how much of the gap to published DeepFish numbers the empty-frame convention explains. Refuses `ozfish_eval`; workers off, so safe on Windows. See F19.
+- `scripts/audit_ozfish_overlap.py` — compares the sealed OzFish test names with the 1,758 labelled OzFish frames by video, frame and stereo deployment, and reports how many frames remain usable for training (794). Reads file names only. See `docs/data_audit.md`.
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -137,6 +138,7 @@ Last updated: 2026-10-04.
 |---|---|---|---|---|---|
 | DeepFish | train + val | 6,517 | 15,463 | 2,012 (30.9%) | 20 sites, 68 clips, median 73 consecutive frames per clip |
 | OzFish test | **sealed** cross-dataset test | 352 | 8,329 | 0 | 297 clips, mean 23.7 boxes/image, max 232 |
+| OzFish labelled frames | acquired 2026-10-05, **not yet converted or used** | 1,758 (794 usable) | 43,572 | 5 | contains the 352 sealed test frames; only the 794 frames outside the test deployments may be trained on; details in `docs/data_audit.md` |
 | Kakadu | extra **train only** (added 2026-10-04) | 44,112 (7,318 kept) | 82,904 (11,695 kept) | 0 | 23 species merged to one class; no video/site field; a held-out split inside it leaks (F13); details in `docs/data_audit.md` |
 
 Split: **5,178 train / 1,339 val** (14 / 6 sites; val sites `7398, 7623, 9862, 9870, 9892, 9898`).

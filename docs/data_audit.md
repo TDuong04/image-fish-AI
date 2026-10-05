@@ -148,6 +148,41 @@ names; Kakadu frames are, however, closer to the val frames than DeepFish train 
 
 **Not done.** No manual label audit of Kakadu; the 23-species merge was not checked for non-fish objects.
 
+## OzFish labelled training frames (acquired 2026-10-05)
+
+**Source and access.** AIMS, UWA and Curtin (2019), *OzFish Dataset*, doi 10.25845/5e28f062c5097, CC BY 3.0 AU (attribution required; converted
+labels are a derivative). The Pawsey portal page is a JavaScript app that answers 200 to any path, but its data host
+`https://data.pawsey.org.au/download/FDFML/<file>` answers 404 for paths that do not exist and 200 with the true size for ones that do
+(`labelled-zip.zip`: 2,909,975,423 bytes), supports range requests, and reached about 0.45 to 1 MB per connection from the GPU server.
+The file was placed at `data/raw/labelled-zip.zip` on the server.
+
+**Contents (read from the archive).** 1,770 members, standard deflate: 1,758 PNG frames in `labelled/frames/batch01..03` (2.87 GB), three SageMaker
+Ground Truth manifests (`labelled/manifests`, one JSON record per frame, 584 + 586 + 588 records), three species-box files, one fish-tail file, four length-measurement
+CSVs. Boxes are pixel `left/top/width/height` on 1920x1080 frames, one class (`fish`): **43,572 boxes, 5 frames with none, up to 232 in one frame.**
+The archive export appends `-N-1` to file names (`A000001_L.avi.17418.png-1-1.png`).
+
+**The sealed test set is inside it.** All 352 images of `ozfish_eval` are identical frames (same video, same frame number) of these 1,758. Training on all
+of them would train on the sealed test. `scripts/audit_ozfish_overlap.py` (reads names only) gives:
+
+| | Test set | Labelled set |
+|---|---|---|
+| Frames | 352 | 1,758 |
+| Videos | 297 | 910 |
+| Deployments (stereo `_L`/`_R` pairs merged) | 249 | 606 |
+
+- 736 labelled frames come from the 297 test videos; excluding those leaves 1,022 frames.
+- **BRUVS is filmed with stereo pairs: the `_L` and `_R` videos of one deployment show the same scene at the same moment.** Excluding the test
+  *deployments*, not just the test videos, leaves **794 frames from 357 deployments** (median 2 frames per deployment, at most 10).
+- Collections by first letter of the video id: a 343, e 266, g 1,149 frames; the test set has 79, 57 and 216.
+
+**Consequences.** (1) Only 794 frames, about 45% of the set, may be used for training if the sealed test is to stay untouched. (2) Excluding by
+deployment still does not prove different sites: one reef can appear in several deployments, so a picture-similarity leak check is required before training, as for Kakadu.
+(3) Training on these frames changes what the OzFish test measures: it becomes performance on new deployments of the same collections and
+cameras, no longer a test on an unseen kind of footage. (4) These are crowded scenes (about 25 boxes per frame), unlike DeepFish (about 2.4).
+
+**Not done.** No conversion to YOLO format yet, no leak check, no training on OzFish. A teammate extracted the archive to `data/processed/ozfish/` in its
+original folder layout (not a YOLO dataset); a second copy of frames and manifests exists at `data/interim/ozfish_labelled/` and is redundant.
+
 ## Open gaps
 
 - **Annotation quality is unmeasured** (FD-105). OzFish boxes came from
