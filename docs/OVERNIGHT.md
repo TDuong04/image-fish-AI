@@ -56,7 +56,10 @@ evaluation protocol (`docs/eval_protocol.md`); claim a comparison from fewer tha
   the run crashed (PROGRESS section 7). Rebuilt from raw with the identical split (verified against the workstation copy).
 - **The path to Zenodo from the server is slow** (about 45 KB/s) and the upload from the workstation is slow
   (about 60 KB/s). Do not plan on moving more than a few hundred MB.
-- **`data/raw/` on the server holds loose unzipped Kakadu PNGs, a JSON and `fixed-archive.zip`** from someone's
-  manual attempt. They are not used. Leave them unless asked.
+- **Housekeeping on the server (2026-10-05).** Unused files were archived with `scripts/archive_paths.py` into `data/archive/<timestamp>/` (moved, not deleted; each folder has a `MANIFEST.json`,
+  and `--restore <manifest> --yes` undoes it): our redundant OzFish copy and the leaky random-split diagnostic dataset (`20261005-173254`), the 397 loose Kakadu PNGs and a JSON that were byte-size-identical
+  copies of members of `kakadu_training_data.zip`, and our abandoned upload and download leftovers (`20261005-173255`, with `MANIFEST_loose_copies.json` rebuilt after a manifest overwrite).
+  **`data/raw/fixed-archive.zip` was left in place:** it is the same size as the Kakadu zip but a different checksum, it is not ours, and nothing uses it; ask before touching it.
+  The other project in `~/workspace` (`RL-agent-iot`) is not ours and was not touched.
 - **A held-out split inside Kakadu leaks** (PROGRESS F13). Kakadu is training data only; judge on the DeepFish
   val split (comparable with every run) and, at the end, once, on the sealed OzFish set.

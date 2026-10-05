@@ -1,0 +1,20 @@
+# YOLOv8s on the current best data recipe (DeepFish + Kakadu + OzFish train, default augmentation; F23 arm A with a larger model).
+# Compare with the YOLOv8n arm yolov8n_960_kakadu_ozfish. The automatic batch size differs between the two models (about 6 against 10),
+# so the comparison also mixes batch size. One seed: a screen. Orin latency of YOLOv8s has not been measured.
+name: yolov8s-960-kakadu-ozfish
+model: yolov8s.pt   # NOTE (FD-008): COCO weights are AGPL-3.0; see yolov8n_960.yaml.
+data: deepfish_kakadu_ozfish
+
+imgsz: 960
+epochs: 150
+patience: 30
+seeds: [0]
+batch: null
+workers: null
+amp: null
+close_mosaic: 10
+
+val_conf: 0.001
+val_iou: 0.7
+extra:
+  plots: true
