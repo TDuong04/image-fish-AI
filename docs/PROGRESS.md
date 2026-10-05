@@ -586,6 +586,8 @@ the unchanged DeepFish val split (1,339). `ai-gpu`, Ultralytics 8.4.172, early-s
 
 - **Seed spread on this machine, update (control seed 1, `20261004-yolov8n-960-s1`, batch 10, 59 epochs):** 0.4970 mAP@50 and 0.2966 mAP@50-95, against seed 0's 0.4562 and 0.2957. So with two control seeds the mAP@50 spread is 0.041 (the Kaggle 3-seed figure was 0.034) and the mAP@50-95 spread is only 0.001. Seed 1 finds 687 fish (seed 0: 648) with 525 false alarms (531). The Kakadu seed-0 score is still 0.21 above the better control seed. Kakadu seeds 1 and 2 and control seed 2 are queued.
 
+- **Kakadu seed 1 (`20261004-yolov8n-960-kakadu-s1`, batch 10, early-stopped at epoch 101, 2.42 h; analysis `runs/analysis-20261004-20261004-yolov8n-960-kakadu-s1`):** 0.6844 mAP@50, 0.4640 mAP@50-95, precision 0.776, recall 0.599. Found 839 fish (seed 0: 852), 155 false alarms (131), recall 14.3% at 16-32 px (19.8%) and 61.0% at 32-96 px (61.4%). So the Kakadu gain reproduces on a second seed: 0.684 against the matching control seed's 0.497 is +0.187 mAP@50. The 3-seed comparison follows when seed 2 of both arms finishes.
+
 **Limits.** n=1 seed for both rows. Same machine and batch size for the pair, so that confound is removed. One
 validation split of near-duplicate frames. Kakadu labels were merged from 23 species and only lightly audited (F13).
 Not tested on the sealed OzFish set; Orin speed unchanged from YOLOv8n (same model).
