@@ -15,7 +15,7 @@ Last updated: 2026-10-04.
 |---|---|
 | Environment | Working. Python 3.11 venv, torch 2.6.0+cu124, ultralytics 8.4.130, RTX 4060 Laptop 8 GB. |
 | Data | **In hand.** DeepFish (train/val), Kakadu (extra train only, F13) and an OzFish test set (sealed). The OzFish training set is reachable at a direct link (about 2.9 GB, 1,800 frames, 45k boxes) and not yet downloaded. |
-| Training | **Planned grid done** (6 runs: 3 seeds x {640, 960} px), then an improvement programme (F12 to F18): the strongest result is adding Kakadu training data, **mean mAP@50 0.698 against 0.473 for a same-machine control, 3 seeds each, on the DeepFish val split (F18)**. Not yet confirmed on the sealed OzFish set. Larger models and stronger augmentation help on one seed each (F14, F15). |
+| Training | **Planned grid done** (6 runs: 3 seeds x {640, 960} px), then an improvement programme (F12 to F18): the strongest result is adding Kakadu training data, **mean mAP@50 0.698 against 0.473 for a same-machine control, 3 seeds each, on the DeepFish val split (F18)**. Not yet confirmed on the sealed OzFish set. Larger models and stronger augmentation help on one seed each (F14, F15), and one seed of the combined recipe (Kakadu + OzFish data + augmentation) reaches 0.755 mAP@50 on the same split (F22, a screen). |
 | Evaluation | In-domain, cross-dataset (sealed OzFish), size-stratified recall, and a colour-perturbation study. |
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
@@ -706,6 +706,35 @@ saw any OzFish frame. The sealed OzFish test set was **not** used.
   and none of these models saw any BRUVS footage in training. This is the baseline against which adding OzFish training data (`ozfish_train/images/train`) is judged.
 - **Limits.** The held-out deployments are disjoint from the training deployments but one reef can span deployments, so numbers are for decisions only. 157 images; same
   seeds as F18; the OzFish-style crowded scenes differ a lot from DeepFish, so this says the gain transfers, not by how much to a new site. Not the sealed test.
+
+### F22. One seed of the combined recipe (Kakadu + OzFish data + stronger augmentation) beats every Kakadu-only seed on DeepFish val, with more false alarms at the default threshold (a screen)
+`20261005-yolov8n-960-all-s0`: YOLOv8n, seed 0, 960 px, **batch 10** (same machine and batch as the F18 arms), trained on DeepFish train (5,178) + Kakadu (7,318) + OzFish train (622) with
+the augmentation of the F14 screen (scale 0.9, hue 0.05, saturation 0.8, value 0.5); validated on the unchanged DeepFish val split; early-stopped at epoch 99 (best epoch 69) after
+2.52 h on `ai-gpu`. Analysis: `runs/analysis-20261005-20261005-yolov8n-960-all-s0`. **It changes two things at once** (the OzFish data and the augmentation), so it shows the additions
+can stack, not which one helped. **One seed: a screen, not a result.**
+
+| | Kakadu-only (3 seeds, F18) | **All-in (1 seed)** |
+|---|---|---|
+| DeepFish val mAP@50 | 0.7088, 0.6844, 0.7002 (mean 0.6978, range 0.024) | **0.7551** |
+| DeepFish val mAP@50-95 | 0.4781, 0.4640, 0.4712 (mean 0.4711, range 0.014) | **0.5228** |
+| Precision / recall (final eval) | 0.840 / 0.622, 0.776 / 0.599, 0.808 / 0.612 | 0.843 / 0.639 |
+| Fish found, of 1,385 (conf 0.25) | 852, 839, 891 | **952** |
+| False alarms (on the 464 empty frames) | 131, 155, 254 (70, 47, 88) | **508 (187)** |
+| Recall at 16-32 px / 32-96 px / above 96 px | 19.8, 14.3, 24.9% / 61.4, 61.0, 64.9% / 95.5, 96.9, 94.9% | **27.5% / 70.8% / 98.0%** |
+| Best-F1 confidence threshold on val | 0.2 to 0.25 | **0.6** |
+| Held-out OzFish deployments, mAP@50 / mAP@50-95 (F21) | 0.3483, 0.3677, 0.3548 / 0.1805, 0.1904, 0.1836 | **0.7071 / 0.3868** (P 0.829, R 0.620) |
+
+- **On DeepFish val it exceeds the Kakadu-only seed spread**: +0.057 mAP@50 over the mean and +0.046 over the best seed (the arm's range is 0.024, so 1.9 to 2.3 times it), and +0.052 mAP@50-95 over the mean
+  (3.7 times that arm's 0.014 range). It finds about 90 more fish and more small ones (16-32 px: 27.5% against 14 to 25%).
+- **It makes far more false alarms at the default threshold** (508 against 131 to 254, 187 on empty frames against 47 to 88), and the best operating threshold on val moved to 0.6. Its scores are
+  higher in the way mAP rewards (ranking) while its raw detections at 0.25 are noisier, so a deployment threshold must be chosen for it (on val, not on the sealed set).
+- **On the held-out OzFish deployments the score doubles (0.71 against 0.36)**, which is expected: it trained on OzFish deployments and Kakadu-only did not. This is **not** evidence of
+  generalising to a new reef: the held-out deployments are disjoint from the training deployments, but one reef can span deployments, so the number is optimistic (F21).
+- **Not separated:** the OzFish data and the augmentation (bundled); seed spread of this recipe (n=1); the benefit of OzFish on DeepFish val specifically (OzFish looks very different, so
+  the DeepFish-val gain probably comes mostly from the augmentation, which is untested).
+
+**Limits.** n=1 seed for the all-in arm, batch 10, one machine. DeepFish val resembles Kakadu (F13). The sealed OzFish test has **not** been run; training on OzFish changes what it measures
+(`docs/data_audit.md`). The two-model plan (a separate generalisation model without OzFish) has not been approved.
 
 ---
 
