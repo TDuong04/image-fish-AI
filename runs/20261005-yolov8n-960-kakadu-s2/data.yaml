@@ -1,0 +1,7 @@
+path: /home/developer/workspace/fish-detection/data/processed
+train:
+- deepfish/images/train
+- kakadu/images/train
+val: deepfish/images/val
+names:
+  0: fish

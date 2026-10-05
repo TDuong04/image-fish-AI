@@ -14,8 +14,8 @@ Last updated: 2026-10-04.
 | Area | State |
 |---|---|
 | Environment | Working. Python 3.11 venv, torch 2.6.0+cu124, ultralytics 8.4.130, RTX 4060 Laptop 8 GB. |
-| Data | **In hand.** DeepFish (train/val) and an OzFish test set (sealed). |
-| Training | **Done for the planned grid.** 6 converged runs: 3 seeds x {640, 960} px. |
+| Data | **In hand.** DeepFish (train/val), Kakadu (extra train only, F13) and an OzFish test set (sealed). The OzFish training set is reachable at a direct link (about 2.9 GB, 1,800 frames, 45k boxes) and not yet downloaded. |
+| Training | **Planned grid done** (6 runs: 3 seeds x {640, 960} px), then an improvement programme (F12 to F18): the strongest result is adding Kakadu training data, **mean mAP@50 0.698 against 0.473 for a same-machine control, 3 seeds each, on the DeepFish val split (F18)**. Not yet confirmed on the sealed OzFish set. Larger models and stronger augmentation help on one seed each (F14, F15). |
 | Evaluation | In-domain, cross-dataset (sealed OzFish), size-stratified recall, and a colour-perturbation study. |
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
@@ -594,6 +594,44 @@ the unchanged DeepFish val split (1,339). `ai-gpu`, Ultralytics 8.4.172, early-s
 **Limits.** n=1 seed for both rows. Same machine and batch size for the pair, so that confound is removed. One
 validation split of near-duplicate frames. Kakadu labels were merged from 23 species and only lightly audited (F13).
 Not tested on the sealed OzFish set; Orin speed unchanged from YOLOv8n (same model).
+
+### F18. Three seeds each: adding Kakadu lifts every seed far above every control seed on the DeepFish val split
+Same machine (`ai-gpu`, RTX 5060, Ultralytics 8.4.172), same batch (10), same recipe, 960 px, YOLOv8n, seeds 0, 1, 2. The only
+difference is the training data: DeepFish train (5,178) against DeepFish train plus Kakadu (7,318 frames kept, 12,496 in all).
+Both arms validate on the unchanged DeepFish val split (1,339 images, 1,385 fish). Run folders: control `20261004-yolov8n-960-s0`,
+`20261004-yolov8n-960-s1`, `20261005-yolov8n-960-s2`; Kakadu `20261004-yolov8n-960-kakadu-s0`, `20261004-yolov8n-960-kakadu-s1`,
+`20261005-yolov8n-960-kakadu-s2`. Analyses in `runs/analysis-<date>-<run>/`.
+
+| Seed | Control mAP@50 | Kakadu mAP@50 | Difference | Control mAP@50-95 | Kakadu mAP@50-95 | Difference |
+|---|---|---|---|---|---|---|
+| 0 | 0.4562 | 0.7088 | +0.2527 | 0.2957 | 0.4781 | +0.1824 |
+| 1 | 0.4970 | 0.6844 | +0.1874 | 0.2966 | 0.4640 | +0.1674 |
+| 2 | 0.4669 | 0.7002 | +0.2333 | 0.3106 | 0.4712 | +0.1606 |
+| **Mean (range)** | **0.4733 (0.041)** | **0.6978 (0.024)** | **+0.2245** | **0.3010 (0.015)** | **0.4711 (0.014)** | **+0.1701** |
+
+| At conf 0.25 | Control (3 seeds) | Kakadu (3 seeds) |
+|---|---|---|
+| Fish found, of 1,385 | 648, 687, 644 (mean 660) | 852, 839, 891 (mean 861) |
+| False alarms (on the 464 empty frames) | 531, 525, 535 (150, 219, 186) | 131, 155, 254 (70, 47, 88) |
+| Recall at 16-32 px (273 fish) | 2.6%, 2.9%, 2.6% | 19.8%, 14.3%, 24.9% (mean 19.7%) |
+| Recall at 32-96 px (746 fish) | 42.2%, 47.0%, 42.1% | 61.4%, 61.0%, 64.9% (mean 62.4%) |
+| Recall above 96 px (356 fish) | 91.6%, 92.1%, 90.7% | 95.5%, 96.9%, 94.9% |
+
+- **The difference exceeds the seed spread by a wide margin.** The weakest Kakadu seed (0.6844) is 0.187 mAP@50 above the best
+  control seed (0.4970), which is 4.6 times the control's own range (0.041); for mAP@50-95 the gap is 0.153 against a control range of 0.015.
+  All three paired differences have the same sign and similar size.
+- **It finds more fish, at every box size, and far fewer false alarms.** About 200 more fish (of 1,385), 350 fewer false alarms, and the
+  16-32 px fish, which every control and earlier variant found only 1% to 6% of, go from 2.7% to about 20%. Seed-to-seed variation within the Kakadu arm is larger
+  for the smallest fish (14% to 25%) and for false alarms (131 to 254) than within the control.
+- **Fish under 16 px (10 of them) are almost never found** (1 of 10 in one Kakadu run, 0 in every other run), **and about 80% of 16-32 px fish are still missed.**
+
+**What this does not show.** (1) Kakadu frames resemble the DeepFish val frames more than DeepFish's own train frames do (median
+thumbnail distance 13.6 against 15.7, F13), so part of this gain is training data that looks like the validation sites; it is not
+evidence that the model generalises to a new kind of footage. (2) The sealed OzFish set, the test of that, has **not** been run and
+should be run once, on the final candidate. (3) Kakadu's labels were lightly checked, not audited (F13). (4) One model size (YOLOv8n),
+one validation split of near-duplicate frames. (5) The augmentation and larger-model gains (F14, F15) were measured on one seed and
+have not been combined with Kakadu or repeated. (6) The best operating threshold on val moved to 0.2-0.25 for Kakadu models (0.5 for
+the controls); a deployment threshold must be chosen on val, not on the sealed set.
 
 ---
 

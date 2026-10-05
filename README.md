@@ -4,7 +4,9 @@ Finds fish in underwater video with a box around each one, using a model small e
 for a Jetson Orin Nano. **Status:** trained and evaluated on a desktop GPU, and running on
 a Jetson Orin Nano (8 GB) as TensorRT FP16 engines. End to end, a simple serial pipeline
 takes about 33 ms per frame at 640 px and 41 ms at 960 px, and held about 34 fps at 960 for
-30 minutes on a video clip (one run). The hardware video decoder and INT8 are not measured yet. Details: `docs/PROGRESS.md`.
+30 minutes on a video clip (one run). The hardware video decoder and INT8 are not measured yet. Adding a second training set (Kakadu)
+raised mean validation mAP@50 from 0.47 to 0.70 (3 seeds each, same machine); that validation set resembles the added data, and the
+sealed cross-dataset test has not been run yet. Details: `docs/PROGRESS.md`.
 
 ## 1. Set up (once)
 
