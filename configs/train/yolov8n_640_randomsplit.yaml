@@ -1,0 +1,20 @@
+# DIAGNOSTIC ONLY. YOLOv8n at 640 px on a random per-image split of the fish-containing DeepFish images, the
+# convention of published DeepFish results. The split leaks near-identical frames by design, so the score is inflated.
+# It exists to show how much of the gap to published numbers is the split. Never report it as a result.
+name: yolov8n-640-randomsplit
+model: yolov8n.pt   # NOTE (FD-008): COCO weights are AGPL-3.0; see yolov8n_960.yaml.
+data: deepfish_randomsplit
+
+imgsz: 640
+epochs: 150
+patience: 30
+seeds: [0]
+batch: null
+workers: null
+amp: null
+close_mosaic: 10
+
+val_conf: 0.001
+val_iou: 0.7
+extra:
+  plots: true

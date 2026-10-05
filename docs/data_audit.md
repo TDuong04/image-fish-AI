@@ -180,7 +180,7 @@ deployment still does not prove different sites: one reef can appear in several 
 (3) Training on these frames changes what the OzFish test measures: it becomes performance on new deployments of the same collections and
 cameras, no longer a test on an unseen kind of footage. (4) These are crowded scenes (about 25 boxes per frame), unlike DeepFish (about 2.4).
 
-**Not done.** No conversion to YOLO format yet, no leak check, no training on OzFish. A teammate extracted the archive to `data/processed/ozfish/` in its
+**Converted 2026-10-05** by `scripts/prepare_ozfish_train.py` into `data/processed/ozfish_train` (train only, one class, 960 px wide JPEG): 794 frames kept by deployment, **15 dropped** for being within thumbnail distance 4.0 of a sealed-test frame, leaving **779 images and 17,564 boxes** (22.5 per frame). Many boxes are tiny: examples are 6 to 12 px wide at native resolution. Leak report (nearest-neighbour thumbnail distance, kept frames): to the sealed test frames median 9.74, 15 under 4.0, 53 under 5.0; between different deployments inside the kept set median 9.33, 19 under 4.0, 62 under 5.0, so test frames are no closer to the kept frames than the kept deployments are to each other; to the DeepFish val split minimum 7.15, none under 5.0. This cannot show that a reef is not shared between deployments. **Not done:** no training on OzFish yet. A teammate extracted the archive to `data/processed/ozfish/` in its
 original folder layout (not a YOLO dataset); a second copy of frames and manifests exists at `data/interim/ozfish_labelled/` and is redundant.
 
 ## Open gaps

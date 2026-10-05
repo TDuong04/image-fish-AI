@@ -53,7 +53,7 @@ checkpoint. E4 needs the board. **E6 does not wait for anything — start FD-060
 # E0 — Unblock, decide, bootstrap
 
 ## FD-113 · OzFish acquisition sprint — parallel routes, 5-day gate · P0 · ACQUIRED, NOT YET USED **[added]**
-**Update 2026-10-05:** acquired. Direct link `https://data.pawsey.org.au/download/FDFML/labelled-zip.zip` (2.91 GB) works. 1,758 labelled frames, 43,572 boxes; the 352-frame sealed test is inside them, leaving 794 frames (357 deployments) trainable. Next: conversion to YOLO, picture-similarity leak check, then training (see `docs/data_audit.md`).
+**Update 2026-10-05:** acquired. Direct link `https://data.pawsey.org.au/download/FDFML/labelled-zip.zip` (2.91 GB) works. 1,758 labelled frames, 43,572 boxes; the 352-frame sealed test is inside them, leaving 794 frames (357 deployments) trainable. Converted and leak-checked 2026-10-05: `ozfish_train`, 779 images, 17,564 boxes (see `docs/data_audit.md`). Training on it awaits the user's go-ahead.
 **Status 2026-10-04:** the Pawsey store exists and is browsable (`labelled-zip.zip` 2.91 GB, `frames.zip` 106 GB). The AIMS record says 1800 labelled frames, ~45k boxes. Waiting on a browser-sourced download link for `labelled-zip.zip`, and on confirming it contains the images. Must exclude the sealed test frames by video. See PROGRESS section 8.
 **Why:** Every ticket in E2–E5 and the whole results half of the report is blocked on box
 training data, none is on disk, and the previously-recorded acquisition routes do not hold up
