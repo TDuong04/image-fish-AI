@@ -1,0 +1,5 @@
+path: /home/developer/workspace/fish-detection/data/processed/deepfish_randomsplit
+train: images/train
+val: images/val
+names:
+  0: fish

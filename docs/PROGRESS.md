@@ -665,6 +665,28 @@ the same checkpoints on the 875 validation images that contain fish (960 px, con
 split descriptions (one page refused access), so the "random split" point rests on the OzFish study I could read and on the standard
 practice of that literature, not on those specific papers.
 
+### F20. DIAGNOSTIC: on a random per-image split the same pipeline scores 0.98 mAP@50, so the split, not a weak model, explains our gap to published numbers
+**These numbers are inflated by construction and are not results.** `scripts/prepare_random_split.py` builds a deliberately leaky split of the DeepFish
+images that contain fish: **4,505 images and 15,463 boxes, the size of the published DeepFish detection set**, split at random per image (seed 0): 3,604 train
+(12,405 boxes), 901 val (3,058 boxes). Near-identical frames of one clip land on both sides. Same model, code and recipe as our other runs
+(YOLOv8n, COCO weights, patience 30), one seed, on `ai-gpu`.
+
+| Run | Split | Val images | mAP@50 | mAP@50-95 | P / R | Epochs |
+|---|---|---|---|---|---|---|
+| `20261005-yolov8n-640-randomsplit-s0` (batch 24, 640 px) | **random per image (leaky)** | 901 | **0.9787** | **0.6447** | 0.953 / 0.941 | 150 (hit the cap), best 139 |
+| Our controls (3 seeds, 960 px, batch 10, F18) | by site | 1,339 | 0.4733 mean (0.456 to 0.497) | 0.3010 mean | | 59 to 107 |
+| Published DeepFish YOLOv8 results (secondary sources, split not verified) | not verified | not verified | about 0.92 | not given | | |
+
+- **The 960 px diagnostic run was still training when this was written** (epoch 52, best so far 0.970 mAP@50 and 0.630 mAP@50-95); its final numbers will be added below.
+- **The split accounts for the gap, and more.** With only the split changed (and the empty frames dropped, which F19 shows is worth under 0.03), the
+  same pipeline reaches 0.979, above the published 0.92 and about 0.5 above our site-split score. It reached 0.915 by epoch 13. So the low
+  site-split numbers are not evidence of a weak model or a faulty pipeline. They reflect how much of a random split's score comes from seeing the same scene in training.
+- **What this does not show.** The published papers' own splits were not read (one page refused access), so "they used a random split" is an inference from the OzFish study I could
+  read and from common practice, not a verified fact. The 640 diagnostic and the 960 controls differ in resolution, batch size and validation set (901 fish-only images against
+  1,339), so the comparison is a diagnostic and not a like-for-like pair; one seed and one random split.
+- **Consequence for the report.** Numbers from random-split DeepFish results should not be compared with ours, and a high published DeepFish score says little about performance on a new site.
+  Our site-split score is the more honest estimate for a new deployment; the sealed OzFish set is the stricter one.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
