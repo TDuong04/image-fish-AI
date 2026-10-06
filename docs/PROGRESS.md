@@ -21,7 +21,7 @@ Last updated: 2026-10-04.
 | Demos | Three shareable pages and a runnable Gradio app. |
 | Automation | Crash-recovering supervisor and a Kaggle session runner. |
 | **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** **End to end, a serial pipeline takes about 33 ms per frame at 640 and 41 ms at 960 (about 30 and 24 fps), and a web app runs on the board** (`edge/app.py`). **A 30-minute sustained run held about 34 fps at 960 with no throttling (F9, one run, 25 W mode, ambient 26 C assumed).** Not yet measured: hardware video decode, INT8, on-device mAP, other power modes. The deployment half of the thesis is only partly answered. |
-| Report | `docs/RESEARCH.md` (2026-10-06) is the narrative of the research and methodology and the suggested next steps; `report_sections.md` still describes the older LCFCN *counting* experiment, not this work, and the final report prose is not yet written. |
+| Report | Draft started 2026-10-06 in `docs/report/` (`paper.md`, `references.bib`, `references.md`, `README.md`); sections that need F27, YOLOv8s on the Orin and the sealed test are marked pending. `docs/RESEARCH.md` (2026-10-06) is the narrative of the research and methodology and the suggested next steps; `report_sections.md` still describes the older LCFCN *counting* experiment, not this work, and the final report prose is not yet written. |
 
 ---
 
@@ -85,6 +85,7 @@ Last updated: 2026-10-04.
 - `configs/train/yolov8s_960_kakadu_ozfish.yaml`, `configs/plan_confirm.yaml` — the 3-seed confirmation of the best recipe (YOLOv8n on DeepFish + Kakadu + OzFish train, default augmentation: seeds 1 and 2) and one seed of YOLOv8s on the same data. **Queued 2026-10-05, no result yet.**
 - `scripts/eval_tiled.py` — tiled inference test: runs a checkpoint on overlapping crops plus the whole frame, merges with NMS, and scores every variant with one AP routine on the DeepFish val split (refuses the sealed OzFish set); output `tiled.json` (F25).
 - `configs/train/yolov8s_1280_kakadu_ozfish.yaml`, `configs/data/deepfish_kakadu_ozfish_1280.yaml`, `configs/plan_hires.yaml` — the 1280 px screen (queued 2026-10-06, **no result yet**): Kakadu and OzFish re-cut at 1280 px wide (same frames, groups and split: 7,318, 622 train and 157 held-out, checked) because the existing copies are 960 px wide and a 1280 run would otherwise be fed stretched images; YOLOv8s, one seed, automatic batch 3.
+- `tests/test_report.py` — keeps the report draft traceable: every finding `paper.md` cites exists in this file (except those listed as pending) and every bibliography key has a row in `docs/report/references.md`.
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -972,6 +973,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Checksums | `docs/model_manifest.json` |
 | Evaluation contract | `docs/eval_protocol.md` |
 | Research narrative, methodology, next steps | `docs/RESEARCH.md` |
+| Report draft and reference tracker | `docs/report/` |
 | Plain-language guide to the concepts and mechanisms (for the owner) | `docs/GUIDE.md` |
 | Dataset statistics | `docs/data_audit.md` |
 | Setup and training | `README.md`, `docs/TRAINING.md` |
