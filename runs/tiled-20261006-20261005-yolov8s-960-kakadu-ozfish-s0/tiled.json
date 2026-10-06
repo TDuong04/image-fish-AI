@@ -1,0 +1,151 @@
+{
+  "model": "20261005-yolov8s-960-kakadu-ozfish-s0.pt",
+  "data": "deepfish",
+  "split": "val",
+  "images": 1339,
+  "imgsz": 960,
+  "operating_conf": 0.25,
+  "nms_iou": 0.7,
+  "overlap": 0.2,
+  "edge_drop_px": 4,
+  "device": "cuda (NVIDIA GeForce RTX 4060 Laptop GPU, 8.0 GB)",
+  "date_utc": "2026-10-06T01:57:08+00:00",
+  "variants": {
+    "full": {
+      "map50": 0.8167,
+      "map50_95": 0.5556,
+      "found": 1004,
+      "gt_boxes": 1385,
+      "false_alarms": 123,
+      "false_alarms_on_empty_frames": 24,
+      "recall_by_size_at_640_input": {
+        "<16": 0.0,
+        "16-32": 0.2637,
+        "32-96": 0.7748,
+        ">96": 0.9944
+      },
+      "seconds_per_frame_this_machine": 0.01
+    },
+    "2x2": {
+      "map50": 0.5963,
+      "map50_95": 0.3575,
+      "found": 803,
+      "gt_boxes": 1385,
+      "false_alarms": 314,
+      "false_alarms_on_empty_frames": 76,
+      "recall_by_size_at_640_input": {
+        "<16": 0.0,
+        "16-32": 0.2747,
+        "32-96": 0.6823,
+        ">96": 0.6152
+      },
+      "seconds_per_frame_this_machine": 0.032
+    },
+    "2x2+full": {
+      "map50": 0.7906,
+      "map50_95": 0.5441,
+      "found": 1085,
+      "gt_boxes": 1385,
+      "false_alarms": 459,
+      "false_alarms_on_empty_frames": 98,
+      "recall_by_size_at_640_input": {
+        "<16": 0.0,
+        "16-32": 0.3736,
+        "32-96": 0.8432,
+        ">96": 0.9944
+      },
+      "seconds_per_frame_this_machine": 0.042
+    },
+    "3x3": {
+      "map50": 0.3655,
+      "map50_95": 0.192,
+      "found": 507,
+      "gt_boxes": 1385,
+      "false_alarms": 444,
+      "false_alarms_on_empty_frames": 103,
+      "recall_by_size_at_640_input": {
+        "<16": 0.0,
+        "16-32": 0.2601,
+        "32-96": 0.4987,
+        ">96": 0.1798
+      },
+      "seconds_per_frame_this_machine": 0.131
+    },
+    "3x3+full": {
+      "map50": 0.7843,
+      "map50_95": 0.5488,
+      "found": 1080,
+      "gt_boxes": 1385,
+      "false_alarms": 611,
+      "false_alarms_on_empty_frames": 127,
+      "recall_by_size_at_640_input": {
+        "<16": 0.0,
+        "16-32": 0.3883,
+        "32-96": 0.8311,
+        ">96": 0.9944
+      },
+      "seconds_per_frame_this_machine": 0.141
+    },
+    "2x2_keepedges": {
+      "map50": 0.6061,
+      "map50_95": 0.3442,
+      "found": 970,
+      "gt_boxes": 1385,
+      "false_alarms": 737,
+      "false_alarms_on_empty_frames": 100,
+      "recall_by_size_at_640_input": {
+        "<16": 0.0,
+        "16-32": 0.2747,
+        "32-96": 0.7534,
+        ">96": 0.9354
+      },
+      "seconds_per_frame_this_machine": 0.032
+    },
+    "2x2_keepedges+full": {
+      "map50": 0.7124,
+      "map50_95": 0.4876,
+      "found": 1086,
+      "gt_boxes": 1385,
+      "false_alarms": 910,
+      "false_alarms_on_empty_frames": 122,
+      "recall_by_size_at_640_input": {
+        "<16": 0.0,
+        "16-32": 0.3736,
+        "32-96": 0.8445,
+        ">96": 0.9944
+      },
+      "seconds_per_frame_this_machine": 0.042
+    },
+    "3x3_keepedges": {
+      "map50": 0.3836,
+      "map50_95": 0.1875,
+      "found": 730,
+      "gt_boxes": 1385,
+      "false_alarms": 1332,
+      "false_alarms_on_empty_frames": 126,
+      "recall_by_size_at_640_input": {
+        "<16": 0.0,
+        "16-32": 0.2601,
+        "32-96": 0.6555,
+        ">96": 0.4775
+      },
+      "seconds_per_frame_this_machine": 0.131
+    },
+    "3x3_keepedges+full": {
+      "map50": 0.704,
+      "map50_95": 0.5011,
+      "found": 1087,
+      "gt_boxes": 1385,
+      "false_alarms": 1588,
+      "false_alarms_on_empty_frames": 150,
+      "recall_by_size_at_640_input": {
+        "<16": 0.0,
+        "16-32": 0.3883,
+        "32-96": 0.8405,
+        ">96": 0.9944
+      },
+      "seconds_per_frame_this_machine": 0.141
+    }
+  },
+  "note": "AP here is a 101-point pooled AP shared by all rows, close to but not identical to Ultralytics' mAP. Seconds per frame are from this machine, not the Orin. Frames from one video are near-duplicates: descriptive, not independent samples."
+}

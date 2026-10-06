@@ -80,6 +80,7 @@ corrections are kept in a table (§6 there), not overwritten.
 | More data | Kakadu | the biggest lever: 0.698 vs 0.473 mAP@50, 3 seeds each (F17, F18); holds on unseen OzFish deployments (F21) |
 | OzFish data | add the labelled OzFish frames | +0.052 mAP@50 over Kakadu-only on three seeds (F22 to F24); held-out OzFish 0.689 vs 0.357 |
 | Model size on combined data | YOLOv8s | best accuracy so far: 0.821 mAP@50, 0.562 mAP@50-95, one seed, batch 5 (F24); Orin latency unmeasured |
+| Small fish at inference | tile the frame and merge | finds +8% fish and lifts 16-32 px recall from 26% to 37-39%, but false alarms rise 3.7-5x and AP50 falls 0.817 to 0.78-0.79, at 5-10x the compute (F25); not a gain as it stands |
 
 ## 5. What the evidence supports
 
@@ -107,8 +108,7 @@ In order of value for the report:
    power mode). Needs the board online. Decides whether the accuracy gain is deployable.
 2. **Two more YOLOv8s seeds** at the same batch (about 3.5 h each) to turn the one-seed lead into a confirmed one.
 3. **Run the sealed OzFish test once** on the chosen final model, after steps 1 and 2. The owner decides the timing.
-4. **Small-fish test**: tiled or higher-resolution inference on the best model, since recall for 16 to 32 px fish is the
-   weakest point.
+4. **Small fish** (tiling was tried and did not help, F25): a merge rule that keeps only small tile boxes, or a model trained at higher resolution or on tiles, are untried; any rule chosen on DeepFish val needs a fresh split to confirm.
 5. **Decide the licence question** (will any copy of software or weights leave the institution?). If yes, the AGPL
    encumbrance on Ultralytics weights means YOLOX-nano or NanoDet-Plus.
 6. **Write the report** from this file, `docs/PROGRESS.md` and `docs/eval_protocol.md`; `report_sections.md` is the

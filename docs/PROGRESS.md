@@ -83,6 +83,7 @@ Last updated: 2026-10-04.
 - `configs/train/yolov8n_960_kakadu_ozfish.yaml`, `yolov8n_960_kakadu_aug.yaml`, `configs/plan_split.yaml` — the split test of the combined recipe (F22): Kakadu + OzFish data with default augmentation, and Kakadu data with the stronger augmentation, one seed each, so the two changes of F22 can be told apart. **Queued 2026-10-05, no result yet.**
 - `scripts/archive_paths.py` — archives files we no longer use on a shared machine: moves (a rename on the same disk), never deletes or compresses, writes a `MANIFEST.json` that can undo every move, defaults to a dry run, and refuses the datasets, raw archives and interim sources the project depends on and paths outside `DATA_ROOT` without `--allow-outside`. Two runs in the same second get separate folders (a first version let the second overwrite the first's manifest; see section 7).
 - `configs/train/yolov8s_960_kakadu_ozfish.yaml`, `configs/plan_confirm.yaml` — the 3-seed confirmation of the best recipe (YOLOv8n on DeepFish + Kakadu + OzFish train, default augmentation: seeds 1 and 2) and one seed of YOLOv8s on the same data. **Queued 2026-10-05, no result yet.**
+- `scripts/eval_tiled.py` — tiled inference test: runs a checkpoint on overlapping crops plus the whole frame, merges with NMS, and scores every variant with one AP routine on the DeepFish val split (refuses the sealed OzFish set); output `tiled.json` (F25).
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -801,6 +802,30 @@ Orin already measured). The choice between them waits for YOLOv8s Orin timing an
 
 **Not shown.** Seed spread of the YOLOv8s arm (n=1) and any effect of its different batch size; Orin latency of YOLOv8s; generalisation to a new reef (the held-out OzFish deployments may share reefs with the training ones); DeepFish val resembles Kakadu (F13);
 the **sealed OzFish test has not been run**, and training on OzFish changed what it measures; a bigger model with the OzFish data was not run for YOLOv8m or YOLO11s.
+
+### F25. Tiled inference finds more small fish but adds more false alarms than fish, so the score falls (one checkpoint, DeepFish val)
+**Setup.** `scripts/eval_tiled.py` on the YOLOv8s checkpoint of F24 (`20261005-yolov8s-960-kakadu-ozfish-s0`, no retraining), DeepFish val (1,339 frames of 1920x1080), imgsz 960 per tile, 20% tile overlap, NMS IoU 0.7, operating
+conf 0.25. One AP routine scores every row, so the untiled row is a same-script control: it gives 0.8167 AP50 against Ultralytics' 0.8209 (the 101-point pooled AP is close to, not identical to, Ultralytics' mAP).
+Output: `runs/tiled-20261006-20261005-yolov8s-960-kakadu-ozfish-s0/tiled.json`. Tile boxes touching an inner tile edge are dropped (a cut fish gives a partial box); "keepedges" rows keep them.
+
+| Variant | AP50 | AP50-95 | Fish found (of 1,385) | False alarms (on empty frames) | Recall 16-32 px / 32-96 px |
+|---|---|---|---|---|---|
+| **Whole frame (control)** | **0.8167** | **0.5556** | 1,004 | **123 (24)** | 26.4% / 77.5% |
+| 2x2 tiles only | 0.5963 | 0.3575 | 803 | 314 | 27.5% / 68.2% |
+| 2x2 tiles + whole frame | 0.7906 | 0.5441 | 1,085 | 459 (98) | 37.4% / 84.3% |
+| 3x3 tiles only | 0.3655 | 0.1920 | 507 | 444 | 26.0% / 49.9% |
+| 3x3 tiles + whole frame | 0.7843 | 0.5488 | 1,080 | 611 (127) | 38.8% / 83.1% |
+| 2x2 + whole frame, edge boxes kept | 0.7124 | 0.4876 | 1,086 | 910 | 37.4% / 84.5% |
+| 3x3 + whole frame, edge boxes kept | 0.7040 | 0.5011 | 1,087 | 1,588 | 38.8% / 84.0% |
+
+- **Tiling does find more fish where it was meant to.** Adding tiles to the whole frame finds 76 to 81 more fish (+8%), and recall on 16-32 px fish rises from 26% to 37 to 39% and on 32-96 px fish from 77% to 83 to 84%. Fish above 96 px are unchanged (99.4%) and fish under 16 px are still not found (0%).
+- **It pays for that in false alarms, and the net score falls.** False alarms at conf 0.25 rise 3.7x to 5x (123 to 459 and 611), including on empty frames (24 to 98 and 127), and AP50 drops by 0.026 to 0.033 and AP50-95 by 0.007 to 0.011. AP is threshold-free, so a different confidence cut does not rescue it; no tiled variant beats the whole-frame control.
+- **Tiles alone are much worse** (AP50 0.60 and 0.37): each tile is magnified so large fish are cut and look unlike the training scale, and the whole frame is needed to anchor them.
+- **The edge-box rule matters a great deal** (false alarms 459 against 910 for 2x2 + whole frame) and was needed to get even this far; whether a smarter merge (for example accepting only small tile boxes, or a higher confidence floor for tile boxes) turns the +81 fish into a net gain was **not tried**, and choosing such a rule on this split would be tuning on the validation set, so it would need a fresh screen and a different split to confirm.
+- **Cost.** 2x2 + whole frame sends 5 images through the network per frame and 3x3 + whole frame 10, so on the Orin the GPU stage alone would be about 5x to 10x. Not measured there (the Nano is offline); seconds per frame in the JSON come from the workstation and say nothing about the Orin.
+
+**Verdict.** On this checkpoint and this split, plain tiled inference does not improve detection quality: it trades 8% more fish found for several times the false alarms, at 5x to 10x the compute. It is not worth deploying as it stands.
+**Limits.** One checkpoint, one seed, one split of near-duplicate frames; fixed tiling and overlap with no sweep; DeepFish val has few fish under 32 px (the 16-32 px bucket is a few hundred boxes), so the recall gains are real but their size is imprecise; no result on OzFish (sealed or held-out).
 
 ---
 
