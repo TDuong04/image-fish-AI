@@ -827,6 +827,26 @@ Output: `runs/tiled-20261006-20261005-yolov8s-960-kakadu-ozfish-s0/tiled.json`. 
 **Verdict.** On this checkpoint and this split, plain tiled inference does not improve detection quality: it trades 8% more fish found for several times the false alarms, at 5x to 10x the compute. It is not worth deploying as it stands.
 **Limits.** One checkpoint, one seed, one split of near-duplicate frames; fixed tiling and overlap with no sweep; DeepFish val has few fish under 32 px (the 16-32 px bucket is a few hundred boxes), so the recall gains are real but their size is imprecise; no result on OzFish (sealed or held-out).
 
+### F26. A small-box merge for tiled inference also does not beat the whole frame (four rules fixed in advance, all reported)
+**Setup.** The merge rule F25 left untried: keep a tile box only if the fish is small (sqrt of box area at most 32 px as seen at 640 input, the existing bucket scale), optionally also requiring confidence of at least 0.4 on tile boxes,
+then merge with the whole-frame boxes by NMS. Four variants (2x2 and 3x3 tiling, with and without the 0.4 floor) were **fixed before the run and all are reported; none was chosen on this split**. Same checkpoint, split, imgsz and scoring as F25.
+Output: `runs/tiled-20261006-smallbox-20261005-yolov8s-960-kakadu-ozfish-s0/tiled.json` (it also repeats the F25 rows).
+
+| Variant | AP50 | AP50-95 | Fish found (of 1,385) | False alarms | Recall 16-32 px |
+|---|---|---|---|---|---|
+| **Whole frame (control)** | **0.8167** | **0.5556** | 1,004 | **123** | 26.4% |
+| 2x2, small tile boxes only | 0.8014 | 0.5493 | 1,025 | 236 | 33.0% |
+| 2x2, small tile boxes, tile conf >= 0.4 | 0.8120 | 0.5537 | 1,019 | 181 | 31.1% |
+| 3x3, small tile boxes only | 0.7850 | 0.5420 | 1,041 | 363 | 35.2% |
+| 3x3, small tile boxes, tile conf >= 0.4 | 0.8098 | 0.5540 | 1,034 | 223 | 34.4% |
+
+- **Restricting tiles to small boxes recovers most of the loss but not all of it.** The best variant (2x2 with the floor) is 0.005 AP50 and 0.002 AP50-95 below the whole frame, while finding 15 more fish and adding 58 false alarms. No variant is above the control on either score, and the gaps are within what a single split of near-duplicate frames can hide, so the fair reading is "no gain", not "a small loss".
+- **Small fish are the part tiling helps, and it is not enough.** 16-32 px recall rises from 26% to 31-35%, but the extra fish arrive with roughly as many extra false alarms.
+- **Not tried:** training at a higher resolution or on tiles (the model has never seen magnified fish at tile scale), or a tuned rule on a second split. Any rule chosen after seeing this table would be tuned on this split and would need a fresh one to confirm.
+- **Limits.** One checkpoint, one split, workstation, no Orin timing; the cost is still 5 to 10 images per frame.
+
+**Verdict.** Tiled inference, with or without a small-box merge, does not improve detection on this benchmark. It is dropped as a route to better accuracy for now.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them

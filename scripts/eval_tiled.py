@@ -132,6 +132,11 @@ def main() -> int:
     ap.add_argument("--overlap", type=float, default=0.2, help="fraction of a tile shared with its neighbour")
     ap.add_argument("--edge-drop", type=int, default=4, help="drop tile boxes within N px of an inner tile edge")
     ap.add_argument("--grids", nargs="+", default=["2x2", "3x3"], help="COLSxROWS tilings to try")
+    ap.add_argument("--tile-max-size", type=float, nargs="+", default=[32.0],
+                    help="small-box merge: keep a tile box only if its size (sqrt of area, as seen at 640 input, the "
+                         "bucket scale of error_analysis) is at most this; fixed in advance, every value is reported")
+    ap.add_argument("--tile-min-conf", type=float, nargs="+", default=[0.0, 0.4],
+                    help="small-box merge: also require this confidence for tile boxes (0 = no floor)")
     ap.add_argument("--limit", type=int, default=0, help="only the first N images (smoke test)")
     ap.add_argument("--out", type=Path, default=None)
     args = ap.parse_args()
@@ -204,10 +209,27 @@ def main() -> int:
                                      for (b, c), (fb, fc) in zip(pred[s], pred["full"])]
             secs[s + "+full"] = secs[s] + secs["full"]
 
+    n_rule = 0
+    for s in [x for x in sets if not x.endswith("_keepedges")]:
+        if s == "full":
+            continue
+        for cap in args.tile_max_size:
+            for floor in args.tile_min_conf:
+                name = f"{s}+full_small<={cap:g}_conf>={floor:g}"
+                per = []
+                for (tb, tc), (fb, fc), (w, h) in zip(pred[s], pred["full"], sizes_wh):
+                    side = np.sqrt(np.clip((tb[:, 2] - tb[:, 0]) * (tb[:, 3] - tb[:, 1]), 0, None)) * 640.0 / max(w, h)
+                    ok = (side <= cap) & (tc >= floor)
+                    per.append(nms(np.concatenate([tb[ok], fb]), np.concatenate([tc[ok], fc]), args.nms_iou))
+                variants[name] = per
+                secs[name] = secs[s] + secs["full"]
+                n_rule += 1
+    print(f"{n_rule} small-box merge variants scored (all reported; none chosen on this split)")
+
     report = {
         "model": args.model.name, "data": args.data, "split": args.split, "images": len(images),
         "imgsz": args.imgsz, "operating_conf": args.conf, "nms_iou": args.nms_iou, "overlap": args.overlap,
-        "edge_drop_px": args.edge_drop, "device": str(device),
+        "edge_drop_px": args.edge_drop, "tile_max_size": args.tile_max_size, "tile_min_conf": args.tile_min_conf, "device": str(device),
         "date_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "variants": {}, "note": "AP here is a 101-point pooled AP shared by all rows, close to but not identical to "
                                 "Ultralytics' mAP. Seconds per frame are from this machine, not the Orin. Frames from one "
