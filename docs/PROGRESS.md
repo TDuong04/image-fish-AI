@@ -15,7 +15,7 @@ Last updated: 2026-10-04.
 |---|---|
 | Environment | Working. Python 3.11 venv, torch 2.6.0+cu124, ultralytics 8.4.130, RTX 4060 Laptop 8 GB. |
 | Data | **In hand.** DeepFish (train/val), Kakadu (extra train only, F13) and an OzFish test set (sealed). The OzFish training set is reachable at a direct link (about 2.9 GB, 1,800 frames, 45k boxes) and not yet downloaded. |
-| Training | **Planned grid done** (6 runs: 3 seeds x {640, 960} px), then an improvement programme (F12 to F18): the strongest result is adding Kakadu training data, **mean mAP@50 0.698 against 0.473 for a same-machine control, 3 seeds each, on the DeepFish val split (F18)**. Not yet confirmed on the sealed OzFish set. Larger models and stronger augmentation help on one seed each (F14, F15), and one seed of the combined recipe (Kakadu + OzFish data + augmentation) reaches 0.755 mAP@50 on the same split (F22, a screen); the split test (F23) attributes that gain to the OzFish data, not the augmentation (0.764 with default augmentation, 0.698 for augmentation alone, one seed each). |
+| Training | **Planned grid done** (6 runs: 3 seeds x {640, 960} px), then an improvement programme (F12 to F18): the strongest result is adding Kakadu training data, **mean mAP@50 0.698 against 0.473 for a same-machine control, 3 seeds each, on the DeepFish val split (F18)**. Not yet confirmed on the sealed OzFish set. Larger models and stronger augmentation help on one seed each (F14, F15), and one seed of the combined recipe (Kakadu + OzFish data + augmentation) reaches 0.755 mAP@50 on the same split (F22, a screen); the split test (F23) attributes that gain to the OzFish data, not the augmentation (0.764 with default augmentation, 0.698 for augmentation alone, one seed each); on three seeds the OzFish-data recipe reaches 0.750 mAP@50 (F24), and YOLOv8s on the same data 0.821 (one seed, Orin latency unmeasured). |
 | Evaluation | In-domain, cross-dataset (sealed OzFish), size-stratified recall, and a colour-perturbation study. |
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
@@ -770,6 +770,37 @@ combined recipe `20261005-yolov8n-960-all-s0` (F22). Analyses in `runs/analysis-
 
 **Limits.** One seed for arms A and B and the combined recipe; the effects are large against the Kakadu-only spread (OzFish) or zero (augmentation), but each new arm has no seed spread of its own. Held-out OzFish deployments may share reefs with
 training deployments, so those scores are optimistic. DeepFish val resembles Kakadu (F13), although OzFish train frames are far from it (nearest distance 7.15). The sealed OzFish test has **not** been run.
+
+### F24. The OzFish effect holds on three seeds; YOLOv8s on the same data is the most accurate model so far (one seed, speed on the Orin unmeasured)
+**Arm A on three seeds**: YOLOv8n, DeepFish + Kakadu + OzFish train data, default augmentation, `ai-gpu`, batch 10, 960 px, validated on DeepFish val; runs `20261005-yolov8n-960-kakadu-ozfish-s0`,
+`20261005-yolov8n-960-kakadu-ozfish-s1`, `20261005-yolov8n-960-kakadu-ozfish-s2`. **YOLOv8s** on the same data and recipe: `20261005-yolov8s-960-kakadu-ozfish-s0` (seed 0, **batch 5**, early-stopped at epoch 71,
+best 41, 3.54 h at 179 s per epoch; YOLOv8n took about 1.5 minutes per epoch). Analyses in `runs/analysis-<date>-<run>/`. Held-out OzFish = the 157 held-out deployments of F21.
+
+| | DeepFish-only control (3 seeds) | Kakadu-only (3 seeds) | **Arm A: YOLOv8n + OzFish (3 seeds)** | **YOLOv8s + OzFish (1 seed)** |
+|---|---|---|---|---|
+| DeepFish val mAP@50 | 0.4733 (0.456 to 0.497) | 0.6978 (0.684 to 0.709) | **0.7499** (0.7402, 0.7454, 0.7640; range 0.024) | **0.8209** |
+| DeepFish val mAP@50-95 | 0.3010 | 0.4711 (0.464 to 0.478) | **0.5142** (0.5007, 0.5158, 0.5260; range 0.025) | **0.5624** |
+| Fish found, of 1,385 (conf 0.25) | 660 | 861 (839 to 891) | 910 (897, 906, 928) | **1,004** |
+| False alarms at conf 0.25 (on empty frames) | 530 | 180 (131 to 254) | **269 (155, 175, 477)** | **122 (24)** |
+| Recall 16-32 px / 32-96 px / above 96 px | 2.7% / 43.8% / 91.5% | 19.7% / 62.4% / 95.8% | 15.0% / 69.9% / 97.9% | **26.4% / 77.5% / 99.4%** |
+| Best-F1 confidence on val | 0.5 | 0.2 to 0.25 | 0.2, 0.4, 0.25 | 0.25 |
+| Held-out OzFish mAP@50 / mAP@50-95 | 0.2562 / 0.1219 | 0.3569 / 0.1848 | **0.6887 / 0.3745** (0.686, 0.682, 0.698) | **0.7242 / 0.3976** |
+
+- **The OzFish effect holds on three seeds.** The weakest arm-A seed (0.7402) is above the best Kakadu-only seed (0.7088), by 1.3 times that arm's 0.024 range; the mean gain is **+0.052 mAP@50 and +0.043 mAP@50-95**, about 49 more fish
+  found, and on the held-out OzFish deployments +0.33 mAP@50 (0.689 against 0.357). The single-seed estimate of +0.066 (F23) was a little high.
+- **False alarms at conf 0.25 and the best threshold vary a lot between seeds** (arm A: 155, 175, 477; best-F1 threshold 0.2 to 0.4; the Kakadu-only seeds ranged 131 to 254). A model's operating threshold must be chosen on validation for
+  that model, and no false-alarm figure from one seed should be quoted as a property of a recipe.
+- **YOLOv8s on the same data is the best model by every accuracy measure here**: +0.071 mAP@50 and +0.048 mAP@50-95 over the arm-A mean (+0.057 over its best seed, 2.4 times arm A's 0.024 range), 94 more fish found, the fewest false alarms of
+  the combined-data models (122, 24 on empty frames), 26.4% of 16-32 px fish and 77.5% of 32-96 px fish, and +0.036 mAP@50 on the held-out OzFish deployments (0.724).
+- **What the larger model costs.** About 3 times the compute per image, 2 times the training time per epoch at half the batch size (5 against 10, so this comparison also mixes batch size), and an unmeasured latency on the Orin.
+  **The Nano is offline, so YOLOv8s has not been timed.** In the end-to-end measurement of F8 the YOLOv8n GPU stage was about 14 ms of 41 ms per frame at 960 px with the CPU stages dominating, so a larger GPU stage may still be
+  affordable; that is a hypothesis and not a measurement, and a model that cannot hold the frame rate does not count for this project.
+
+**Best model by evidence.** On accuracy, YOLOv8s trained on DeepFish + Kakadu + OzFish train data with default augmentation (one seed). On what is confirmed **and** deployable, YOLOv8n trained on the same data (three seeds, speed on the
+Orin already measured). The choice between them waits for YOLOv8s Orin timing and, ideally, more YOLOv8s seeds.
+
+**Not shown.** Seed spread of the YOLOv8s arm (n=1) and any effect of its different batch size; Orin latency of YOLOv8s; generalisation to a new reef (the held-out OzFish deployments may share reefs with the training ones); DeepFish val resembles Kakadu (F13);
+the **sealed OzFish test has not been run**, and training on OzFish changed what it measures; a bigger model with the OzFish data was not run for YOLOv8m or YOLO11s.
 
 ---
 
