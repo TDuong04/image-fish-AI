@@ -1,0 +1,12 @@
+# Same three sources as deepfish_kakadu_ozfish, but Kakadu and OzFish frames re-cut at 1280 px wide instead of 960
+# (scripts/prepare_kakadu.py and prepare_ozfish_train.py with --max-side 1280, into kakadu_1280 and ozfish_train_1280; same
+# frames, same groups, same split), so a 1280 px training run is not fed 960 px images stretched up. DeepFish stays native (1920x1080).
+# Validation is the same DeepFish val split as every other run. The sealed OzFish test is not used.
+path: processed
+train:
+  - deepfish/images/train
+  - kakadu_1280/images/train
+  - ozfish_train_1280/images/train
+val: deepfish/images/val
+names:
+  0: fish

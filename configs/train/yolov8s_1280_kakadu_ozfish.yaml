@@ -1,0 +1,21 @@
+# F27 screen: does training and validating at 1280 px (instead of 960) raise recall on small fish? Same model, data and recipe as
+# yolov8s_960_kakadu_ozfish, with the Kakadu/OzFish frames re-cut at 1280 (data deepfish_kakadu_ozfish_1280). One seed: a screen.
+# The automatic batch size will be smaller than the 960 run (5), so the comparison also mixes batch size, and training is slower.
+# Orin latency at 1280 has not been measured.
+name: yolov8s-1280-kakadu-ozfish
+model: yolov8s.pt   # NOTE (FD-008): COCO weights are AGPL-3.0; see yolov8n_960.yaml.
+data: deepfish_kakadu_ozfish_1280
+
+imgsz: 1280
+epochs: 150
+patience: 30
+seeds: [0]
+batch: null
+workers: null
+amp: null
+close_mosaic: 10
+
+val_conf: 0.001
+val_iou: 0.7
+extra:
+  plots: true

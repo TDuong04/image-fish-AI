@@ -1,0 +1,15 @@
+# F27: re-cut Kakadu and OzFish at 1280 px, then one seed of YOLOv8s at 1280 on the combined data.
+# Run with: FISH_ENV=aigpu python scripts/queue_runner.py configs/plan_hires.yaml
+steps:
+  - name: prep-kakadu-1280
+    skip_if: "data/processed/kakadu_1280/labels/train/*.txt"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/prepare_kakadu.py", "--out", "data/processed/kakadu_1280", "--max-per-group", "15", "--max-side", "1280"]
+  - name: prep-ozfish-1280
+    skip_if: "data/processed/ozfish_train_1280/labels/train/*.txt"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/prepare_ozfish_train.py", "--out", "data/processed/ozfish_train_1280", "--max-side", "1280", "--val-frac", "0.2", "--drop-below", "4.0"]
+  - name: v8s-1280
+    skip_if: "runs/2026100[6-9]-yolov8s-1280-kakadu-ozfish-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8s_1280_kakadu_ozfish", "--seed", "0", "--resume"]
