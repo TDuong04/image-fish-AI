@@ -972,6 +972,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Checksums | `docs/model_manifest.json` |
 | Evaluation contract | `docs/eval_protocol.md` |
 | Research narrative, methodology, next steps | `docs/RESEARCH.md` |
+| Plain-language guide to the concepts and mechanisms (for the owner) | `docs/GUIDE.md` |
 | Dataset statistics | `docs/data_audit.md` |
 | Setup and training | `README.md`, `docs/TRAINING.md` |
 | Tickets | `docs/tickets/BACKLOG.md` |

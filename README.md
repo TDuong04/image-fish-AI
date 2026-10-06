@@ -103,6 +103,7 @@ but the validation split resembles it, so treat that as unproven until the seale
 |---|---|
 | `docs/PROGRESS.md` | **Start here** — what was built, every result, every correction, what is open |
 | `docs/TRAINING.md` | You want the long version of training |
+| `docs/GUIDE.md` | You want to understand what everything is and how it works, from the basics |
 | `docs/RESEARCH.md` | The research story, methodology and suggested next steps |
 | `docs/eval_protocol.md` | **Before quoting any number** |
 | `docs/data_audit.md` | You want to know what is in the data |
