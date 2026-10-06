@@ -240,10 +240,9 @@ Tiling finds 8% more fish and raises recall for 16-32 px fish from 26% to 37 to 
 times and AP falls; restricting tile boxes to small fish recovers most of the loss but no variant beats the whole frame.
 It also costs 5 to 10 network passes per frame. One checkpoint, one split, fixed tilings.
 
-### 5.7 Higher input resolution **[PENDING: F27]**
+### 5.7 Higher input resolution (F27)
 
-A YOLOv8s run at 1280 px, with the Kakadu and OzFish frames re-cut at 1280 px so that they are not up-scaled from 960, tests
-whether more pixels per fish raise small-fish recall. One seed; a screen. **[Insert result and comparison with the 960 run.]**
+A YOLOv8s run at 1280 px, with the Kakadu and OzFish frames re-cut at 1280 px so that they are not up-scaled from 960, tests whether more pixels per fish raise small-fish recall. They did not: recall on 16-32 px fish was 24.5% against 26.4% for the 960 px model (fish under 16 px: 0 of 10 in both), the number of fish found was the same (1,009 against 1,004), DeepFish validation mAP@50 was 0.785 against 0.821 (mAP@50-95 0.555 against 0.562), and false alarms at the default threshold were higher (344 against 122; the best-F1 confidence moved from 0.25 to 0.5). On held-out OzFish the 1280 px model scored slightly higher (0.736 against 0.724 mAP@50), similar in size to the seed spread of the YOLOv8n arm. One seed each and different batch sizes (3 against 5), so this is a screen; training took 1.7 times longer per epoch.
 
 ### 5.8 Device measurements on the Jetson Orin Nano (F6 to F9)
 
@@ -268,8 +267,7 @@ engine for the YOLOv8s model, the combined-data models or 1280 px (**[PENDING: b
 **What limits accuracy.** Our evidence points to data diversity and fish size rather than the detector design.
 Adding two openly licensed datasets raised mAP@50 on a site-held-out split from 0.47 to 0.75 (F24), more than
 resolution (+0.09), augmentation (none after data), or test-time tiling (negative). The remaining misses are mostly
-small and faint fish, so small-object methods that change training (higher resolution, **[F27]**) remain the open
-route, whereas test-time tiling trades more fish found for more false alarms.
+small and faint fish, so neither test-time tiling (more fish found for more false alarms) nor training at a higher resolution (no gain, F27) fixed them, so more data that contains small, hard fish is the more likely route.
 
 **Why our scores sit below published figures.** The same pipeline scores 0.98 mAP@50 on a random per-image split
 (F20). Published results may use random per-image splits or other protocols, which we could not verify, so the

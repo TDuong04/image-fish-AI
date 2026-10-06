@@ -84,7 +84,7 @@ Last updated: 2026-10-04.
 - `scripts/archive_paths.py` — archives files we no longer use on a shared machine: moves (a rename on the same disk), never deletes or compresses, writes a `MANIFEST.json` that can undo every move, defaults to a dry run, and refuses the datasets, raw archives and interim sources the project depends on and paths outside `DATA_ROOT` without `--allow-outside`. Two runs in the same second get separate folders (a first version let the second overwrite the first's manifest; see section 7).
 - `configs/train/yolov8s_960_kakadu_ozfish.yaml`, `configs/plan_confirm.yaml` — the 3-seed confirmation of the best recipe (YOLOv8n on DeepFish + Kakadu + OzFish train, default augmentation: seeds 1 and 2) and one seed of YOLOv8s on the same data. **Queued 2026-10-05, no result yet.**
 - `scripts/eval_tiled.py` — tiled inference test: runs a checkpoint on overlapping crops plus the whole frame, merges with NMS, and scores every variant with one AP routine on the DeepFish val split (refuses the sealed OzFish set); output `tiled.json` (F25).
-- `configs/train/yolov8s_1280_kakadu_ozfish.yaml`, `configs/data/deepfish_kakadu_ozfish_1280.yaml`, `configs/plan_hires.yaml` — the 1280 px screen (queued 2026-10-06, **no result yet**): Kakadu and OzFish re-cut at 1280 px wide (same frames, groups and split: 7,318, 622 train and 157 held-out, checked) because the existing copies are 960 px wide and a 1280 run would otherwise be fed stretched images; YOLOv8s, one seed, automatic batch 3.
+- `configs/train/yolov8s_1280_kakadu_ozfish.yaml`, `configs/data/deepfish_kakadu_ozfish_1280.yaml`, `configs/plan_hires.yaml` — the 1280 px screen (queued 2026-10-06; result in F27: no gain in small-fish recall): Kakadu and OzFish re-cut at 1280 px wide (same frames, groups and split: 7,318, 622 train and 157 held-out, checked) because the existing copies are 960 px wide and a 1280 run would otherwise be fed stretched images; YOLOv8s, one seed, automatic batch 3.
 - `tests/test_report.py` — keeps the report draft traceable: every finding `paper.md` cites exists in this file (except those listed as pending) and every bibliography key has a row in `docs/report/references.md`.
 - `scripts/export_onnx.py` (changed 2026-10-06) — the checkpoint-name pattern now accepts names such as `yolov8s-960-kakadu-ozfish-s0`; it only matched `yolov8n-960-s2` before. Used to export the two best models for the Nano: `models/onnx/20261005-yolov8n-960-kakadu-ozfish-s0-544x960.onnx` (parity PASS) and `...yolov8s-960-kakadu-ozfish-s0-544x960.onnx` (**strict raw-tensor gate FAILED by 0.0006 px**: 0.0106 against 0.01; detections identical to PyTorch on 12 frames, worst IoU 0.99998; gate not relaxed; not yet built or timed on the board).
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
@@ -849,6 +849,30 @@ Output: `runs/tiled-20261006-smallbox-20261005-yolov8s-960-kakadu-ozfish-s0/tile
 - **Limits.** One checkpoint, one split, workstation, no Orin timing; the cost is still 5 to 10 images per frame.
 
 **Verdict.** Tiled inference, with or without a small-box merge, does not improve detection on this benchmark. It is dropped as a route to better accuracy for now.
+
+### F27. Training at 1280 px did not raise small-fish recall or the DeepFish score; the held-out OzFish score rose slightly (one seed, a screen)
+**Setup.** YOLOv8s, DeepFish + Kakadu + OzFish train data with Kakadu and OzFish re-cut at 1280 px wide (same frames, groups and split; 7,318, 622 train and 157 held-out), trained and validated at imgsz 1280 (letterbox 736x1280),
+default augmentation, seed 0, `ai-gpu`, **automatic batch 3** (the 960 run used 5), early-stopped at epoch 98 with the best at epoch 68, 312 s per epoch (the 960 run: 179 s), about 8.5 h in all. Run: `20261006-yolov8s-1280-kakadu-ozfish-s0`;
+analysis `runs/analysis-20261006-20261006-yolov8s-1280-kakadu-ozfish-s0/analysis.json`. Compared with the YOLOv8s 960 run of F24 (one seed, batch 5).
+
+| | YOLOv8s 960 (F24) | **YOLOv8s 1280** |
+|---|---|---|
+| DeepFish val mAP@50 / mAP@50-95 | **0.8209 / 0.5624** | 0.7852 / 0.5552 |
+| Fish found (of 1,385) at conf 0.25 | 1,004 | **1,009** |
+| False alarms at conf 0.25 (on empty frames) | **122 (24)** | 344 (146) |
+| Best-F1 confidence on val | 0.25 | 0.5 |
+| Recall 16-32 px / 32-96 px / above 96 px | **26.4%** / 77.5% / 99.4% | 24.5% / **78.8%** / 99.4% |
+| Missed: no prediction / found under threshold | 105 / 271 | 162 / 206 |
+| Held-out OzFish mAP@50 / mAP@50-95 | 0.7242 / 0.3976 | **0.7358 / 0.4142** |
+
+- **The hypothesis was not supported.** The reason for trying 1280 was to give small fish more pixels. Recall on 16-32 px fish did not rise (24.5% against 26.4%, 67 against 72 of 273 fish) and fish under 16 px are still never found (0 of 10). Total fish found is the same (1,009 against 1,004).
+- **DeepFish mAP@50 is lower by 0.036** (mAP@50-95 lower by 0.007), which is about the size of the observed seed spread for similar arms, so this is "not better", not a measured loss. It also mixes batch size (3 against 5).
+- **False alarms at the default 0.25 threshold are 2.8 times higher** (344 against 122), but the best-F1 threshold moved to 0.5, so the 1280 model is less well calibrated at 0.25 rather than clearly worse at every threshold. At its own best threshold (0.5) it finds 921 fish with 134 false alarms, which is worse than the 960 model at 0.25 (1,004 and 122).
+- **Held-out OzFish is slightly higher** (+0.012 mAP@50, +0.017 mAP@50-95), about the size of the seed ranges seen for the YOLOv8n OzFish arm (0.016 and 0.013, F24); it is one seed and the 157-frame set is crowded footage that may share reefs with training deployments, so it is not evidence of a gain.
+- **Cost.** Training was 1.7 times slower per epoch and about 3 times the pixels at inference; Orin latency at 1280 px was not measured (the Nano is offline).
+
+**Verdict.** Higher training resolution is not a route to better small-fish recall on this data, at least for a single seed of this model; the detector's difficulty with 16-32 px and smaller fish is not fixed by input size alone. The 960 px YOLOv8s of F24 stays the most accurate model by DeepFish validation.
+**Limits.** One seed each, different batch sizes (3 against 5), one validation split of near-duplicate frames, the DeepFish validation set has few fish under 32 px (273 in 16-32 px, 10 under 16 px), and Kakadu/OzFish frames at 1280 are re-cuts of the same source footage, not new data.
 
 ---
 

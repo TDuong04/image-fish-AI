@@ -80,6 +80,7 @@ corrections are kept in a table (§6 there), not overwritten.
 | More data | Kakadu | the biggest lever: 0.698 vs 0.473 mAP@50, 3 seeds each (F17, F18); holds on unseen OzFish deployments (F21) |
 | OzFish data | add the labelled OzFish frames | +0.052 mAP@50 over Kakadu-only on three seeds (F22 to F24); held-out OzFish 0.689 vs 0.357 |
 | Model size on combined data | YOLOv8s | best accuracy so far: 0.821 mAP@50, 0.562 mAP@50-95, one seed, batch 5 (F24); Orin latency unmeasured |
+| Higher training resolution | YOLOv8s at 1280 px, data re-cut at 1280 | no gain in small-fish recall (24.5% against 26.4%) and DeepFish mAP@50 0.785 against 0.821; held-out OzFish 0.736 against 0.724; one seed, batch 3 (F27) |
 | Small fish at inference | tile the frame and merge | finds +8% fish and lifts 16-32 px recall from 26% to 37-39%, but false alarms rise 3.7-5x and AP50 falls 0.817 to 0.78-0.79, at 5-10x the compute (F25); a small-box merge (four rules fixed in advance) also did not beat the whole frame (F26): dropped |
 
 ## 5. What the evidence supports
@@ -108,7 +109,7 @@ In order of value for the report:
    power mode). Needs the board online. Decides whether the accuracy gain is deployable.
 2. **Two more YOLOv8s seeds** at the same batch (about 3.5 h each) to turn the one-seed lead into a confirmed one.
 3. **Run the sealed OzFish test once** on the chosen final model, after steps 1 and 2. The owner decides the timing.
-4. **Small fish** (tiling and a small-box merge were tried and did not help, F25 and F26): a model trained at higher resolution or on tiles is untried.
+4. **Small fish** (tiling and a small-box merge were tried and did not help, F25 and F26): training at 1280 px did not help either, F27): training on tiles is untried; the likelier route is more data with small, hard fish.
 5. **Decide the licence question** (will any copy of software or weights leave the institution?). If yes, the AGPL
    encumbrance on Ultralytics weights means YOLOX-nano or NanoDet-Plus.
 6. **Write the report** from this file, `docs/PROGRESS.md` and `docs/eval_protocol.md`; `report_sections.md` is the

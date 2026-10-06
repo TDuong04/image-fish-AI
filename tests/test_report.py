@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / "docs" / "report"
-PENDING = {27}   # findings the draft refers to as pending; remove each one once it is written up in PROGRESS.md
+PENDING = set()   # findings the draft refers to as pending; remove each one once it is written up in PROGRESS.md
 
 
 def test_every_cited_finding_exists_in_progress():
