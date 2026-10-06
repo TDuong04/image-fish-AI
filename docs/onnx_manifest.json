@@ -1,5 +1,5 @@
 {
-  "built_utc": "2026-10-04T06:13:28+00:00",
+  "built_utc": "2026-10-06T06:57:11+00:00",
   "nms_in_graph": false,
   "models": [
     {
@@ -39,6 +39,45 @@
       "torch": "2.6.0+cu124",
       "ultralytics": "8.4.130",
       "onnxruntime": "1.29.0"
+    },
+    {
+      "onnx": "20261005-yolov8s-960-kakadu-ozfish-s0-544x960.onnx",
+      "sha256": "c79d6107ab0cee68282c318d3c655be0599f3a0c714e56c3854c48a22d7535dd",
+      "source_pt": "20261005-yolov8s-960-kakadu-ozfish-s0.pt",
+      "source_pt_sha256": "a87e329b696b4e49bcdcab6b6ee62178264a690dbe87979c456a9dd151f23c97",
+      "imgsz": 960,
+      "hw": [
+        544,
+        960
+      ],
+      "opset": 17,
+      "parity_pass": false,
+      "parity_frames": 12,
+      "worst_raw_diff": 0.0106201171875,
+      "unmatched": 0,
+      "torch": "2.6.0+cu124",
+      "ultralytics": "8.4.130",
+      "onnxruntime": "1.29.0"
+    },
+    {
+      "onnx": "20261005-yolov8n-960-kakadu-ozfish-s0-544x960.onnx",
+      "sha256": "b91b5cbb799949951ee841670121ecc50ec3df55e0a2f9f1ea911bcfb923a63d",
+      "source_pt": "20261005-yolov8n-960-kakadu-ozfish-s0.pt",
+      "source_pt_sha256": "f70a8bc99e3f604f3c48bc58c717d150cb48e02c945b88f3ccbe40d2be3f5ff1",
+      "imgsz": 960,
+      "hw": [
+        544,
+        960
+      ],
+      "opset": 17,
+      "parity_pass": true,
+      "parity_frames": 12,
+      "worst_raw_diff": 0.0032958984375,
+      "unmatched": 0,
+      "torch": "2.6.0+cu124",
+      "ultralytics": "8.4.130",
+      "onnxruntime": "1.29.0"
     }
-  ]
+  ],
+  "note": "2026-10-06: two models appended (YOLOv8n and YOLOv8s on DeepFish+Kakadu+OzFish). The YOLOv8s export misses the strict raw-tensor gate (0.0106 px against 0.01 px) while its detections match PyTorch exactly (0 misses, 0 extras, worst IoU 0.99998); the gate was not relaxed. Engine-level parity on the board (scripts/engine_parity.py) is still to be run."
 }

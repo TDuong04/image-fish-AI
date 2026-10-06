@@ -112,7 +112,7 @@ def main() -> int:
     failures = 0
 
     for pt in models:
-        m = re.search(r"-(\d+)-s(\d+)", pt.stem)
+        m = re.search(r"-(\d{3,4})(?:-[a-z0-9]+)*-s(\d+)$", pt.stem)   # e.g. yolov8s-960-kakadu-ozfish-s0
         imgsz = int(m.group(1))
         hw = evaluated_shape(imgsz)
         tag = f"{pt.stem}-{hw[0]}x{hw[1]}"
