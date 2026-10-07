@@ -1,0 +1,180 @@
+{
+  "when_utc": "2026-10-07T17:58:48+00:00",
+  "model": "20261005-yolov8n-960-kakadu-ozfish-s0.pt",
+  "hw": [
+    544,
+    960
+  ],
+  "label": "fp16",
+  "verdict": {
+    "frames": 12,
+    "unmatched_ref": 0,
+    "extra": 0,
+    "borderline": 0,
+    "worst_iou": 0.7076091766357422,
+    "worst_dconf": 0.04473164677619934,
+    "pass": false,
+    "reasons": [
+      "worst matched IoU 0.708 < 0.9"
+    ]
+  },
+  "worst_raw_diff": 6.98162841796875,
+  "rows": [
+    {
+      "frame": "7398_F1_f000000.jpg",
+      "max_abs_raw": 2.67669677734375,
+      "ref": 0,
+      "got": 0,
+      "matched": 0,
+      "min_iou": null,
+      "max_dconf": null,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "7398_F3_f000035.jpg",
+      "max_abs_raw": 3.8487091064453125,
+      "ref": 2,
+      "got": 2,
+      "matched": 2,
+      "min_iou": 0.9986960291862488,
+      "max_dconf": 0.0013293623924255371,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "7398_NF2_f000180.jpg",
+      "max_abs_raw": 2.7956085205078125,
+      "ref": 0,
+      "got": 0,
+      "matched": 0,
+      "min_iou": null,
+      "max_dconf": null,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "7623_F2_f000101.jpg",
+      "max_abs_raw": 2.834716796875,
+      "ref": 2,
+      "got": 2,
+      "matched": 2,
+      "min_iou": 0.9981129765510559,
+      "max_dconf": 0.00023239850997924805,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "7623_NF1_f000073.jpg",
+      "max_abs_raw": 5.391777038574219,
+      "ref": 0,
+      "got": 0,
+      "matched": 0,
+      "min_iou": null,
+      "max_dconf": null,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "9862_no_fish_f000030.jpg",
+      "max_abs_raw": 4.6807403564453125,
+      "ref": 1,
+      "got": 1,
+      "matched": 1,
+      "min_iou": 0.9993759989738464,
+      "max_dconf": 0.0011770427227020264,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "9870_no_fish_f000038.jpg",
+      "max_abs_raw": 4.2413330078125,
+      "ref": 0,
+      "got": 0,
+      "matched": 0,
+      "min_iou": null,
+      "max_dconf": null,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "9892_no_fish_2_f000020.jpg",
+      "max_abs_raw": 6.98162841796875,
+      "ref": 0,
+      "got": 0,
+      "matched": 0,
+      "min_iou": null,
+      "max_dconf": null,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "A000007_L-avi-74577.jpg",
+      "max_abs_raw": 1.61956787109375,
+      "ref": 74,
+      "got": 74,
+      "matched": 74,
+      "min_iou": 0.7076091766357422,
+      "max_dconf": 0.04473164677619934,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "E000141_R-MP4-30988.jpg",
+      "max_abs_raw": 2.12847900390625,
+      "ref": 25,
+      "got": 25,
+      "matched": 25,
+      "min_iou": 0.9651597142219543,
+      "max_dconf": 0.0023145973682403564,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "G000067_L-avi-66232.jpg",
+      "max_abs_raw": 2.21405029296875,
+      "ref": 6,
+      "got": 6,
+      "matched": 6,
+      "min_iou": 0.9978210926055908,
+      "max_dconf": 0.005740731954574585,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    },
+    {
+      "frame": "G000196_R-avi-36172.jpg",
+      "max_abs_raw": 3.3969268798828125,
+      "ref": 12,
+      "got": 12,
+      "matched": 12,
+      "min_iou": 0.9973452091217041,
+      "max_dconf": 0.0014753639698028564,
+      "unmatched_ref": 0,
+      "unmatched_ref_borderline": 0,
+      "extra": 0,
+      "extra_borderline": 0
+    }
+  ]
+}

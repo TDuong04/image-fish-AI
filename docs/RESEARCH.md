@@ -95,7 +95,7 @@ corrections are kept in a table (§6 there), not overwritten.
 ## 6. What it does not show
 
 - The seed spread of YOLOv8s, and any effect of its batch size (5 against 10).
-- YOLOv8s on the Orin is timed end to end (F28: 50.1 ms serial) and for 30 minutes with video decode (F29: 24.4 fps, no throttling); one run at 25 W, ambient not measured; no on-device mAP, no INT8, no other power modes, no NVDEC decode, and engine-against-PyTorch parity not yet run for the new engines.
+- YOLOv8s on the Orin is timed end to end (F28: 50.1 ms serial) and for 30 minutes with video decode (F29: 24.4 fps, no throttling); one run at 25 W, ambient not measured; no on-device mAP, no INT8, no other power modes, no NVDEC decode, and engine-against-PyTorch agreement was checked on 12 frames only (F30: YOLOv8s passes; the new YOLOv8n engine fails the IoU gate on one tiny box).
 - Generalisation to a new reef: held-out OzFish deployments may share reefs with the training ones, and DeepFish val
   resembles Kakadu (F13).
 - The sealed OzFish test result (not run).
@@ -106,7 +106,7 @@ corrections are kept in a table (§6 there), not overwritten.
 
 In order of value for the report:
 
-1. **YOLOv8s on the Orin was timed (F28):** 50.1 ms per frame against 40.8 ms for YOLOv8n at 25 W. A 30-minute video run held 24.4 fps (F29). Still to do: engine-against-PyTorch parity on the board.
+1. **YOLOv8s on the Orin was timed (F28):** 50.1 ms per frame against 40.8 ms for YOLOv8n at 25 W. A 30-minute video run held 24.4 fps (F29). Parity on the board was checked (F30). Still to do: other power modes.
 2. **Two more YOLOv8s seeds** at the same batch (about 3.5 h each) to turn the one-seed lead into a confirmed one.
 3. **Run the sealed OzFish test once** on the chosen final model, after steps 1 and 2. The owner decides the timing.
 4. **Small fish** (tiling and a small-box merge were tried and did not help, F25 and F26): training at 1280 px did not help either, F27): training on tiles is untried; the likelier route is more data with small, hard fish.

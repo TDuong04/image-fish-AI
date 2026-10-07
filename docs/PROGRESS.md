@@ -896,7 +896,7 @@ Logs, build logs and the run record: `runs/device-20261007/`. ONNX sha256 values
 - **p95 is tight** (50.6 to 50.9 ms), so the figure is steady at this load.
 
 **Limits.** Serial pipeline with JPEG decode, not video: the F9 run (video decode, about 34 fps for YOLOv8n) was **not** repeated for YOLOv8s, so no sustained-load, thermal or video frame rate is claimed for it. One engine per model, one frame pair, one power mode (25 W), clocks not locked, warm board, ambient unrecorded.
-**Not done:** the 12-frame engine-against-PyTorch parity (`scripts/engine_parity.py`, F7) has not been run on these two engines, and the YOLOv8s ONNX failed the strict raw-tensor gate by 0.0006 px (see `docs/onnx_manifest.json`; detections matched exactly), so their agreement with PyTorch is **unverified on the board**; there is no on-device mAP, no INT8 and no 1280 px engine.
+**Not done at the time of F28 (run afterwards, see F30):** the 12-frame engine-against-PyTorch parity (`scripts/engine_parity.py`, F7) had not been run on these two engines, and the YOLOv8s ONNX failed the strict raw-tensor gate by 0.0006 px (see `docs/onnx_manifest.json`; detections matched exactly), so their agreement with PyTorch is **unverified on the board**; there is no on-device mAP, no INT8 and no 1280 px engine.
 
 ### F29. A 30-minute run of YOLOv8s at 960 px held about 24.4 fps with no throttling; the junction temperature plateaued at about 58 C (one run, 25 W)
 `edge/sustained.py` on the board (same script and method as F9), YOLOv8s FP16 engine `20261005-yolov8s-960-kakadu-ozfish-s0-544x960-fp16.engine`, looping `sample_clip.mp4`, serial pipeline with software H.264 decode, **nvpmodel 25W**, clocks not locked, governor `schedutil`, fan on.
@@ -919,6 +919,27 @@ Started 2026-10-07T16:50:46Z, ended 17:20:46Z, 179 ten-second windows. **Ambient
 - **Compared with F28:** the serial JPEG pipeline gave 50.1 ms (19.9 fps) for the same engine; with video decode instead of JPEG decode (about 9.8 against 17.5 ms) the same model reaches about 24.4 fps.
 
 **Limits.** One run, one clip (the same one as F9), one engine, 25 W only, ambient not measured, software H.264 decode (the board's NVDEC is not used), light duty cycle, serial pipeline, no engine-against-PyTorch parity check yet for this engine (F28), and run-to-run spread unknown. A heavier load, MAXN_SUPER or a warmer room may behave differently.
+
+### F30. On the Orin, the YOLOv8s engine agrees with PyTorch on all 12 frames; the new YOLOv8n engine matches every detection but fails the IoU gate on one tiny box (12 frames, FP16)
+`edge/engine_dump.py` on the board (`trtexec`, FP16 engines of F28) fed the **same 12 frames** the PyTorch reference used (4 OzFish and 8 DeepFish frames, empty ones included; the preprocessed inputs were rebuilt on the board from a lossless uint8 copy, checked bit-exact against the
+workstation tensors before upload), and `scripts/engine_parity.py` compared the raw outputs and the detections after NMS (conf 0.25, IoU 0.7) with PyTorch, the same method as F7. Results: `runs/device-20261007/engine_parity_fp16_*.json`; the gate is set in `src/fish/parity.py`
+(no confident miss or extra, worst matched IoU at least 0.9, worst confidence drift at most 0.05).
+
+| | New YOLOv8n engine | **YOLOv8s engine** |
+|---|---|---|
+| Detections, PyTorch / engine (12 frames) | identical counts on every frame | identical counts on every frame |
+| Confident misses / extras / borderline | 0 / 0 / 0 | 0 / 0 / 0 |
+| Worst matched box IoU | **0.708 (gate fails)** | 0.990 |
+| Worst confidence drift | 0.045 | 0.007 |
+| Largest raw-tensor difference (box pixels) | 6.98 | 21.70 (an empty frame) |
+| Gate verdict | **FAIL** (IoU 0.708 below 0.9) | PASS |
+
+- **YOLOv8s agrees with PyTorch on the board.** Every detection matches (including 63 on the most crowded frame), the worst IoU is 0.990 and confidence drifts by at most 0.007. Its ONNX export had narrowly missed the strict raw-tensor gate (F28 / `docs/onnx_manifest.json`, by 0.0006 px), but the engine passes the detection-level gate that matters here.
+- **The new YOLOv8n engine fails the gate on one box.** All detection counts match and there are no misses or extras. The single failure is on the crowded frame `A000007_L-avi-74577` (74 detections), where one box 9.4x8.7 px, confidence 0.325 in PyTorch and 0.281 in the engine, matches with IoU 0.708. The other 73 matched pairs on that frame have a median IoU 0.997 and a 5th percentile of 0.992; on the other 11 frames the worst IoU is 0.965 or better.
+  A shift of about one pixel is enough to take a box that small from 1.0 to about 0.7, so this is consistent with FP16 jitter on a tiny, low-confidence box in a crowd (three engine boxes overlap it), but that explanation was not verified against the weights. **The gate was not relaxed**: by the rule fixed in advance this engine did not pass.
+- **Raw differences are larger than in F7** (7 and 22 px against 3 and 15 px for the older engines), which F7 already noted occur mostly on frames with few or no detections (the 21.7 px case is a frame with none), and detection-level agreement is what is judged.
+
+**Limits.** 12 frames, one engine per model, FP16 only; agreement with PyTorch on a small sample, **not** an mAP measurement on the device. The uint8 rebuild of the inputs was verified exact on the workstation but the board-side tensors were not checksummed.
 
 ---
 
