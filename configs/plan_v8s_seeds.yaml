@@ -1,0 +1,19 @@
+# Two more seeds of YOLOv8s on the combined data (seed 0 is F24), each followed by the analysis on the server.
+# Run with: FISH_ENV=aigpu python scripts/queue_runner.py configs/plan_v8s_seeds.yaml
+steps:
+  - name: v8s-s1
+    skip_if: "runs/202610*-yolov8s-960-kakadu-ozfish-s1/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8s_960_kakadu_ozfish", "--seed", "1", "--resume"]
+  - name: post-v8s-s1
+    skip_if: "runs/analysis-*-202610*-yolov8s-960-kakadu-ozfish-s1/analysis.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/post_run.py", "--slug", "yolov8s-960-kakadu-ozfish-s1", "--imgsz", "960"]
+  - name: v8s-s2
+    skip_if: "runs/202610*-yolov8s-960-kakadu-ozfish-s2/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8s_960_kakadu_ozfish", "--seed", "2", "--resume"]
+  - name: post-v8s-s2
+    skip_if: "runs/analysis-*-202610*-yolov8s-960-kakadu-ozfish-s2/analysis.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/post_run.py", "--slug", "yolov8s-960-kakadu-ozfish-s2", "--imgsz", "960"]
