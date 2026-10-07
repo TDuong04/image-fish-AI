@@ -20,7 +20,7 @@ Last updated: 2026-10-04.
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
 | Automation | Crash-recovering supervisor and a Kaggle session runner. |
-| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** **End to end, a serial pipeline takes about 33 ms per frame at 640 and 41 ms at 960 (about 30 and 24 fps), and a web app runs on the board** (`edge/app.py`). **A 30-minute sustained run held about 34 fps at 960 with no throttling (F9, one run, 25 W mode, ambient 26 C assumed).** **YOLOv8s on the combined data takes about 50 ms per frame (19.9 fps serial) against 41 ms for YOLOv8n (F28, 25 W, 2026-10-07).** **A 30-minute run of YOLOv8s held 24.4 fps with no throttling, plateau about 58 C (F29, one run, 25 W, ambient not measured).** Not yet measured: hardware video decode, INT8, on-device mAP, other power modes. The deployment half of the thesis is only partly answered. |
+| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** **End to end, a serial pipeline takes about 33 ms per frame at 640 and 41 ms at 960 (about 30 and 24 fps), and a web app runs on the board** (`edge/app.py`). **A 30-minute sustained run held about 34 fps at 960 with no throttling (F9, one run, 25 W mode, ambient 26 C assumed).** **YOLOv8s on the combined data takes about 50 ms per frame (19.9 fps serial) against 41 ms for YOLOv8n (F28, 25 W, 2026-10-07).** **A 30-minute run of YOLOv8s held 24.4 fps with no throttling, plateau about 58 C (F29, one run, 25 W, ambient not measured).** **MAXN_SUPER gave no speed-up of the network; the video frame rate was unchanged (F31, 10-minute runs).** Not yet measured: hardware video decode, INT8, on-device mAP, the 15 W and 7 W modes. The deployment half of the thesis is only partly answered. |
 | Report | Draft started 2026-10-06 in `docs/report/` (`paper.md`, `references.bib`, `references.md`, `README.md`); sections that need F27, YOLOv8s on the Orin and the sealed test are marked pending. `docs/RESEARCH.md` (2026-10-06) is the narrative of the research and methodology and the suggested next steps; `report_sections.md` still describes the older LCFCN *counting* experiment, not this work, and the final report prose is not yet written. |
 
 ---
@@ -941,6 +941,37 @@ workstation tensors before upload), and `scripts/engine_parity.py` compared the 
 - **Raw differences are larger than in F7** (7 and 22 px against 3 and 15 px for the older engines), which F7 already noted occur mostly on frames with few or no detections (the 21.7 px case is a frame with none), and detection-level agreement is what is judged.
 
 **Limits.** 12 frames, one engine per model, FP16 only; agreement with PyTorch on a small sample, **not** an mAP measurement on the device. The uint8 rebuild of the inputs was verified exact on the workstation but the board-side tensors were not checksummed.
+
+### F31. MAXN_SUPER did not speed up the network on the Orin Nano: the end-to-end gain (4 to 5 ms) came from faster JPEG decode, and the video frame rate did not change (10-minute runs)
+Same engines, runner and method as F28 and F29 (YOLOv8n `20261005-yolov8n-960-kakadu-ozfish-s0` and YOLOv8s `20261005-yolov8s-960-kakadu-ozfish-s0`, FP16, 544x960), with the board set to **nvpmodel MAXN_SUPER (mode id 2)** by `maxn_super.sh` on the board, `jetson_clocks` inactive, governor `schedutil`, fan on, and **restored to 25 W afterwards**
+(the status file records `RESTORED mode=1` at 18:38:41Z, and the board was confirmed at 25 W again at check time). Run 2026-10-07 18:17 to 18:38 UTC; board junction temperature 49.0 to 50.4 C at the start of each timing case. Ambient not measured. Median of 200 runs per frame, serial, JPEG decode; then a 10-minute loop of `sample_clip.mp4` (software H.264 decode) per model.
+Logs: `runs/device-20261007/e2e_maxn_super_*`, `sustained_maxn_super_{n,s}.jsonl` and `maxn_super_status.txt`.
+
+| Median per frame (DeepFish frame) | YOLOv8n, 25 W (F28) | **YOLOv8n, MAXN_SUPER** | YOLOv8s, 25 W (F28) | **YOLOv8s, MAXN_SUPER** |
+|---|---|---|---|---|
+| JPEG decode (CPU) | 17.43 ms | **13.25 ms** | 17.51 ms | **13.20 ms** |
+| Letterbox + normalise (CPU) | 8.04 ms | 8.00 ms | 8.07 ms | 8.03 ms |
+| Copy in + GPU forward + copy out | 14.33 ms | **14.33 ms** | 23.59 ms | **23.54 ms** |
+| Threshold + NMS (CPU) | 0.93 ms | 0.93 ms | 0.93 ms | 0.92 ms |
+| **Total, serial** | 40.79 ms | **36.54 ms (p95 39.45)** | 50.13 ms | **45.73 ms (p95 46.37)** |
+| Frames per second, serial | 24.5 | 27.4 | 19.9 | 21.9 |
+
+The crowded OzFish frame gave the same picture (YOLOv8n 35.97 ms, YOLOv8s 46.08 ms at MAXN_SUPER).
+
+| 10-minute video loop (59 windows) | YOLOv8n, MAXN_SUPER | YOLOv8s, MAXN_SUPER | 30-minute runs at 25 W (F9 / F29) |
+|---|---|---|---|
+| Frames per second, first / last 2 min | 34.6 / 34.5 | 24.4 / 24.4 | 34.2 / 34.0 and 24.4 / 24.4 |
+| Total p50 per frame | 28.4 to 28.5 ms | 40.5 to 40.4 ms | 28.6 and 40.5 ms |
+| Copy + GPU p50 / video decode p50 | 14.1 / 8.2 ms | 23.4 / 9.9 ms | 14.2 / 8.3 and 23.5 / 9.8 ms |
+| Junction temperature | 51.8 to 56.7 C | 56.3 to 57.4 C (started warm after the first run) | plateau 56.5 and 57.8 C |
+| Fan RPM / input power | 1,561 to 2,174 / 6.5 to 7.3 W | 2,174 to 2,187 / 6.7 to 7.1 W (mean 6.94) | similar |
+
+- **The GPU stage did not get faster** (14.3 ms for YOLOv8n and 23.5 ms for YOLOv8s at both modes), so MAXN_SUPER does nothing for the network at this load. The earlier unmeasured assumption that the mode swing would be large is not supported for this pipeline.
+- **The serial end-to-end gain is all CPU:** JPEG decode fell by about 4.2 ms (17.5 to 13.2 ms), which accounts for the total dropping from 40.8 to 36.5 ms (YOLOv8n) and from 50.1 to 45.7 ms (YOLOv8s), about 10% and 9%. The CPU's top speed in the log rose from 1,344 to 1,728 MHz; the board's reported GPU maximum rose from 918 to 1,020 MHz, but the log's live GPU clock read 306 MHz in every window again (see F9), so **no claim about GPU clocks is made**.
+- **Video frame rate did not change** (34.5 and 24.4 fps against 34.1 and 24.4 at 25 W), because the video path's decode (about 8 to 10 ms) is not the part that sped up.
+- **No throttling visible; temperature and power are about the same** as at 25 W in these 10-minute runs (about 57 C, about 7 W), so on this evidence the faster mode costs little heat at this duty cycle. Whether that holds for a longer run or a warmer room is untested.
+
+**Limits.** 10-minute loops (F9 and F29 were 30 minutes), one run per case, ambient not measured, `jetson_clocks` inactive (clocks not locked), warm board for the second sustained run, one clip, serial pipeline, software decode, no NVDEC. Only mode id 2 was tried; the 15 W and 7 W modes were not measured.
 
 ---
 

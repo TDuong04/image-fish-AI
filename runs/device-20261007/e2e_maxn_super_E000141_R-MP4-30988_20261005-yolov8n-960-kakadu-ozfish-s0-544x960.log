@@ -1,0 +1,22 @@
+[10/08/2026-01:18:08] [TRT] [W] Using an engine plan file across different models of devices is not recommended and is likely to affect performance or even cause errors.
+engine 20261005-yolov8n-960-kakadu-ozfish-s0-544x960-fp16.engine   input 544x960   output (1, 5, 10710)
+25 detection(s) on a 1920x1080 frame
+  [0, 548, 464, 1015]  conf 0.847
+  [1636, 3, 1918, 139]  conf 0.841
+  [1204, 398, 1586, 645]  conf 0.816
+  [1261, 639, 1845, 897]  conf 0.816
+  [433, 13, 746, 143]  conf 0.798
+  [474, 148, 976, 503]  conf 0.797
+  [411, 197, 566, 284]  conf 0.766
+  [280, 303, 493, 399]  conf 0.748
+  [1144, 56, 1263, 165]  conf 0.744
+  [1262, 920, 1495, 1076]  conf 0.741
+
+per-stage over 200 runs, each a separate wall-clock figure:
+  jpeg_decode_ms  median   13.14   p95   13.22   mean   13.29
+  preprocess_ms   median    7.33   p95    7.60   mean    7.25
+  gpu_ms          median   14.24   p95   17.40   mean   14.52
+  postprocess_ms  median    1.22   p95    1.41   mean    1.23
+  frame_total_ms  median   35.97   p95   39.32   mean   36.28
+  (gpu_ms = host-to-device + GPU forward + device-to-host, one sync. It is larger
+   than trtexec's kernel-only figure because the copies are included.)

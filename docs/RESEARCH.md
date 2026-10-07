@@ -80,7 +80,7 @@ corrections are kept in a table (§6 there), not overwritten.
 | More data | Kakadu | the biggest lever: 0.698 vs 0.473 mAP@50, 3 seeds each (F17, F18); holds on unseen OzFish deployments (F21) |
 | OzFish data | add the labelled OzFish frames | +0.052 mAP@50 over Kakadu-only on three seeds (F22 to F24); held-out OzFish 0.689 vs 0.357 |
 | Model size on combined data | YOLOv8s | best accuracy so far: 0.821 mAP@50, 0.562 mAP@50-95, one seed, batch 5 (F24); Orin latency unmeasured |
-| Device cost of the bigger model | time YOLOv8s on the Orin | 50.1 ms per frame against 40.8 ms for YOLOv8n (19.9 against 24.5 fps serial, 25 W, JPEG decode); only the GPU stage grows (F28); a 30-minute video run held 24.4 fps against 34 fps for YOLOv8n, with no throttling and a plateau near 58 C (F29) |
+| Device cost of the bigger model | time YOLOv8s on the Orin | 50.1 ms per frame against 40.8 ms for YOLOv8n (19.9 against 24.5 fps serial, 25 W, JPEG decode); only the GPU stage grows (F28); a 30-minute video run held 24.4 fps against 34 fps for YOLOv8n, with no throttling and a plateau near 58 C (F29); MAXN_SUPER did not speed up the network (F31) |
 | Higher training resolution | YOLOv8s at 1280 px, data re-cut at 1280 | no gain in small-fish recall (24.5% against 26.4%) and DeepFish mAP@50 0.785 against 0.821; held-out OzFish 0.736 against 0.724; one seed, batch 3 (F27) |
 | Small fish at inference | tile the frame and merge | finds +8% fish and lifts 16-32 px recall from 26% to 37-39%, but false alarms rise 3.7-5x and AP50 falls 0.817 to 0.78-0.79, at 5-10x the compute (F25); a small-box merge (four rules fixed in advance) also did not beat the whole frame (F26): dropped |
 
