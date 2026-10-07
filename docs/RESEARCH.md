@@ -80,6 +80,7 @@ corrections are kept in a table (§6 there), not overwritten.
 | More data | Kakadu | the biggest lever: 0.698 vs 0.473 mAP@50, 3 seeds each (F17, F18); holds on unseen OzFish deployments (F21) |
 | OzFish data | add the labelled OzFish frames | +0.052 mAP@50 over Kakadu-only on three seeds (F22 to F24); held-out OzFish 0.689 vs 0.357 |
 | Model size on combined data | YOLOv8s | best accuracy so far: 0.821 mAP@50, 0.562 mAP@50-95, one seed, batch 5 (F24); Orin latency unmeasured |
+| Device cost of the bigger model | time YOLOv8s on the Orin | 50.1 ms per frame against 40.8 ms for YOLOv8n (19.9 against 24.5 fps serial, 25 W, JPEG decode); only the GPU stage grows (F28) |
 | Higher training resolution | YOLOv8s at 1280 px, data re-cut at 1280 | no gain in small-fish recall (24.5% against 26.4%) and DeepFish mAP@50 0.785 against 0.821; held-out OzFish 0.736 against 0.724; one seed, batch 3 (F27) |
 | Small fish at inference | tile the frame and merge | finds +8% fish and lifts 16-32 px recall from 26% to 37-39%, but false alarms rise 3.7-5x and AP50 falls 0.817 to 0.78-0.79, at 5-10x the compute (F25); a small-box merge (four rules fixed in advance) also did not beat the whole frame (F26): dropped |
 
@@ -94,7 +95,7 @@ corrections are kept in a table (§6 there), not overwritten.
 ## 6. What it does not show
 
 - The seed spread of YOLOv8s, and any effect of its batch size (5 against 10).
-- YOLOv8s latency on the Orin (board offline); no on-device mAP, no INT8, no other power modes, no NVDEC decode.
+- Sustained and video-decode behaviour of YOLOv8s on the Orin (its end-to-end frame time is measured, F28: 50.1 ms); no on-device mAP, no INT8, no other power modes, no NVDEC decode, and engine-against-PyTorch parity not yet run for the new engines.
 - Generalisation to a new reef: held-out OzFish deployments may share reefs with the training ones, and DeepFish val
   resembles Kakadu (F13).
 - The sealed OzFish test result (not run).
@@ -105,8 +106,7 @@ corrections are kept in a table (§6 there), not overwritten.
 
 In order of value for the report:
 
-1. **Time YOLOv8s on the Orin** (export ONNX, build the engine on the board at 544x960, end-to-end run, record the
-   power mode). Needs the board online. Decides whether the accuracy gain is deployable.
+1. **YOLOv8s on the Orin was timed (F28):** 50.1 ms per frame against 40.8 ms for YOLOv8n at 25 W. Still to do: engine-against-PyTorch parity on the board and a sustained video run.
 2. **Two more YOLOv8s seeds** at the same batch (about 3.5 h each) to turn the one-seed lead into a confirmed one.
 3. **Run the sealed OzFish test once** on the chosen final model, after steps 1 and 2. The owner decides the timing.
 4. **Small fish** (tiling and a small-box merge were tried and did not help, F25 and F26): training at 1280 px did not help either, F27): training on tiles is untried; the likelier route is more data with small, hard fish.

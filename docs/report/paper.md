@@ -244,7 +244,7 @@ It also costs 5 to 10 network passes per frame. One checkpoint, one split, fixed
 
 A YOLOv8s run at 1280 px, with the Kakadu and OzFish frames re-cut at 1280 px so that they are not up-scaled from 960, tests whether more pixels per fish raise small-fish recall. They did not: recall on 16-32 px fish was 24.5% against 26.4% for the 960 px model (fish under 16 px: 0 of 10 in both), the number of fish found was the same (1,009 against 1,004), DeepFish validation mAP@50 was 0.785 against 0.821 (mAP@50-95 0.555 against 0.562), and false alarms at the default threshold were higher (344 against 122; the best-F1 confidence moved from 0.25 to 0.5). On held-out OzFish the 1280 px model scored slightly higher (0.736 against 0.724 mAP@50), similar in size to the seed spread of the YOLOv8n arm. One seed each and different batch sizes (3 against 5), so this is a screen; training took 1.7 times longer per epoch.
 
-### 5.8 Device measurements on the Jetson Orin Nano (F6 to F9)
+### 5.8 Device measurements on the Jetson Orin Nano (F6 to F9, F28)
 
 All figures are for YOLOv8n FP16 engines built on the board (25 W mode, clocks not locked, fan on, `trtexec` and the
 project's own runner).
@@ -259,8 +259,7 @@ The GPU kernel is a small part of each frame; JPEG decode, letterboxing and host
 minute run at 960 px with video decode, the frame rate held at about 34 fps (first and last two minutes within 0.5%),
 the junction temperature rose from about 50 to 56.5 C and flattened, input power was about 6.5 to 7.1 W, and no
 throttling was visible (F9; one run, ambient assumed 26 C, GPU clock reading unusable). The engines match PyTorch on 12
-real frames (F7). **Not measured:** other power modes, INT8, mAP computed on the device, NVDEC hardware decode, and any
-engine for the YOLOv8s model, the combined-data models or 1280 px (**[PENDING: board offline]**).
+real frames (F7). **The larger model costs more on the device (F28):** a YOLOv8s engine trained on the combined data takes 50.1 ms per frame end to end (serial, JPEG decode, 25 W, 200 runs) against 40.8 ms for the YOLOv8n engine, because only the GPU stage grows (23.6 against 14.3 ms); the serial frame rate falls from about 24.5 to 19.9 fps. A control rerun of the original baseline engine gave 41.0 ms, matching F8. **Not measured:** other power modes, INT8, mAP computed on the device, NVDEC hardware decode, a sustained or video-decode run for YOLOv8s, and engine-against-PyTorch agreement for the new engines.
 
 ## 6. Discussion
 
@@ -274,8 +273,7 @@ small and faint fish, so neither test-time tiling (more fish found for more fals
 comparison is not like for like. Precision at our operating point (about 0.89 to 0.92) is in the same range as the figures
 reported in the literature, while recall (about 0.72) is lower **[compare only after reading the cited papers]**.
 
-**Deployment.** Because the network is a small part of each frame on the Orin, a larger model than YOLOv8n may be
-affordable, but that is a hypothesis until YOLOv8s is timed on the board.
+**Deployment.** Because the network is a small part of each frame on the Orin, the larger model is affordable: YOLOv8s adds about 9 ms (22%) per frame (F28) for a gain of about 0.07 mAP@50 (F24, one seed).
 
 ## 7. Limitations
 
@@ -287,7 +285,7 @@ affordable, but that is a hypothesis until YOLOv8s is timed on the board.
   OzFish data.
 - OzFish labels come from crowd annotation, so an unlabelled fish scores as a false alarm; the label audit is one
   reviewer's sample.
-- Device results cover one clip, one run and one power mode (25 W) for YOLOv8n only; thermal behaviour at other power modes,
+- Device results cover one clip and one run for YOLOv8n and one frame pair for YOLOv8s, at one power mode (25 W); thermal behaviour at other power modes,
   ambient temperatures or loads is unknown. The Nano was offline for the later experiments.
 - The AGPL-3.0 licence of Ultralytics code and its pretrained weights applies to any copy that leaves the institution;
   this is an open decision (PROGRESS section 8).

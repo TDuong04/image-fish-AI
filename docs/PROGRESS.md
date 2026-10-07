@@ -20,7 +20,7 @@ Last updated: 2026-10-04.
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
 | Automation | Crash-recovering supervisor and a Kaggle session runner. |
-| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** **End to end, a serial pipeline takes about 33 ms per frame at 640 and 41 ms at 960 (about 30 and 24 fps), and a web app runs on the board** (`edge/app.py`). **A 30-minute sustained run held about 34 fps at 960 with no throttling (F9, one run, 25 W mode, ambient 26 C assumed).** Not yet measured: hardware video decode, INT8, on-device mAP, other power modes. The deployment half of the thesis is only partly answered. |
+| **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** **End to end, a serial pipeline takes about 33 ms per frame at 640 and 41 ms at 960 (about 30 and 24 fps), and a web app runs on the board** (`edge/app.py`). **A 30-minute sustained run held about 34 fps at 960 with no throttling (F9, one run, 25 W mode, ambient 26 C assumed).** **YOLOv8s on the combined data takes about 50 ms per frame (19.9 fps serial) against 41 ms for YOLOv8n (F28, 25 W, 2026-10-07).** Not yet measured: hardware video decode, INT8, on-device mAP, other power modes, sustained load for YOLOv8s. The deployment half of the thesis is only partly answered. |
 | Report | Draft started 2026-10-06 in `docs/report/` (`paper.md`, `references.bib`, `references.md`, `README.md`); sections that need F27, YOLOv8s on the Orin and the sealed test are marked pending. `docs/RESEARCH.md` (2026-10-06) is the narrative of the research and methodology and the suggested next steps; `report_sections.md` still describes the older LCFCN *counting* experiment, not this work, and the final report prose is not yet written. |
 
 ---
@@ -874,6 +874,30 @@ analysis `runs/analysis-20261006-20261006-yolov8s-1280-kakadu-ozfish-s0/analysis
 **Verdict.** Higher training resolution is not a route to better small-fish recall on this data, at least for a single seed of this model; the detector's difficulty with 16-32 px and smaller fish is not fixed by input size alone. The 960 px YOLOv8s of F24 stays the most accurate model by DeepFish validation.
 **Limits.** One seed each, different batch sizes (3 against 5), one validation split of near-duplicate frames, the DeepFish validation set has few fish under 32 px (273 in 16-32 px, 10 under 16 px), and Kakadu/OzFish frames at 1280 are re-cuts of the same source footage, not new data.
 
+### F28. YOLOv8s costs about 9 ms (22%) more per frame than YOLOv8n on the Orin Nano: 50.1 ms against 40.8 ms end to end at 960 px (serial pipeline, 25 W)
+`~/fish-detection/trt_runner.py --bench 200` on the board (same runner and method as F8), FP16 engines built on the board with `trtexec` (TensorRT 10.3.0, L4T 36.4.7) at 544x960 from the ONNX files of F24: YOLOv8s (`20261005-yolov8s-960-kakadu-ozfish-s0`) and YOLOv8n
+(`20261005-yolov8n-960-kakadu-ozfish-s0`), with the original DeepFish-only baseline engine (`20260923-yolov8n-960-s2`) re-run as a control. **nvpmodel 25W, `jetson_clocks` inactive, governor `schedutil`, fan on**, junction temperature 52.0 to 52.9 C before and after
+(the board had been building engines just before, so this is a warm board, not a cold one). Ambient not recorded. Median of 200 runs per case, two frames (a DeepFish frame with 2 fish and a crowded OzFish frame), serial pipeline, JPEG decode (not video).
+Logs, build logs and the run record: `runs/device-20261007/`. ONNX sha256 values are in `docs/onnx_manifest.json` and were checked on the board after the transfer; engine sha256: YOLOv8n `b200633d...`, YOLOv8s `163068af...`.
+
+| Median per frame, 544x960 FP16 | Baseline YOLOv8n (control) | New YOLOv8n | **New YOLOv8s** |
+|---|---|---|---|
+| JPEG decode (CPU) | 17.47 ms | 17.43 ms | 17.51 ms |
+| Letterbox + normalise (CPU) | 8.03 ms | 8.04 ms | 8.07 ms |
+| Copy in + GPU forward + copy out | 14.49 ms (p95 17.38) | 14.33 ms (p95 17.50) | **23.59 ms (p95 23.71)** |
+| Threshold + NMS (CPU) | 0.94 ms | 0.93 ms | 0.93 ms |
+| **Total, serial** (DeepFish frame) | 41.02 ms (p95 44.02) | 40.79 ms (p95 43.67) | **50.13 ms (p95 50.57)** |
+| Total, serial (crowded OzFish frame) | 40.98 ms | 40.90 ms | 50.24 ms (p95 50.85) |
+| Frames per second, serial | 24.4 | 24.5 | **19.9** |
+
+- **The control reproduces F8.** The baseline YOLOv8n total is 41.0 ms against 40.8 ms in F8 (4 Oct), so today's board state matches the earlier measurement. The new YOLOv8n costs the same as the baseline (they have the same architecture).
+- **Only the GPU stage changes.** YOLOv8s adds about 9.2 ms there (23.6 against 14.3 ms, +65%) and nothing elsewhere, so the total rises 22% (50.1 against 40.8 ms) and the serial frame rate falls from about 24.5 to 19.9. In F24 the same model scored +0.071 mAP@50 on DeepFish val (one seed), so on this measure the extra accuracy costs about 9 ms per frame.
+- **The crowded frame costs the same** (50.2 against 50.1 ms; 3 or more detections), as in F8: NMS is not the limit.
+- **p95 is tight** (50.6 to 50.9 ms), so the figure is steady at this load.
+
+**Limits.** Serial pipeline with JPEG decode, not video: the F9 run (video decode, about 34 fps for YOLOv8n) was **not** repeated for YOLOv8s, so no sustained-load, thermal or video frame rate is claimed for it. One engine per model, one frame pair, one power mode (25 W), clocks not locked, warm board, ambient unrecorded.
+**Not done:** the 12-frame engine-against-PyTorch parity (`scripts/engine_parity.py`, F7) has not been run on these two engines, and the YOLOv8s ONNX failed the strict raw-tensor gate by 0.0006 px (see `docs/onnx_manifest.json`; detections matched exactly), so their agreement with PyTorch is **unverified on the board**; there is no on-device mAP, no INT8 and no 1280 px engine.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
@@ -910,6 +934,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | `data/processed/` on the GPU server was emptied while a run was training (`deepfish`, `ozfish_eval` and the converted Kakadu set gone, loose unzipped PNGs left in their place) | The YOLOv8s run crashed at epoch 50 with `Image Not Found`, and the queued YOLOv8m and YOLO11s runs failed at once. Someone was working on the server at the time; who and why is not known. Recovered with `scripts/get_data.py` from `data/raw` and `data/interim` (no download): 5,178 train and 1,339 val images, 352 OzFish test images, and the DeepFish split identical to the workstation copy (same site groups and statistics). Kakadu was converted again from its zip. | A training log ending in `FileNotFoundError`, then `ls data/processed` |
 | `scripts/archive_paths.py` named its archive folder by the second | Two archive commands run in the same second shared one folder and the second manifest overwrote the first; the files were safe but the undo record of the first move was lost. Found by reading the printed manifest paths, fixed (a counter suffix, a test), and the lost manifest rebuilt from the archived files (`MANIFEST_loose_copies.json`, 398 items). | Output of the second and third archive commands |
 | `scripts/export_onnx.py` crashed on any checkpoint not named like `yolov8n-960-s2` | Its name pattern `-(\d+)-s(\d+)` did not match `yolov8s-960-kakadu-ozfish-s0`, so the first export attempt of the new models died with an AttributeError (nothing was written). Fixed with a pattern that allows extra name parts. | The traceback on the first export |
+| The first Nano timing run of 2026-10-07 produced nothing | `trt_runner.py` was started without the board's `pylibs` folder on `PYTHONPATH`, so `cuda-python` was not found (`No module named 'cuda'`), and the redirect `>` overwrote the board's copies of the earlier 960 px e2e logs with the traceback. No result was reported from it; the repo copies of the original logs (`runs/device-20261004/`) are intact, and the rerun writes date-stamped files (`e2e_20261007_*`). | The `Traceback` in every output log |
 | `bootstrap.py` chose the `cu124` wheel on a CUDA 13 driver | RTX 5060 (compute capability 12.0) needs cu128; cu124 would fail only at the first CUDA op. The driver header said `CUDA UMD Version`, which the parser did not read, so it fell back to cu124. | Reading the dry-run output on the new server |
 | `import cv2` fails on the remote server (`libxcb.so.1`) | The headless container has no display libraries, so `opencv-python` cannot load and `check_env.py` reported ultralytics missing. Fixed there by swapping in `opencv-python-headless` (no sudo needed). Not yet automated in `bootstrap.py`. | `check_env.py --require-gpu` |
 | `bootstrap.py` refused to install outside a venv | Kaggle run died on `import ultralytics` after downloading data | Reading the supervisor log |
