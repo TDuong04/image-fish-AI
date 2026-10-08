@@ -13,7 +13,7 @@ is forgotten.]**
 
 A single-class fish detector for underwater video is trained from COCO-pretrained YOLOv8 weights on three openly
 licensed datasets and evaluated with a site-level split that avoids frame leakage. [Headline result with seeds and
-spread.] [Cross-dataset result on the sealed test set, run once.] [Measured end-to-end frame rate and sustained thermal
+spread.] [Cross-dataset result on the sealed test set, run once: mean 0.700 mAP@50 on three YOLOv8s seeds (F33), new deployments of the same footage.] [Measured end-to-end frame rate and sustained thermal
 behaviour on a Jetson Orin Nano, with the power mode stated.] The analysis shows that [what limits recall], that
 [what raised it], and that [what did not help].
 
@@ -107,7 +107,7 @@ still leaked (the closest train-validation pairs were the same scene), so Kakadu
 OzFish (Australian Institute of Marine Science et al., 2019; CC BY 3.0 AU) holds crowded BRUVS frames with
 crowd-sourced boxes, unlabelled by species for the detection task. Our sealed test set has 352 frames, 8,329 boxes
 and no empty frames (297 clips, 23.7 boxes per frame against 2.4 in DeepFish). The sealed set was used for the
-baseline cross-dataset result (F2) and is **not touched again** until the final model is chosen. We later obtained the
+baseline cross-dataset result (F2) and, after the final recipe was fixed, once more on the three YOLOv8s seeds (F33). We later obtained the
 labelled OzFish frames. Because the test frames come from the same labelled pool, we excluded every deployment that
 appears in the test set (leaving 794 of 1,758 frames, 779 after a near-duplicate filter), and held out whole deployments (157 frames) as a decision-only validation set, with 622 frames for
 training. Training on OzFish changes what the sealed test measures: it then tests new deployments of the same
@@ -257,6 +257,10 @@ the junction temperature rose from about 50 to 56.5 C and flattened, input power
 throttling was visible (F9; one run, ambient assumed 26 C, GPU clock reading unusable). The engines match PyTorch on 12
 real frames (F7). **The larger model costs more on the device (F28):** a YOLOv8s engine trained on the combined data takes 50.1 ms per frame end to end (serial, JPEG decode, 25 W, 200 runs) against 40.8 ms for the YOLOv8n engine, because only the GPU stage grows (23.6 against 14.3 ms); the serial frame rate falls from about 24.5 to 19.9 fps. In a 30 minute run with video decode the YOLOv8s engine held 24.4 fps (against 34 fps for YOLOv8n), the junction temperature plateaued near 58 C and no throttling was visible (F29; one run, 25 W, ambient not measured). Switching the board to MAXN_SUPER left the GPU stage unchanged (14.3 and 23.5 ms) and sped up only CPU JPEG decode (about 4 ms), so the serial totals fell by 9 to 10% but the 10-minute video frame rates did not change (F31). A control rerun of the original baseline engine gave 41.0 ms, matching F8. **Not measured:** the 15 W and 7 W power modes, INT8, mAP computed on the device, NVDEC hardware decode, and agreement with PyTorch beyond 12 frames. On those 12 frames the YOLOv8s engine agrees with PyTorch on every detection (worst IoU 0.990), while the new YOLOv8n engine matches every detection but fails the preset IoU gate on one 9-pixel box in a crowded frame (IoU 0.708, F30).
 
+### 5.9 Sealed cross-dataset test (F33)
+
+The sealed OzFish test set (352 frames, 8,329 boxes, 297 clips from deployments excluded from training) was evaluated once on the three YOLOv8s seeds, under a plan fixed in the evaluation protocol before the run: mean mAP@50 **0.700** (seeds 0.695, 0.701, 0.705) and mAP@50-95 **0.380** (0.376, 0.381, 0.385), precision 0.807 and recall 0.610 at the default operating point. This is close to the 0.729 mAP@50 on the held-out OzFish deployments used for decisions (F32), and far above the 0.217 of the DeepFish-only YOLOv8n baselines on the same set (F2); that comparison mixes model size, Kakadu data and OzFish data. Because OzFish frames were in training, the test measures new deployments of the same footage, not an unseen source. No seed was chosen from the result, nothing was tuned on it, and the YOLOv8n arm was not evaluated on it. The set has no empty frames, so it says nothing about false alarms.
+
 ## 6. Discussion
 
 **What limits accuracy.** Our evidence points to data diversity and fish size rather than the detector design.
@@ -277,8 +281,8 @@ reported in the literature, while recall (about 0.72) is lower **[compare only a
   OzFish arm of YOLOv8n.
 - Per-frame metrics on near-duplicate video frames overstate certainty.
 - DeepFish validation resembles Kakadu, and the held-out OzFish deployments may share reefs with training ones, so
-  cross-source generalisation is only partly tested; the sealed OzFish test has not been run on any model trained with
-  OzFish data.
+  cross-source generalisation is only partly tested; the sealed OzFish test was run once on the YOLOv8s recipe (Section 5.9) but
+  measures new deployments of the same OzFish footage, not an unrelated source, and the YOLOv8n arm was not run on it.
 - OzFish labels come from crowd annotation, so an unlabelled fish scores as a false alarm; the label audit is one
   reviewer's sample.
 - Device results cover one clip and one 30-minute run each for YOLOv8n and YOLOv8s (plus one frame pair for timing), at one power mode (25 W); thermal behaviour at other power modes,
@@ -289,7 +293,7 @@ reported in the literature, while recall (about 0.72) is lower **[compare only a
 
 ## 8. Conclusion **[PENDING]**
 
-**[Written after: 1280 px result, YOLOv8s seeds, the final model's sealed OzFish test (once), YOLOv8s on the Orin.]**
+**[Remaining before writing: which YOLOv8s seed (or all) is shipped and rebuilt for the Orin, the licence decision, and the final wording.]**
 
 ## Reproducibility statement
 

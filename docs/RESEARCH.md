@@ -97,7 +97,7 @@ corrections are kept in a table (§6 there), not overwritten.
 - YOLOv8s on the Orin is timed end to end (F28: 50.1 ms serial) and for 30 minutes with video decode (F29: 24.4 fps, no throttling); one run at 25 W, ambient not measured; no on-device mAP, no INT8, no other power modes, no NVDEC decode, and engine-against-PyTorch agreement was checked on 12 frames only (F30: YOLOv8s passes; the new YOLOv8n engine fails the IoU gate on one tiny box).
 - Generalisation to a new reef: held-out OzFish deployments may share reefs with the training ones, and DeepFish val
   resembles Kakadu (F13).
-- The sealed OzFish test result (not run).
+- Performance on a truly unseen source: the sealed OzFish test was run once on the three YOLOv8s seeds (F33: mean 0.700 mAP@50, 0.380 mAP@50-95), but it measures new deployments of the same OzFish footage, not an unrelated source.
 - Comparison with published numbers (different splits; not verified).
 - Frames from one video are not independent samples, so per-frame mAP overstates confidence.
 
@@ -107,7 +107,7 @@ In order of value for the report:
 
 1. **YOLOv8s on the Orin was timed (F28):** 50.1 ms per frame against 40.8 ms for YOLOv8n at 25 W. A 30-minute video run held 24.4 fps (F29). Parity on the board was checked (F30). Still to do: other power modes.
 2. **Two more YOLOv8s seeds** were run (F32): the lead holds on three seeds.
-3. **Run the sealed OzFish test once** on the chosen final model, after steps 1 and 2. The owner decides the timing.
+3. **The sealed OzFish test was run once** on the three YOLOv8s seeds (F33).
 4. **Small fish** (tiling and a small-box merge were tried and did not help, F25 and F26): training at 1280 px did not help either, F27): training on tiles is untried; the likelier route is more data with small, hard fish.
 5. **Decide the licence question** (will any copy of software or weights leave the institution?). If yes, the AGPL
    encumbrance on Ultralytics weights means YOLOX-nano or NanoDet-Plus.

@@ -1002,6 +1002,25 @@ The crowded OzFish frame gave the same picture (YOLOv8n 35.97 ms, YOLOv8s 46.08 
 the Orin engine and the F24 analysis are seed 0, seed 2 scores best on this validation split, and picking the best seed on the split it is scored on gives a slightly optimistic number, so the choice should be made before the sealed OzFish test is run and not from it.
 **Limits.** The batch size differs from the YOLOv8n arm (5 against 10); three seeds per arm; DeepFish val resembles Kakadu (F13); held-out OzFish deployments may share reefs with training ones; the sealed OzFish test has **not** been run, and its meaning changed once OzFish training data was used (Section 3.3 of the report draft); false alarms are counted at one threshold.
 
+### F33. Sealed OzFish test, run once on the three YOLOv8s seeds: mean 0.700 mAP@50 and 0.380 mAP@50-95, against 0.217 for the DeepFish-only baseline (new deployments of the same footage, not an unseen source)
+**Plan fixed before the run** (`docs/eval_protocol.md` item 9, commit `d2d8d7a`): the final candidate is the YOLOv8s recipe (DeepFish + Kakadu + OzFish train data, 960 px); its three seeds were each evaluated **once** with `scripts/evaluate.py --data ozfish_eval` (imgsz 960, conf 0.001, NMS IoU 0.7 = the script's defaults),
+on `ai-gpu`, and reported as a mean and range. No seed was chosen from the result, no threshold tuned, nothing re-run, and the YOLOv8n arm was **not** evaluated on this set. Run record: `runs/eval-ozfish_eval-20261008-1403/eval.json` (and the console log beside it).
+The set: 352 frames, 8,329 boxes (23.7 per frame), no empty frames, from 297 clips whose deployments were excluded from the OzFish training frames (F21, `docs/data_audit.md`).
+
+| Sealed OzFish test, 960 px | Seed 0 | Seed 1 | Seed 2 | **Mean (range)** | DeepFish-only baseline, 960 px (F2, 3 seeds) |
+|---|---|---|---|---|---|
+| mAP@50 | 0.6953 | 0.7005 | 0.7049 | **0.7003 (0.0096)** | 0.2165 |
+| mAP@50-95 | 0.3759 | 0.3805 | 0.3846 | **0.3803 (0.0087)** | not recorded in F2 |
+| Precision / recall (Ultralytics operating point) | 0.806 / 0.600 | 0.807 / 0.615 | 0.808 / 0.615 | 0.807 / 0.610 | not recorded |
+| For reference: held-out OzFish deployments (F32) mAP@50 | 0.7242 | 0.7329 | 0.7312 | 0.7294 (0.0087) | |
+
+- **The detector holds up on a set no decision was made on.** Mean mAP@50 on the sealed set is 0.700, close to the 0.729 measured on the held-out OzFish deployments the models were chosen with (F32), so the decision-only validation set was not badly optimistic. The three seeds differ by only 0.010 here, much less than their spread on DeepFish val (0.041, F32).
+- **Large gain over the baseline, mostly from the training data.** The DeepFish-only YOLOv8n models of F2 scored 0.217 mAP@50 on this set; the YOLOv8s recipe scores 0.700. That difference mixes model size, Kakadu data and OzFish data, so the sealed result alone does not say which part did the work (F18 to F24 do).
+- **Training on OzFish changed what this measures.** The test deployments are not in the training frames (they were excluded, F21), but they come from the same OzFish collections as the training frames, so this measures **new deployments of the same footage, not an unseen source**. The 0.700 should not be read as performance on an unrelated site.
+  The recall of 0.61 at Ultralytics' operating point means about two in five boxes are missed on this crowded set (23.7 boxes per frame), so a count from this detector would under-count by roughly that share.
+
+**Limits.** 352 frames from 297 clips is a small set, so confidence intervals are wide and the three seeds are not independent samples of the footage; the set has no empty frames, so there is no false-alarm measurement here; precision and recall are at the Ultralytics default point, not a threshold chosen on validation; one recipe, three seeds, one run each; the YOLOv8n arm and the 1280 px model were not run on it.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
