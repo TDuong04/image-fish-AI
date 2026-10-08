@@ -15,7 +15,7 @@ Last updated: 2026-10-04.
 |---|---|
 | Environment | Working. Python 3.11 venv, torch 2.6.0+cu124, ultralytics 8.4.130, RTX 4060 Laptop 8 GB. |
 | Data | **In hand.** DeepFish (train/val), Kakadu (extra train only, F13) and an OzFish test set (sealed). The OzFish training set is reachable at a direct link (about 2.9 GB, 1,800 frames, 45k boxes) and not yet downloaded. |
-| Training | **Planned grid done** (6 runs: 3 seeds x {640, 960} px), then an improvement programme (F12 to F18): the strongest result is adding Kakadu training data, **mean mAP@50 0.698 against 0.473 for a same-machine control, 3 seeds each, on the DeepFish val split (F18)**. Not yet confirmed on the sealed OzFish set. Larger models and stronger augmentation help on one seed each (F14, F15), and one seed of the combined recipe (Kakadu + OzFish data + augmentation) reaches 0.755 mAP@50 on the same split (F22, a screen); the split test (F23) attributes that gain to the OzFish data, not the augmentation (0.764 with default augmentation, 0.698 for augmentation alone, one seed each); on three seeds the OzFish-data recipe reaches 0.750 mAP@50 (F24), and YOLOv8s on the same data 0.821 (one seed, Orin latency unmeasured). |
+| Training | **Planned grid done** (6 runs: 3 seeds x {640, 960} px), then an improvement programme (F12 to F18): the strongest result is adding Kakadu training data, **mean mAP@50 0.698 against 0.473 for a same-machine control, 3 seeds each, on the DeepFish val split (F18)**. Not yet confirmed on the sealed OzFish set. Larger models and stronger augmentation help on one seed each (F14, F15), and one seed of the combined recipe (Kakadu + OzFish data + augmentation) reaches 0.755 mAP@50 on the same split (F22, a screen); the split test (F23) attributes that gain to the OzFish data, not the augmentation (0.764 with default augmentation, 0.698 for augmentation alone, one seed each); on three seeds the OzFish-data recipe reaches 0.750 mAP@50 (F24), and YOLOv8s on the same data **0.812 mean over three seeds, range 0.041 (F32)**, at about 50 ms per frame on the Orin (F28). |
 | Evaluation | In-domain, cross-dataset (sealed OzFish), size-stratified recall, and a colour-perturbation study. |
 | Weights | Published as GitHub release `v0.1.0-models`, fetched and checksum-verified by `scripts/fetch_models.py`. |
 | Demos | Three shareable pages and a runnable Gradio app. |
@@ -973,6 +973,34 @@ The crowded OzFish frame gave the same picture (YOLOv8n 35.97 ms, YOLOv8s 46.08 
 
 **Limits.** 10-minute loops (F9 and F29 were 30 minutes), one run per case, ambient not measured, `jetson_clocks` inactive (clocks not locked), warm board for the second sustained run, one clip, serial pipeline, software decode, no NVDEC. Only mode id 2 was tried; the 15 W and 7 W modes were not measured.
 
+### F32. YOLOv8s on the combined data holds its lead over YOLOv8n on three seeds: mean 0.812 mAP@50 against 0.750, every YOLOv8s seed above every YOLOv8n seed (but the YOLOv8s seed range is 0.041)
+`ai-gpu`, YOLOv8s, DeepFish + Kakadu + OzFish train data, default augmentation, 960 px, **batch 5** (automatic; the YOLOv8n arm used batch 10), validated on DeepFish val; the same recipe as F24 with seeds 1 and 2 added by `configs/plan_v8s_seeds.yaml`. Runs: `20261005-yolov8s-960-kakadu-ozfish-s0` (seed 0, F24),
+`20261007-yolov8s-960-kakadu-ozfish-s1`, `20261007-yolov8s-960-kakadu-ozfish-s2`; analyses `runs/analysis-20261005-20261005-yolov8s-960-kakadu-ozfish-s0`, `runs/analysis-20261007-20261007-yolov8s-960-kakadu-ozfish-s1`, `runs/analysis-20261008-20261007-yolov8s-960-kakadu-ozfish-s2`
+(error analysis at conf 0.25 and IoU 0.5; held-out OzFish deployments as in F21). Epochs 71, 77 and 80; the best epoch 41, 46 and 50.
+
+| | Seed 0 | Seed 1 | Seed 2 | **YOLOv8s mean (range)** | YOLOv8n arm (F24) mean (range) |
+|---|---|---|---|---|---|
+| DeepFish val mAP@50 | 0.8209 | 0.7873 | **0.8286** | **0.8123 (0.0413)** | 0.7499 (0.0238) |
+| DeepFish val mAP@50-95 | 0.5624 | 0.5607 | **0.5778** | **0.5670 (0.0171)** | 0.5142 (0.0253) |
+| Fish found, of 1,385 (conf 0.25) | 1,004 | 1,009 | **1,015** | 1,009 (11) | 910 (31) |
+| False alarms at conf 0.25 (on empty frames) | 122 (24) | 601 (268) | **80 (21)** | 268 (521) | 269 (322) |
+| Recall 16-32 px at conf 0.25 | 26.4% | 30.0% | **30.8%** | 29.1% | 15.0% |
+| Best-F1 confidence (F1 there) | 0.25 (0.800) | 0.5 (0.723) | 0.2 (0.823) | varies | 0.2, 0.4, 0.25 |
+| Held-out OzFish mAP@50 | 0.7242 | 0.7329 | 0.7312 | **0.7294 (0.0087)** | 0.6887 (0.016) |
+| Held-out OzFish mAP@50-95 | 0.3976 | 0.4022 | 0.4010 | **0.4003 (0.0046)** | 0.3745 (0.013) |
+
+- **The lead over YOLOv8n holds on three seeds.** Mean DeepFish val mAP@50 is **+0.062** and mAP@50-95 **+0.053** higher, and on held-out OzFish **+0.041** and **+0.026**. The weakest YOLOv8s seed (seed 1, 0.7873) is above the best YOLOv8n seed (0.7640) by 0.023, about the YOLOv8n range (0.024) and 0.56 times the YOLOv8s range (0.041); on mAP@50-95 (0.5607 against 0.5260)
+  and on held-out OzFish (0.7242 against 0.698) the separation is larger than either arm's range. Three seeds against three is a clear separation of the two sets, not a significance test.
+- **The YOLOv8s seed spread is larger than the YOLOv8n spread on mAP@50** (0.041 against 0.024): seed 1 is 0.034 below seed 0 and 0.041 below seed 2, so the single seed of F24 (0.821) was a good draw and the three-seed mean (**0.812**) is the better number to quote.
+- **Fish found is steady across seeds** (1,004 to 1,015, mean +99 over the YOLOv8n arm) while **false alarms at the default 0.25 are not comparable between seeds** (80 to 601): the models differ in calibration, not in how many fish they find. Seed 1 reaches its best F1 (0.723) only at confidence 0.5 and is the weakest in F1; seed 2 is best (0.823, at 0.2).
+  **An operating threshold has to be chosen per model on validation**, and no false-alarm figure from one seed or one threshold describes the recipe.
+- **Small fish:** recall on 16-32 px fish is 26.4%, 30.0% and 30.8% (about 29% on average, against 15% for the YOLOv8n arm); fish under 16 px are still never found (0 of 10 in every seed). The size of the YOLOv8s advantage is mostly in 32-96 px fish (77.2% to 78.4%).
+- **Cost** (F28, F29): about 50 ms against 41 ms per frame serial, 24.4 against 34.1 fps on video, at 25 W on the Orin (seed 0's engine; seeds 1 and 2 were not built).
+
+**Best model by evidence.** YOLOv8s trained on DeepFish + Kakadu + OzFish train data (three seeds, mean 0.812 mAP@50, 0.567 mAP@50-95), deployable at about 24 fps on video on the Orin; YOLOv8n on the same data remains the faster fallback (about 34 fps, mean 0.750). Which YOLOv8s seed to ship is a separate choice:
+the Orin engine and the F24 analysis are seed 0, seed 2 scores best on this validation split, and picking the best seed on the split it is scored on gives a slightly optimistic number, so the choice should be made before the sealed OzFish test is run and not from it.
+**Limits.** The batch size differs from the YOLOv8n arm (5 against 10); three seeds per arm; DeepFish val resembles Kakadu (F13); held-out OzFish deployments may share reefs with training ones; the sealed OzFish test has **not** been run, and its meaning changed once OzFish training data was used (Section 3.3 of the report draft); false alarms are counted at one threshold.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
@@ -1010,6 +1038,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | `scripts/archive_paths.py` named its archive folder by the second | Two archive commands run in the same second shared one folder and the second manifest overwrote the first; the files were safe but the undo record of the first move was lost. Found by reading the printed manifest paths, fixed (a counter suffix, a test), and the lost manifest rebuilt from the archived files (`MANIFEST_loose_copies.json`, 398 items). | Output of the second and third archive commands |
 | `scripts/export_onnx.py` crashed on any checkpoint not named like `yolov8n-960-s2` | Its name pattern `-(\d+)-s(\d+)` did not match `yolov8s-960-kakadu-ozfish-s0`, so the first export attempt of the new models died with an AttributeError (nothing was written). Fixed with a pattern that allows extra name parts. | The traceback on the first export |
 | The first Nano timing run of 2026-10-07 produced nothing | `trt_runner.py` was started without the board's `pylibs` folder on `PYTHONPATH`, so `cuda-python` was not found (`No module named 'cuda'`), and the redirect `>` overwrote the board's copies of the earlier 960 px e2e logs with the traceback. No result was reported from it; the repo copies of the original logs (`runs/device-20261004/`) are intact, and the rerun writes date-stamped files (`e2e_20261007_*`). | The `Traceback` in every output log |
+| `scripts/post_run.py` failed on the server for the first queued seed | The queue's analysis step ran `scripts/error_analysis.py`, which had only ever been run on the workstation and was not in the server's `scripts/` folder (`No such file or directory`); the held-out OzFish half worked. The cause was in this repo's deployment, not the model: the script was copied over and the seed 1 analysis was run by hand on the CPU (the GPU was busy training seed 2). The step still shows `failed` in the queue status. Caught from the step log at the next hourly check. | `data/.cache/queue/post-v8s-s1.log` |
 | `bootstrap.py` chose the `cu124` wheel on a CUDA 13 driver | RTX 5060 (compute capability 12.0) needs cu128; cu124 would fail only at the first CUDA op. The driver header said `CUDA UMD Version`, which the parser did not read, so it fell back to cu124. | Reading the dry-run output on the new server |
 | `import cv2` fails on the remote server (`libxcb.so.1`) | The headless container has no display libraries, so `opencv-python` cannot load and `check_env.py` reported ultralytics missing. Fixed there by swapping in `opencv-python-headless` (no sudo needed). Not yet automated in `bootstrap.py`. | `check_env.py --require-gpu` |
 | `bootstrap.py` refused to install outside a venv | Kaggle run died on `import ultralytics` after downloading data | Reading the supervisor log |

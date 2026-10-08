@@ -79,7 +79,7 @@ corrections are kept in a table (§6 there), not overwritten.
 | Augmentation, model size | stronger augmentation; s, m, YOLO11s | augmentation and size help in-domain on one seed (F14 to F16); later shown to add nothing once data is added (F23) |
 | More data | Kakadu | the biggest lever: 0.698 vs 0.473 mAP@50, 3 seeds each (F17, F18); holds on unseen OzFish deployments (F21) |
 | OzFish data | add the labelled OzFish frames | +0.052 mAP@50 over Kakadu-only on three seeds (F22 to F24); held-out OzFish 0.689 vs 0.357 |
-| Model size on combined data | YOLOv8s | best accuracy so far: 0.821 mAP@50, 0.562 mAP@50-95, one seed, batch 5 (F24); Orin latency unmeasured |
+| Model size on combined data | YOLOv8s | best accuracy: mean 0.812 mAP@50 and 0.567 mAP@50-95 over three seeds (range 0.041), batch 5, against 0.750 and 0.514 for YOLOv8n; every YOLOv8s seed above every YOLOv8n seed (F24, F32); about 50 ms per frame on the Orin (F28) |
 | Device cost of the bigger model | time YOLOv8s on the Orin | 50.1 ms per frame against 40.8 ms for YOLOv8n (19.9 against 24.5 fps serial, 25 W, JPEG decode); only the GPU stage grows (F28); a 30-minute video run held 24.4 fps against 34 fps for YOLOv8n, with no throttling and a plateau near 58 C (F29); MAXN_SUPER did not speed up the network (F31) |
 | Higher training resolution | YOLOv8s at 1280 px, data re-cut at 1280 | no gain in small-fish recall (24.5% against 26.4%) and DeepFish mAP@50 0.785 against 0.821; held-out OzFish 0.736 against 0.724; one seed, batch 3 (F27) |
 | Small fish at inference | tile the frame and merge | finds +8% fish and lifts 16-32 px recall from 26% to 37-39%, but false alarms rise 3.7-5x and AP50 falls 0.817 to 0.78-0.79, at 5-10x the compute (F25); a small-box merge (four rules fixed in advance) also did not beat the whole frame (F26): dropped |
@@ -88,8 +88,7 @@ corrections are kept in a table (§6 there), not overwritten.
 
 - **Data diversity is the dominant lever**, larger than resolution, architecture or augmentation.
 - **The low scores are mostly a protocol effect** (site split vs random split) plus narrow data, not a broken model.
-- **The best model by accuracy is YOLOv8s on DeepFish + Kakadu + OzFish** (one seed); **the best confirmed and
-  deployable one is YOLOv8n on the same data** (three seeds, timed on the Orin).
+- **The best model is YOLOv8s on DeepFish + Kakadu + OzFish** (three seeds, mean 0.812 mAP@50, F32), deployable at about 24 fps on video on the Orin (F29); **YOLOv8n on the same data is the faster fallback** (about 34 fps, mean 0.750).
 - Small fish (16 to 32 px) are still mostly missed: 26% recall at best.
 
 ## 6. What it does not show
@@ -107,7 +106,7 @@ corrections are kept in a table (§6 there), not overwritten.
 In order of value for the report:
 
 1. **YOLOv8s on the Orin was timed (F28):** 50.1 ms per frame against 40.8 ms for YOLOv8n at 25 W. A 30-minute video run held 24.4 fps (F29). Parity on the board was checked (F30). Still to do: other power modes.
-2. **Two more YOLOv8s seeds** at the same batch (about 3.5 h each) to turn the one-seed lead into a confirmed one.
+2. **Two more YOLOv8s seeds** were run (F32): the lead holds on three seeds.
 3. **Run the sealed OzFish test once** on the chosen final model, after steps 1 and 2. The owner decides the timing.
 4. **Small fish** (tiling and a small-box merge were tried and did not help, F25 and F26): training at 1280 px did not help either, F27): training on tiles is untried; the likelier route is more data with small, hard fish.
 5. **Decide the licence question** (will any copy of software or weights leave the institution?). If yes, the AGPL

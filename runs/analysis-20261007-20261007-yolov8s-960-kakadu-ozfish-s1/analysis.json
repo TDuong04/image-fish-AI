@@ -1,0 +1,135 @@
+{
+  "model": "best.pt",
+  "imgsz": 960,
+  "data": "deepfish",
+  "split": "val",
+  "images": 1339,
+  "gt_boxes": 1385,
+  "iou_match": 0.5,
+  "operating_conf": 0.25,
+  "device": "cpu (x86_64)",
+  "date_utc": "2026-10-07T23:07:03+00:00",
+  "sweep": [
+    {
+      "conf": 0.05,
+      "precision": 0.4201,
+      "recall": 0.8087,
+      "f1": 0.5529,
+      "tp": 1120,
+      "fp": 1546,
+      "fn": 265
+    },
+    {
+      "conf": 0.1,
+      "precision": 0.5037,
+      "recall": 0.7819,
+      "f1": 0.6127,
+      "tp": 1083,
+      "fp": 1067,
+      "fn": 302
+    },
+    {
+      "conf": 0.15,
+      "precision": 0.5539,
+      "recall": 0.7603,
+      "f1": 0.6409,
+      "tp": 1053,
+      "fp": 848,
+      "fn": 332
+    },
+    {
+      "conf": 0.2,
+      "precision": 0.591,
+      "recall": 0.743,
+      "f1": 0.6583,
+      "tp": 1029,
+      "fp": 712,
+      "fn": 356
+    },
+    {
+      "conf": 0.25,
+      "precision": 0.6267,
+      "recall": 0.7285,
+      "f1": 0.6738,
+      "tp": 1009,
+      "fp": 601,
+      "fn": 376
+    },
+    {
+      "conf": 0.3,
+      "precision": 0.6703,
+      "recall": 0.7148,
+      "f1": 0.6918,
+      "tp": 990,
+      "fp": 487,
+      "fn": 395
+    },
+    {
+      "conf": 0.4,
+      "precision": 0.7568,
+      "recall": 0.6787,
+      "f1": 0.7156,
+      "tp": 940,
+      "fp": 302,
+      "fn": 445
+    },
+    {
+      "conf": 0.5,
+      "precision": 0.8183,
+      "recall": 0.6469,
+      "f1": 0.7226,
+      "tp": 896,
+      "fp": 199,
+      "fn": 489
+    },
+    {
+      "conf": 0.6,
+      "precision": 0.8958,
+      "recall": 0.6022,
+      "f1": 0.7202,
+      "tp": 834,
+      "fp": 97,
+      "fn": 551
+    }
+  ],
+  "best_f1_threshold": 0.5,
+  "missed_fish": {
+    "total": 376,
+    "no prediction": 99,
+    "found but under threshold": 277,
+    "badly placed": 0
+  },
+  "false_alarms": {
+    "total": 601,
+    "duplicate": 14,
+    "badly placed": 6,
+    "background": 581
+  },
+  "recall_by_size_at_640_input": {
+    "<16": {
+      "found": 0,
+      "total": 10,
+      "recall": 0.0
+    },
+    "16-32": {
+      "found": 82,
+      "total": 273,
+      "recall": 0.3004
+    },
+    "32-96": {
+      "found": 576,
+      "total": 746,
+      "recall": 0.7721
+    },
+    ">96": {
+      "found": 351,
+      "total": 356,
+      "recall": 0.986
+    }
+  },
+  "empty_frames": {
+    "frames": 464,
+    "false_alarms": 268
+  },
+  "note": "single split of near-duplicate video frames: counts are descriptive, not independent samples"
+}

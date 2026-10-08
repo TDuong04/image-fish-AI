@@ -219,13 +219,9 @@ reefs with the training deployments, and DeepFish validation resembles Kakadu (F
 False alarms at the default threshold varied a lot between seeds (155, 477, 175) and the best-F1 threshold moved from 0.2
 to 0.4, so an operating threshold has to be chosen per model on validation (F24).
 
-### 5.5 Model size (F14 to F16, F24)
+### 5.5 Model size (F14 to F16, F24, F32)
 
-Larger models on DeepFish alone gave one-seed gains that were later shown to depend on data. On the combined data
-YOLOv8s scored 0.821 mAP@50 and 0.562 mAP@50-95 (one seed, batch 5), against 0.750 and 0.514 for the YOLOv8n mean: it found
-1,004 of 1,385 fish with 122 false alarms (YOLOv8n arm: 910 and 269) and scored 0.724 on held-out OzFish (0.689). It
-costs about three times the compute per image and its latency on the Orin has not been measured; the YOLOv8s result is
-a single seed with a different batch size from the YOLOv8n arm and is a screen (F24).
+Larger models on DeepFish alone gave one-seed gains that were later shown to depend on data. On the combined data YOLOv8s (batch 5, three seeds) scored a mean of 0.812 mAP@50 (seeds 0.821, 0.787, 0.829; range 0.041) and 0.567 mAP@50-95, against 0.750 and 0.514 for the YOLOv8n mean (range 0.024): every YOLOv8s seed is above every YOLOv8n seed, and on held-out OzFish the means are 0.729 and 0.689 (F32). YOLOv8s found about 1,009 of 1,385 fish at the default threshold (YOLOv8n arm: 910) and 29% of 16-32 px fish (15%). False alarms at a fixed 0.25 threshold varied from 80 to 601 between YOLOv8s seeds because the models differ in calibration, so an operating threshold has to be chosen per model on validation. The YOLOv8s seed spread is larger than the YOLOv8n spread, and its batch size differs (5 against 10). It costs about three times the compute per image and 9 ms more per frame on the Orin (Section 5.8).
 
 ### 5.6 Test-time tiling does not help (F25, F26)
 
