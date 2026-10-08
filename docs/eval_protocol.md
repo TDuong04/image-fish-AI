@@ -145,8 +145,14 @@ These were applied from 2026-10-04 and are why some earlier numbers are not comp
    (earlier runs) to 0.2-0.25 (Kakadu runs); a deployment threshold is a setting, not a property of the model.
 7. **Error analysis is part of a result**: `scripts/error_analysis.py` at IoU 0.5 and conf 0.25 (found and missed, false alarms by
    cause, recall by box size), so a gain in mAP is attributed to finding more fish or to fewer false alarms (F16 is the example).
-8. **The sealed OzFish set is run once, at the end, on the final candidate, and not used to choose between candidates.** It has not
-   been run on any model as of this entry.
+8. **The sealed OzFish set is run once, at the end, on the final candidate, and not used to choose between candidates.** (Correction
+   2026-10-08: an earlier version of this line said it had not been run on any model. It had been run on the six DeepFish-only baseline models
+   of PROGRESS F2, before any OzFish data were used for training.)
+9. **Sealed-set run of 2026-10-08, fixed before it was run.** The final candidate is the YOLOv8s recipe (DeepFish + Kakadu + OzFish train data, 960 px,
+   default augmentation). Its **three seeds** (`20261005-yolov8s-960-kakadu-ozfish-s0`, `20261007-yolov8s-960-kakadu-ozfish-s1`, `20261007-yolov8s-960-kakadu-ozfish-s2`)
+   are each evaluated **once** with `scripts/evaluate.py --data ozfish_eval` (imgsz 960, conf 0.001, NMS IoU 0.7, the script's defaults) and reported as a mean and
+   range. No seed is chosen from the result, no threshold is tuned on it, nothing is re-run, and the YOLOv8n arm is not evaluated on it. The test frames come from
+   deployments excluded from the OzFish training frames, but from the same collections, so this measures new deployments of the same footage and not an unseen source.
 
 ## Known limitations, declared up front
 

@@ -35,7 +35,7 @@ from fish import paths  # noqa: E402
 from fish.device import resolve_device  # noqa: E402
 
 # Checkpoints are named ...-<imgsz>-s<seed>.pt by the training run.
-NAME = re.compile(r"yolov8n-(?P<imgsz>\d+)-s(?P<seed>\d+)")
+NAME = re.compile(r"yolo[a-z0-9]+-(?P<imgsz>\d{3,4})(?:-[a-z0-9]+)*-s(?P<seed>\d+)")   # yolov8n-960-s2, yolov8s-960-kakadu-ozfish-s1
 
 
 def parse_name(p: Path) -> tuple[int, int] | None:
