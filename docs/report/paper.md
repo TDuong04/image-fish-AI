@@ -8,14 +8,9 @@ Results, Discussion, Limitations, Conclusion, as in comparable fish-detection pa
 
 ## Abstract
 
-**[PENDING: written last, when the final numbers exist. Provisional statement of what it will have to say, so nothing
-is forgotten.]**
-
-A single-class fish detector for underwater video is trained from COCO-pretrained YOLOv8 weights on three openly
-licensed datasets and evaluated with a site-level split that avoids frame leakage. [Headline result with seeds and
-spread.] [Cross-dataset result on the sealed test set, run once: mean 0.700 mAP@50 on three YOLOv8s seeds (F33), new deployments of the same footage; and on a truly unseen Mediterranean source every detector is poor, AP50 0.05 to 0.23 (F39).] [Measured end-to-end frame rate and sustained thermal
-behaviour on a Jetson Orin Nano, with the power mode stated.] The analysis shows that [what limits recall], that
-[what raised it], and that [what did not help].
+Fish detectors for underwater video are usually reported with a single score, but that score depends on how the data were split, which data were used and what the model had seen before. We train a single-class YOLOv8 detector from COCO-pretrained weights on three openly licensed datasets (DeepFish, Kakadu, OzFish) and evaluate it with site-level splits, a sealed test set used once, cluster-bootstrap intervals and a source no model saw, then measure it on a Jetson Orin Nano.
+Four findings stand out. (1) The split matters more than the model: on identical sites a model trained on a random per-image split scores 0.99 AP50 against 0.49 for models that held the sites out. (2) More diverse training data was the largest lever (DeepFish alone 0.47 mAP@50, with Kakadu 0.70, with OzFish 0.75 for YOLOv8n; YOLOv8s 0.81 over three seeds, range 0.041), while higher resolution, stronger augmentation, a small-object head, test-time tiling and a second detector family did not change the picture. (3) Generalisation to a truly unseen source is poor: on a Mediterranean set, every detector we tried, including published YOLO-Fish models, scored 0.05 to 0.23 AP50; the sealed OzFish test (new deployments of data also used in training) gave 0.70. Fine-tuning on 25 labelled early frames of one fixed camera lifted later frames of that camera from 0.18 to 0.65 AP50, with a small and uncertain gain on other cameras. (4) On the Orin Nano (25 W, TensorRT FP16, built on the board) the shipped YOLOv8s engine takes about 50 ms per frame end to end, holds 24 fps over 30 minutes of video with no throttling visible and agrees with PyTorch on 12 test frames.
+We report what the evidence does not show: no footage from a deployment site, one device run per model, single-seed screens for several comparisons, and checkpoint selection on a reused validation split. All numbers are regenerable from committed configurations, code and run records, prepared for release under the AGPL-3.0.
 
 ## 1. Introduction
 
@@ -335,9 +330,17 @@ reported in the literature, while recall (about 0.72) is lower **[compare only a
 
 The work uses only openly licensed footage of fish and no human subjects. The datasets are credited and their licences followed (NOTICE.md); the models are for research and monitoring support, and a missed fish can matter, so outputs need human review where a decision depends on them (model card). No animals were handled by the authors.
 
-## 8. Conclusion **[PENDING]**
+## 8. Conclusion
 
-**[Remaining before writing: the abstract, the conclusion and the final wording. The release licence is decided (AGPL-3.0, NOTICE.md).]**
+We set out to ask how accurate a fish detector can be made, and what it costs on a Jetson Orin Nano, when both answers are measured on the device and on data the model has not seen. Within the limits below, the answers are as follows.
+
+**Accuracy is limited by data and by the evaluation, not by the architecture we tried.** A YOLOv8s detector trained on DeepFish, Kakadu and OzFish reaches 0.81 mAP@50 on site-held-out DeepFish validation (three seeds, range 0.041) and 0.70 on the sealed OzFish set, run once. The gain from more diverse data (+0.28 mAP@50 for YOLOv8n) dwarfs those from resolution, augmentation, tiling, a small-object head, and a second detector family, which showed the same data effect. The same pipeline scores 0.99 on a random split of the same sites, so a score is only as meaningful as the protocol behind it; we report intervals that resample clips, deployments, dates or groups, and mark which comparisons stand on one seed.
+
+**Generalisation to a new source is the open problem.** On a Mediterranean set no model reached 0.25 AP50, including published YOLO-Fish detectors, although the same models perform far better on sources close to their training data. A little labelled footage from the target camera recovers most of it for that camera (0.18 to 0.65 AP50 with 25 frames, 0.76 with about 530), but gives only a small, uncertain gain on other cameras. Our reading is a practical recipe rather than a claim of robustness: label a few dozen frames of the deployment camera and fine-tune. We could not test that recipe on a real deployment, because we have no footage from one.
+
+**The device is not the bottleneck.** The shipped YOLOv8s engine takes about 50 ms per frame end to end and holds about 24 fps over 30 minutes of video at 25 W with no throttling visible, with the larger model costing about 9 ms more per frame than YOLOv8n. These are single runs in one power mode with ambient temperature not measured, no INT8 and no on-device mAP.
+
+**Future work.** (i) Footage and labels from the intended site, to test the adaptation recipe and set an operating threshold on the target. (ii) A second validation source, so that model selection and the final claim no longer share a split. (iii) Repeated device runs across power modes and ambient temperatures, and INT8 with its accuracy cost. (iv) An audit of the Mediterranean false alarms, and counting rather than detection as the field metric. Code, configurations, run records and weights are prepared for release under the AGPL-3.0 (not yet public), so that each claim can be checked or overturned.
 
 ## Reproducibility statement
 

@@ -103,7 +103,7 @@ References
 | 5.1 to 5.9 | `paper.md` section 5 | drafted; **5.9 waits for F34** |
 | 5.10 | | one paragraph to write (the finding must stay labelled as not measured) |
 | 6, 7 | `paper.md` sections 6 and 7 | drafted |
-| 8, abstract | | **pending** |
+| 8, abstract | `paper.md` | drafted (2026-10-11) |
 | Appendices | `eval_protocol.md`, `PROGRESS.md`, `GUIDE.md` | assemble |
 
 ## Writing order
