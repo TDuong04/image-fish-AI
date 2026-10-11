@@ -1,0 +1,50 @@
+{
+  "model": "20261007-yolov8s-960-kakadu-ozfish-s2.pt",
+  "conf": 0.25,
+  "imgsz": 960,
+  "seed": 0,
+  "panels": [
+    {
+      "source": "DeepFish validation (sites held out)",
+      "file": "9898_Acanthopagrus_palmaris_f000098.jpg",
+      "labelled": 1,
+      "found": 0,
+      "false_alarms": 0
+    },
+    {
+      "source": "DeepFish validation (sites held out)",
+      "file": "7623_F2_f000248.jpg",
+      "labelled": 2,
+      "found": 2,
+      "false_alarms": 0
+    },
+    {
+      "source": "OzFish held-out deployments",
+      "file": "ozf_g000211_r_026069.jpg",
+      "labelled": 12,
+      "found": 10,
+      "false_alarms": 1
+    },
+    {
+      "source": "OzFish held-out deployments",
+      "file": "ozf_a000003_r_018913.jpg",
+      "labelled": 31,
+      "found": 17,
+      "false_alarms": 9
+    },
+    {
+      "source": "Mediterranean set (unseen source)",
+      "file": "dem_00555.jpg",
+      "labelled": 31,
+      "found": 3,
+      "false_alarms": 0
+    },
+    {
+      "source": "Mediterranean set (unseen source)",
+      "file": "dem_01077.jpg",
+      "labelled": 10,
+      "found": 5,
+      "false_alarms": 4
+    }
+  ]
+}

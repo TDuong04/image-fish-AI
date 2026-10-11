@@ -210,6 +210,10 @@ explain less than 0.03 of the mAP@50 gap to published figures (F19), and the spl
 (F20, Section 1). A colour perturbation study showed the model tolerates missing colour (greyscale -7% to -9%) but not
 wrong colour (hue shifts up to -49%; F4), which is relevant because water colour shifts with depth.
 
+![fig5_examples](figures/fig5_examples.png)
+
+**Figure 2.** Example detections of the shipped YOLOv8s (seed 2), two frames per source, drawn by a fixed random rule (frames with at least one label, `random.Random(0)`), not chosen by appearance. Green solid boxes are labels, red dashed boxes are detections at confidence 0.25; each title gives found of labelled fish and false alarms. Sources: DeepFish validation sites, the held-out OzFish deployments used for decisions (not the sealed test set), and the unseen Mediterranean set. The DeepFish miss is a fish that is hard to see in murky water; on OzFish the model misses small or occluded fish in crowded scenes and adds some boxes in empty water; on the Mediterranean frames it finds the large fish but misses many small ones (3 of 31 on the first). Two frames per source illustrate behaviour and do not measure it. Files and counts: `docs/report/figures/examples.json`; drawn by `scripts/make_examples.py`.
+
 ### 5.4 More diverse data is the largest lever (F17, F18, F21, F23, F24)
 
 Same machine, same batch, three seeds each, DeepFish validation, YOLOv8n at 960 px:
@@ -268,7 +272,7 @@ real frames (F7). **The larger model costs more on the device (F28):** a YOLOv8s
 
 ![fig4_device](figures/fig4_device.png)
 
-**Figure 2.** Thirty minutes of looped video on the Orin Nano (25 W, `jetson_clocks` inactive, software H.264 decode), YOLOv8s FP16 engines of seed 0 (F29) and seed 2, the shipped one (F34). Frame rate stays at about 24 fps; junction temperature rises a few degrees and levels off (the temperature axis does not start at zero, and the seed 2 run started warm). Ambient not measured; one run each. Records: `runs/device-20261007/sustained_*.jsonl`.
+**Figure 3.** Thirty minutes of looped video on the Orin Nano (25 W, `jetson_clocks` inactive, software H.264 decode), YOLOv8s FP16 engines of seed 0 (F29) and seed 2, the shipped one (F34). Frame rate stays at about 24 fps; junction temperature rises a few degrees and levels off (the temperature axis does not start at zero, and the seed 2 run started warm). Ambient not measured; one run each. Records: `runs/device-20261007/sustained_*.jsonl`.
 
 ### 5.9 Sealed cross-dataset test (F33)
 
@@ -283,7 +287,7 @@ A confidence threshold chosen on DeepFish validation also lands at very differen
 
 ![fig2_unseen](figures/fig2_unseen.png)
 
-**Figure 3.** AP50 on the unseen Mediterranean set (1,516 frames, 18 groups) for our detectors and the published YOLO-Fish detectors. Bars are arm means (ours: three seeds); error bars are 95% intervals over groups only, and are wide. Our scoring routine (101-point AP) differs slightly from Ultralytics mAP and the published detectors were run through OpenCV with our own letterboxing. Record: `runs/unseen-20261011-deepecomar-labels/unseen.json` (F39).
+**Figure 4.** AP50 on the unseen Mediterranean set (1,516 frames, 18 groups) for our detectors and the published YOLO-Fish detectors. Bars are arm means (ours: three seeds); error bars are 95% intervals over groups only, and are wide. Our scoring routine (101-point AP) differs slightly from Ultralytics mAP and the published detectors were run through OpenCV with our own letterboxing. Record: `runs/unseen-20261011-deepecomar-labels/unseen.json` (F39).
 
 ### 5.11 A second detector family (F40)
 
@@ -298,7 +302,7 @@ On later frames of the same camera, 25 labelled frames raised AP50 from 0.18 (95
 
 ![fig3_adaptation](figures/fig3_adaptation.png)
 
-**Figure 4.** Fine-tuning on n labelled early frames of one fixed camera (YOLOv8s seed 2 recipe, one seed per point, 95% intervals over dates or groups). Left: later frames of the same camera. Right: other cameras. The square is the COCO-only control on all early frames. Record: `runs/adaptation-20261011/adaptation.json` (F41).
+**Figure 5.** Fine-tuning on n labelled early frames of one fixed camera (YOLOv8s seed 2 recipe, one seed per point, 95% intervals over dates or groups). Left: later frames of the same camera. Right: other cameras. The square is the COCO-only control on all early frames. Record: `runs/adaptation-20261011/adaptation.json` (F41).
 
 ## 6. Discussion
 
