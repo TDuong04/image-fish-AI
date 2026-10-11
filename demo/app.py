@@ -17,6 +17,7 @@ machine it is actually running on and says so.
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import time
 from pathlib import Path
@@ -184,6 +185,9 @@ def run_video(video, imgsz_choice, conf, stride, max_seconds, progress=gr.Progre
     return out_path, summary
 
 
+SOURCE_URL = os.environ.get("FISH_SOURCE_URL", "the repository this software was obtained from (set $FISH_SOURCE_URL to its address)")
+
+
 def build_ui(default_model: int) -> gr.Blocks:
     ck = available_checkpoints()
     found = ", ".join(f"{k}px" for k in sorted(ck)) or "none found"
@@ -240,8 +244,8 @@ def build_ui(default_model: int) -> gr.Blocks:
             "0.416 for 640 (3 seeds each). On held-out OzFish footage the models have never "
             "seen, both drop by more than half and the gap narrows to 0.013 — so most of the "
             "in-domain advantage does not survive a change of scene.\n\n"
-            "**No Jetson numbers anywhere.** The board has not been acquired, so any FPS figure "
-            "for it would be copied from a datasheet rather than measured."
+            "**Jetson numbers are measured, not quoted.** Frame rates for the Orin Nano come from runs on the board "
+            "(docs/PROGRESS.md, findings F8, F9, F28 to F31); nothing is shown here that was not measured." + "\n\n---\n*Licence: AGPL-3.0 (see LICENSE). Source code of this application: %s*" % SOURCE_URL
         )
     return ui
 

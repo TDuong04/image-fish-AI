@@ -32,7 +32,11 @@ statement, so this decision gates the publication.
 > The datasets are third-party and openly licensed: DeepFish (Saleh et al., 2020), Kakadu (Jansen et al., 2022; CC BY 4.0), OzFish (Australian Institute of Marine Science et al., 2019; CC BY 3.0 AU; our converted labels are a derivative work)
 > and DEEPECOMAR (Catalan and Alvarez-Ellacuria, 2023; CC BY 4.0). The scripts that rebuild the splits and converted labels are included; the datasets themselves are obtained from their original sources.
 
-## What I need from you
+## Decision (2026-10-11)
+
+The owner chose **option 1: share everything openly under the AGPL-3.0**, and asked for the licensing to be handled properly. Done in the working tree: `LICENSE`, `NOTICE.md`, `docs/MODEL_CARD.md`, the AGPL section 13 source offer in the apps and a README section; what still needs the owner before publication is in `docs/PUBLISH_CHECKLIST.md`.
+
+## What I needed from you (answered above)
 
 - Which option, or "ask my supervisor".
 - Where the repository would be published (the project has a Gitea and a GitHub remote; nothing has been pushed yet).

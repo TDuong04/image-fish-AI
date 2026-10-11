@@ -97,6 +97,12 @@ but the validation split resembles it, so treat that as unproven until the seale
 | `Dataset ... does not exist` | `python scripts/get_data.py` |
 | Download stopped halfway | Run `python scripts/get_data.py` again. |
 
+## Licence
+
+AGPL-3.0 (`LICENSE`): the code, configurations, documentation and trained weights are free software under the GNU Affero General Public License, version 3, because they build on Ultralytics YOLOv8 (AGPL-3.0).
+Third-party software, dataset credits and the changes made to each dataset are in `NOTICE.md`; the models are described in `docs/MODEL_CARD.md`. If you serve a modified version over a network, offer its source to your users
+(the apps print a source link from `$FISH_SOURCE_URL`). Datasets are not included and keep their own licences (CC BY, MIT). Before making the repository public, read `docs/PUBLISH_CHECKLIST.md`.
+
 ## More
 
 | File | Read it when |

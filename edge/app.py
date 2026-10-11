@@ -214,6 +214,9 @@ def run_video(video, size_choice, conf, stride, max_seconds, engines,
 
 
 # --------------------------------------------------------------------- the UI
+SOURCE_URL = os.environ.get("FISH_SOURCE_URL", "the repository this software was obtained from (set $FISH_SOURCE_URL to its address)")
+
+
 def build_ui(engines):
     sizes = sorted(engines)
     default = str(sizes[-1]) if sizes else "960"
@@ -225,6 +228,7 @@ def build_ui(engines):
             "*Engines loaded: %s. Trained on DeepFish, single class.*"
             % (", ".join("%dpx" % s for s in sizes) or "none found"))
         status = gr.Markdown(board_status())
+        gr.Markdown("\n\n---\n*Licence: AGPL-3.0 (see LICENSE). Source code of this application: %s*" % SOURCE_URL)
 
         with gr.Tab("Photo"):
             with gr.Row():
