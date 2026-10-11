@@ -4,6 +4,7 @@ The research report is drafted here, section by section, as results come in.
 
 | File | What |
 |---|---|
+| `PLAN.md` | **Start here:** the thesis chapter plan, the publication plan and the ordered work list |
 | `paper.md` | The manuscript draft. Sections marked **[PENDING]** wait on experiments. |
 | `references.bib` | Machine-readable references. |
 | `references.md` | How each reference was verified, where it is used and what is still to check. |
