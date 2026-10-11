@@ -195,7 +195,7 @@ baseline models trained before any OzFish data were used.
 Recall depends strongly on fish size (YOLOv8n, 960 px): about 3% for 16-32 px fish, 49% for 32-96 px and 91% above
 96 px (one seed, F10; the three-seed means in F3 agree to within a few points). **Missing fish, not wrongly placed
 boxes, limits the detector:** at 960 px, 523 of 688 missed fish had no prediction at all, 161 were found below the 0.25
-threshold, and only 4 were badly placed (F10). Most false alarms fall on background (321 of 365). A manual audit of a
+threshold, and only 4 were badly placed (F10). Most false alarms fall on background (321 of 365). Used as a counter, the detector counts about 80% of the labelled fish per frame on the DeepFish validation split (YOLOv8s, 79 to 84% over three seeds), but its clip-level maximum count is over-estimated (119 to 150% of the true maximum) because false alarms inflate the largest frame (F36). A manual audit of a
 sample found that most "misses" were visible fish rather than label errors (F11, one reviewer, a sample). Empty frames
 explain less than 0.03 of the mAP@50 gap to published figures (F19), and the split protocol explains the rest of that gap
 (F20, Section 1). A colour perturbation study showed the model tolerates missing colour (greyscale -7% to -9%) but not
