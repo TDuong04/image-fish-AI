@@ -64,7 +64,8 @@ which is why the second family we test is a Faster R-CNN.
 BRUVS are a standard tool in fish ecology. Deep-learning models for BRUVS include generalised models for
 semi-automated length measurement in stereo-BRUVS (Marrable et al., 2023). An earlier paper from the same group (Marrable et al., 2022) fine-tunes a COCO-pretrained YOLOv5-large to find fish on OzFish and reports, for a fish-only detector, precision 0.898 and recall 0.699, and out-of-sample recall of 0.70 to 0.89 on three further OzFish subsets and 0.70 on DeepFish; its split (66/17/17 "by class") is not described as by deployment or video, so these are not comparable with our site-level results. The 2023 work fine-tunes a COCO-pretrained YOLOv5s with early stopping, as we do, but to find head and tail points on fish crops cut from OzFish stereo pairs; it drops fish smaller than 200 pixels in height or width, and it holds out OzFish deployments (by filename prefix) as out-of-sample test data. Dropping small fish is the opposite of our reporting of recall by size (F10, F11). Our footage includes baited, crowded
 scenes (OzFish) as well as sparse reef scenes (DeepFish), and the two behave differently (F2).
-**[Read and expand: what BRUVS studies need from a detector, and the annotation practice behind OzFish.]**
+What a BRUVS study needs from a detector is a count or a measurement per video, not a box per frame. Baited remote underwater video collects relative-abundance data across many habitats, and Marrable et al. (2023) motivate automation by the labour that manual analysis and measurement still require, even when footage is recorded remotely. The usual abundance summary is MaxN, the largest number of fish visible in any single frame of a video; Ditria et al. (2020) score a detector on MaxN and note that false positives and false negatives can cancel each other in that count, so an accurate MaxN does not show an accurate detector. This is why we report counting error and found and missed fish alongside AP (F36) and why we treat the detector as a tool that produces boxes for later summaries.
+The OzFish boxes are described in the dataset documentation as crowd-sourced; fish ecologists marked the head and tail points used for length measurement (Marrable et al., 2023), and Marrable et al. (2022) relabelled point annotations of two species as bounding boxes. An unlabelled fish therefore scores as a false alarm, a limitation we state in Section 7.
 
 ### 2.3 Small objects and tiling
 
@@ -316,10 +317,8 @@ small and faint fish, so neither test-time tiling (more fish found for more fals
   measures new deployments of the same OzFish footage, not an unrelated source, and the YOLOv8n arm was not run on it.
 - OzFish labels come from crowd annotation, so an unlabelled fish scores as a false alarm; the label audit is one
   reviewer's sample.
-- Device results cover one clip and one 30-minute run each for YOLOv8n and YOLOv8s (plus one frame pair for timing), at one power mode (25 W); thermal behaviour at other power modes,
-  ambient temperatures or loads is unknown. The Nano was offline for the later experiments.
-- The AGPL-3.0 licence of Ultralytics code and its pretrained weights applies to any copy that leaves the institution;
-  this is an open decision (PROGRESS section 8).
+- Device results cover one clip and one 30-minute run each for YOLOv8n, YOLOv8s seed 0 and the shipped YOLOv8s seed 2 engine (plus one frame pair for timing), at 25 W, and one 10-minute run per model at MAXN_SUPER (F31); the 15 W and 7 W modes, other ambient temperatures and other loads were not measured, ambient was not recorded, and there is no INT8 engine and no on-device mAP.
+- The AGPL-3.0 licence of Ultralytics code and its pretrained weights applies to any copy that leaves the institution; we chose to release everything openly under the AGPL-3.0 (NOTICE.md), so the licence is an obligation that is met, not a risk, but any non-AGPL reuse would need a different detector.
 - Multiple Ultralytics versions and machines were used across the phases; comparisons are made within a machine.
 - **No deployment data yet.** The system is not deployed, so there is no footage from a target site and no field test; the closest substitutes are the held-out and sealed OzFish sets and the Mediterranean unseen-source test, and the on-device measurements use recorded clips. Deployment-site evaluation is future work.
 
