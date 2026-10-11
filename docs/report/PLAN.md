@@ -37,7 +37,7 @@ Extras for a **journal version** (not needed for the thesis or the workshop pape
 - an unseen-source test (a dataset no training or selection data came from),
 - an external comparison under our split (for example the YOLO-Fish weights, or another detector family; the licence decision may require one anyway),
 - confidence intervals that resample whole clips or sites, since frames are not independent,
-- a field test on live footage.
+- a field test on live footage: **not possible yet** (the owner's team is not deploying yet, 2026-10-11), so the paper states that no deployment data exist and lists it as future work; the Mediterranean unseen-source test (F-number to follow) is the closest substitute.
 
 ## 3. Work list, in order
 

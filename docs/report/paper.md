@@ -291,6 +291,7 @@ reported in the literature, while recall (about 0.72) is lower **[compare only a
 - The AGPL-3.0 licence of Ultralytics code and its pretrained weights applies to any copy that leaves the institution;
   this is an open decision (PROGRESS section 8).
 - Multiple Ultralytics versions and machines were used across the phases; comparisons are made within a machine.
+- **No deployment data yet.** The system is not deployed, so there is no footage from a target site and no field test; the closest substitutes are the held-out and sealed OzFish sets and the Mediterranean unseen-source test, and the on-device measurements use recorded clips. Deployment-site evaluation is future work.
 
 ## 8. Conclusion **[PENDING]**
 

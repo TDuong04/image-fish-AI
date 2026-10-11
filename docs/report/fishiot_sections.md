@@ -54,7 +54,7 @@ and a junction temperature near 57 C (F8, F9). The YOLOv8s engine takes about 50
 These are single short runs at one ambient temperature that was not recorded.
 
 **Status and next steps.** The detector has not been evaluated on footage from the target deployment; its training data are tropical rivers and reefs, and an informal test on a reef photograph from outside the datasets showed it finds large fish and many small ones
-but misses fish in dense, dark schools (not a measured result). **[CHECK: what footage the FishIoT site will produce; if it differs strongly, retraining or fine-tuning on a sample of it is the next step]**
+but misses fish in dense, dark schools (not a measured result). **[CHECK: the system is not deployed yet; once the site footage exists, evaluate on a labelled sample of it and fine-tune if it differs strongly]**
 
 ---
 
