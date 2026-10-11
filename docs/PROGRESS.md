@@ -92,6 +92,7 @@ Last updated: 2026-10-04.
 - `scripts/bootstrap_ci.py`, `configs/stats_arms.yaml` — cluster-bootstrap confidence intervals: every checkpoint of four recipes (3 seeds each) is matched to the DeepFish val labels at IoU 0.50 to 0.95 once, then scored on resamples of whole clips (20) or sites (6), the same resample for every model so differences are paired; arm score = mean over seeds. Output `runs/stats-<date>-bootstrap-{clip,site}/ci.json` (F35).
 - `scripts/prepare_deepecomar.py`, `scripts/eval_unseen.py`, `configs/unseen_arms.yaml` — the unseen-source test (rules fixed in `docs/eval_protocol.md` item 10 before it was run): converts the DEEPECOMAR Mediterranean fish set to one class (stain boxes dropped, duplicate frames removed) and scores Ultralytics checkpoints, the published YOLO-Fish darknet detectors (OpenCV DNN, CPU) and torchvision models with one AP routine. **Queued/running, no result yet.**
 - `scripts/train_tv.py`, `configs/train/tv_frcnn_deepfish_only.yaml`, `configs/train/tv_frcnn_combined.yaml`, `configs/plan_tv.yaml` — a second detector family (torchvision Faster R-CNN, MobileNetV3-Large FPN, BSD-licensed code, COCO-pretrained) trained on the DeepFish-only and the combined data (one seed each, 12 epochs, 960 px, checkpoint by 0.1 AP50 + 0.9 AP50-95 on DeepFish val) to test whether the data finding is specific to YOLO and as a permissive-licence path. **Queued 2026-10-11 on `ai-gpu`, no result yet.** `src/fish/device.py` gained a `torch` property (the `torch.device` of the choice).
+- `scripts/count_accuracy.py` — per-frame counts and clip-level MaxN from the cached predictions of `scripts/bootstrap_ci.py`, at each model's own validation best-F1 confidence; output `runs/stats-counting/counts.json` (F36).
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -1047,6 +1048,24 @@ Runs: `runs/stats-20261011-bootstrap-clip/ci.json` and `runs/stats-20261011-boot
 - **The OzFish gain is not established at the 95% level once clips are resampled.** Its interval includes zero (-0.001 to +0.091 on clips, -0.004 to +0.074 on sites) although 94 to 97% of resamples are positive and every seed of F24 was above every Kakadu-only seed. The honest reading is "positive on every seed, probably real, but its size is uncertain by more than the seed range suggested" (F24 said it "holds on three seeds"; see section 6).
 - **Absolute scores are uncertain by roughly +-0.1** (YOLOv8s 0.798, 0.705 to 0.913) because the split has few clips; frame-level intervals would be far narrower and wrong.
 - **Limits.** 20 clips (6 sites) is a small number of clusters, so the intervals themselves are rough (percentile bootstrap); seed variance is not included in them; the AP routine differs slightly from Ultralytics'; one validation split.
+
+### F36. As a counter, the detector counts about 80% of the fish per frame, but the clip-level maximum (MaxN) is over-estimated because false alarms inflate the largest frame (DeepFish val, 12 checkpoints)
+`scripts/count_accuracy.py` turns the cached predictions of F35 into counts: per frame, the number of boxes above each model's own best-F1 confidence on DeepFish validation (0.20 to 0.50, from its error analysis; the same split, so the numbers are optimistic and meant to show the bias, not to rank models), against the number of labelled fish, and per clip the maximum count (MaxN, the usual ecological summary).
+Output `runs/stats-counting/counts.json`. The split has 1,385 fish in 1,339 frames (mean 1.03 per frame) and 20 clips.
+
+| Recipe (3 seeds) | Fish counted / true (sum over frames) | Mean absolute error per frame | Frame correlation | MaxN, predicted / true (sum over clips) |
+|---|---|---|---|---|
+| YOLOv8n, DeepFish only | 51% to 67% | 0.65 to 0.82 | 0.09 to 0.21 | 108% to 123% |
+| + Kakadu | 72% to 88% | 0.47 to 0.49 | 0.47 to 0.56 | 135% to 192% |
+| + Kakadu + OzFish | 69% to 84% | 0.42 to 0.47 | 0.45 to 0.56 | 123% to 162% |
+| YOLOv8s, same data | **79% to 84% (81, 79, 84)** | **0.31 to 0.50 (0.35, 0.50, 0.31)** | 0.48 to 0.74 (0.66, 0.48, 0.74) | **119% to 150% (146, 119, 150)** |
+
+- **Totals per frame are low, by about a fifth.** YOLOv8s counts 79 to 84% of the labelled fish across all frames, net of its false alarms (about 28% of fish are missed at these thresholds, F32, and false alarms offset part of that). The frame-by-frame correlation with the true count is moderate (0.48 to 0.74), the better seeds being the better counters.
+- **MaxN is over-estimated, not under-estimated.** The largest count in a clip is 119 to 150% of the true largest count for YOLOv8s (up to 192% for some YOLOv8n seeds), because one frame with several false alarms sets the maximum. A per-frame total that is too low and a MaxN that is too high are both true here; which one matters depends on how the count is used.
+- **This corrects a simpler statement.** Earlier text said counts from this detector are biased low; that holds for the per-frame totals and for the crowded OzFish test (recall 0.61, F33), not for MaxN on sparse footage.
+- **Consequence for any consumer of the count** (an ecologist, or a controller that takes the fish count as an observation): the error has a sign that depends on the statistic, so the count should be calibrated or smoothed (for example a median over a window of frames, not a maximum), and its error profile should be measured on the deployment's own footage.
+
+**Limits.** One validation split of 20 clips and few fish per frame (mean 1.03), so these counting errors say little about crowded scenes (the sealed OzFish set, with 23.7 fish per frame, was evaluated for mAP only, once, and not for counts); the threshold was chosen on the same split; frames are not independent; no confidence intervals were computed for these ratios.
 
 ---
 

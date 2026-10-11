@@ -46,7 +46,7 @@ YOLOv8n; every YOLOv8s seed is above every YOLOv8n seed (F32). Training data was
 measures the domain shift between deployments and not a new site type. The earlier DeepFish-only models scored 0.217 on the same set (F2).
 
 **What the detector gets wrong.** The detector misses fish rather than mislocating them: about 72% of fish are found on DeepFish validation and about 61% on the crowded OzFish set. Large fish (over 96 px) are found almost always (99%), medium fish about 77%, small fish (16 to 32 px) about 29%,
-and fish under 16 px are never found (F10, F32). **Counts from this detector are therefore biased low, more so in crowded scenes and for small fish**, which is relevant for an agent that treats the count as an observation. The default 0.25 confidence threshold gives very
+and fish under 16 px are never found (F10, F32). **Counts from this detector are therefore biased, and the sign depends on the statistic**: per-frame totals are about a fifth too low on DeepFish validation (79 to 84% of fish counted by YOLOv8s, F36) and lower still in crowded scenes and for small fish, while the clip-level maximum is over-estimated (119 to 150% of the true MaxN) because false alarms inflate the largest frame. This is relevant for an agent that treats the count as an observation: a windowed median is safer than a maximum. The default 0.25 confidence threshold gives very
 different false-alarm counts between seeds (80 to 601), so the operating threshold must be set per deployed model on validation footage (F32).
 
 **On the Orin Nano** (25 W mode, clocks not locked, fan on). End to end, the YOLOv8n engine takes about 41 ms per frame (about 24 fps) with image decode, and about 34 fps on video; a 30-minute video run held the frame rate with no throttling
