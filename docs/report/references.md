@@ -40,6 +40,9 @@ from a web-search result summary only; do not quote numbers from it in the final
 | `varoquaux2018crossval` | Cross-validation failure, NeuroImage 2018 | Abstract read (arXiv 1706.07581): about plus or minus 10% error at 100 samples in neuroimaging; fold standard error underestimates it (search results: error bars of about +-10% at 100 samples; fold spread understates uncertainty) | Results (small test sets) | Read; check volume and pages |
 | `kapoor2024reforms` | REFORMS reporting guidelines, Science Advances 2024 | Abstract read (arXiv 2308.07832): 32 questions with paired guidelines, 19 authors; the checklist items themselves not read (search results: 32-item checklist from a consensus of 19 researchers) | Reproducibility statement | Read the checklist items on test-set use before claiming compliance |
 
+| `zhang2026ulfd` | ULFD-YOLO, Animals 2026 | **Read** (PMC full text, first 100,000 characters): Orin Nano 8 GB, 15 W configured mode, 448 x 640, FP32, 19 to 24 fps, TensorRT not used, stages and thermal not measured | Related work 2.5 | OK |
+| `huang2025robotic` | Lightweight YOLO for robotic underwater biological detection, Front. Mar. Sci. 2025 | **Read** (Frontiers full text, first 100,000 characters): Jetson Nano 2GB 16.54 fps; runtime, input size and power mode not reported; URPC2021 and DUO | Related work 2.5 | OK |
+| `liu2025lfn` | LFN-YOLO, Front. Mar. Sci. 2025 | **Read** (Frontiers full text, first 100,000 characters): Jetson AGX Orin, no numeric FPS for it; its abstract and conclusion disagree on URPC mAP (74.1 vs 82.2); not quoted for numbers | Related work 2.5 | OK |
 ## Sources considered and not used
 
 - Several other fish-detection papers appeared in search results (EPANet, DeepFishNET+, an ETRI Journal ensemble benchmark,

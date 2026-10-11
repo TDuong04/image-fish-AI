@@ -79,6 +79,11 @@ Recognition models trained at some camera locations can fail at others: Beery et
 the COCO-style average over IoU 0.50 to 0.95 (Lin et al., 2014). Duplicate boxes are removed by non-maximum
 suppression (Neubeck and Van Gool, 2006).
 
+### 2.5 Fish and underwater detection on embedded hardware
+
+Several recent papers run underwater detectors on Jetson boards, mostly without the measurements we make. Zhang et al. (2026) report a 3.0 MB YOLOv11n-derived fish detector at 19 to 24 frames per second on a Jetson Orin Nano (8 GB, 15 W configured mode, 448 x 640 input, FP32, batch 1), with TensorRT installed but not used; they state that the timing is "model inference latency reported by the deployed pipeline", that the stages (preprocessing, inference, post-processing) were not decomposed, that power was a configured mode rather than a measurement, and that thermal steady-state behaviour and TensorRT variants were not tested. Their accuracy is on two small sets of their own (3,402 aquarium images and a 1,180-image WildFish subset, mAP@50 of 0.960 and 0.803), and their held-out images were also used to pick checkpoints, which they acknowledge. Huang et al. (2025) report 16.54 frames per second for a lightweight YOLO11 variant on a Jetson Nano 2GB, and Liu et al. (2025) test a YOLOv8n variant on a Jetson AGX Orin; for both the runtime, timing scope and power mode are not given, and no sustained or thermal measurement is reported in either. Both use URPC-style benchmarks (holothurian, echinus, scallop and starfish) rather than fish footage.
+Our device measurements differ in three ways that matter for comparison: the engine is TensorRT FP16 built on the board; latency is end to end (decode, letterbox, GPU, NMS) with the stages reported separately (F8, F28); and frame rate and temperature are logged over 30 minutes of video, with the power mode stated (F9, F29, F34). The figures are still not like for like: our 24 frames per second is at 544 x 960, a larger input than 448 x 640, with a larger model, at 25 W. We therefore do not rank our speed against theirs; we state what ours was measured under.
+
 ## 3. Datasets
 
 All annotation is converted to a single class, `fish`. Frames are 1920x1080 unless stated.
@@ -348,5 +353,5 @@ seeds are in `docs/eval_protocol.md` and `docs/PROGRESS.md`. Data licences: Deep
 
 See `references.bib` (machine-readable) and `references.md` (how each was verified and what it is used for). Entries
 cited above: Akyon et al. (2022); Australian Institute of Marine Science et al. (2019); Beery et al. (2018); Catalan et al. (2023); Ayyagari et al. (2025); Ditria et al. (2020); Dwork et al. (2015); Everingham et al. (2010); Jansen et
-al. (2022); Jocher et al. (2023); Kapoor and Narayanan (2023); Kapoor et al. (2024); Liu et al. (2020); Lin et al. (2014); Marrable et al. (2022, 2023); Muksit et al. (2022); Neubeck and Van Gool (2006);
-Ovalle et al. (2022); Recht et al. (2019); Redmon et al. (2016); Ren et al. (2017); Roelofs et al. (2019); Saleh et al. (2020); Salman et al. (2020); Varoquaux (2018); Vijayalakshmi and Sasithradevi (2025); Villon et al. (2016); Zhang et al. (2024).
+al. (2022); Huang et al. (2025); Jocher et al. (2023); Kapoor and Narayanan (2023); Kapoor et al. (2024); Liu et al. (2020, 2025); Lin et al. (2014); Marrable et al. (2022, 2023); Muksit et al. (2022); Neubeck and Van Gool (2006);
+Ovalle et al. (2022); Recht et al. (2019); Redmon et al. (2016); Ren et al. (2017); Roelofs et al. (2019); Saleh et al. (2020); Salman et al. (2020); Varoquaux (2018); Vijayalakshmi and Sasithradevi (2025); Villon et al. (2016); Zhang et al. (2024, 2026).
