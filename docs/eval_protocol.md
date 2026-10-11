@@ -169,6 +169,9 @@ These were applied from 2026-10-04 and are why some earlier numbers are not comp
     the export holds 1,590 image files of which 1,516 are unique source frames (74 frames appear twice under different Roboflow hashes; the first copy is kept; train and valid folders share no source frame);
     after conversion the set has 1,516 images, 17,157 fish boxes (16,488 without the `small` category), 794 stain boxes dropped and 30 images without a fish.
 
+    Second addendum, also written before any result of this run was read: as a secondary reading, found fish and false alarms are also reported at each YOLOv8s seed's own best-F1 confidence chosen on the DeepFish validation split
+    (seed 0: 0.25, seed 1: 0.5, seed 2: 0.2, from `runs/analysis-*`), to show whether a threshold chosen on validation transfers to an unseen source. It is a reading, not a selection.
+
 ## Known limitations, declared up front
 
 1. `ozfish_eval` has no empty frames → no cross-dataset false-alarm measurement.

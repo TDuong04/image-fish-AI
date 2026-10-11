@@ -7,6 +7,7 @@ The research report is drafted here, section by section, as results come in.
 | `THESIS_STRUCTURE.md` | **The thesis layout**: chapters, where each finding goes, state and writing order |
 | `PLAN.md` | **Start here:** the thesis chapter plan, the publication plan and the ordered work list |
 | `fishiot_sections.md` | Optional draft of the detection slots in the FishIoT team report; not part of the thesis |
+| `LICENCE_OPTIONS.md` | The licence facts and the options for the availability statement (needs the owner's decision) |
 | `paper.md` | The manuscript draft. Sections marked **[PENDING]** wait on experiments. |
 | `references.bib` | Machine-readable references. |
 | `references.md` | How each reference was verified, where it is used and what is still to check. |
