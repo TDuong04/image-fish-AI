@@ -1,0 +1,13 @@
+engine 20261007-yolov8s-960-kakadu-ozfish-s2-544x960-fp16.engine   input 544x960   output (1, 5, 10710)
+2 detection(s) on a 1920x1080 frame
+  [1210, 2, 1919, 442]  conf 0.875
+  [0, 468, 147, 659]  conf 0.849
+
+per-stage over 200 runs, each a separate wall-clock figure:
+  jpeg_decode_ms  median   17.28   p95   17.54   mean   17.34
+  preprocess_ms   median    8.03   p95    8.23   mean    8.04
+  gpu_ms          median   23.63   p95   23.83   mean   23.72
+  postprocess_ms  median    0.92   p95    1.01   mean    0.94
+  frame_total_ms  median   49.89   p95   50.24   mean   50.03
+  (gpu_ms = host-to-device + GPU forward + device-to-host, one sync. It is larger
+   than trtexec's kernel-only figure because the copies are included.)

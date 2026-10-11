@@ -1156,6 +1156,27 @@ Runs `20261011-tv-frcnn-mnv3-deepfish-only-s0` and `20261011-tv-frcnn-mnv3-combi
 
 **Limits.** One seed per arm, so differences of a few hundredths are within seed spread (F32 shows 0.04); a short, untuned 12-epoch recipe with flip-only augmentation against YOLO's tuned defaults; the validation scores use the checkpoint chosen on the same split; the unseen-source rows were added after the main result was read; a different input size handling (min side 544, max side 960) from the YOLO letterbox.
 
+### F34. The shipped YOLOv8s engine (seed 2) matches seed 0 on the Orin: 50 ms per frame serial, 24.3 fps over 30 minutes of video, engine agrees with PyTorch on 12 frames (25 W, one run)
+The owner chose **seed 2** of the YOLOv8s recipe to ship (after F32 and F33; it is the best seed on DeepFish validation, 0.829 mAP@50, and, without having been used to choose it, also the highest on the sealed test, F33). Its ONNX file (`20261007-yolov8s-960-kakadu-ozfish-s2-544x960.onnx`, sha256 `5badd214...`, checked on the board after upload) was built into an FP16 engine on the Orin
+(TensorRT 10.3.0, L4T 36.4.7; engine sha256 `50367607...c4a4`), then, in one scripted run on 2026-10-11 (`seed2.sh`, **nvpmodel 25W**, `jetson_clocks` inactive, governor `schedutil`, fan on): the 12-frame agreement check, 200-run end-to-end timing on the two frames of F28, and a 30-minute video loop.
+Logs and the parity record: `runs/device-20261007/` (`e2e_20261011_*`, `sustained_yolov8s_s2_960_20261011.*`, `seed2_status.txt`, `engine_parity_fp16_20261007-yolov8s-960-kakadu-ozfish-s2-544x960.json`). Ambient not measured.
+
+| | Seed 2 engine | Seed 0 engine (F28, F29) |
+|---|---|---|
+| Parity with PyTorch, 12 frames (F7 method) | **PASS**: 0 confident misses, 0 extras, 1 borderline; worst IoU 0.923, worst confidence drift 0.017 | PASS (F30): worst IoU 0.990, drift 0.007 |
+| End to end, serial, median (DeepFish frame / crowded OzFish frame) | **49.89 ms (p95 50.24) / 50.17 ms** | 50.13 / 50.24 ms |
+| Stages (decode / letterbox / copy + GPU / NMS) | 17.3 / 8.0 / 23.6 / 0.9 ms | 17.5 / 8.1 / 23.6 / 0.9 ms |
+| 30-minute video loop, fps (min / median / max; first 2 min / last 2 min) | **23.2 / 24.3 / 25.2; 24.2 / 24.5** | 23.0 / 24.4 / 25.3; 24.4 / 24.4 |
+| Total per frame p50 / p95 (first and last 2 min) | 40.7 / 43.0 and 40.4 / 42.3 ms | 40.6 / 42.6 and 40.4 / 42.5 ms |
+| Junction temperature (mean first / last 2 min; maximum) | 57.5 / 59.2 C; 59.5 C | 52.1 / 57.8 C; 58.2 C |
+| Fan RPM (start, end, maximum) / input power | 2,165, 2,461, 2,551 / 6.6 to 7.1 W (mean 6.94) | 1,511, 2,271, 2,360 / 6.5 to 7.1 W (mean 6.92) |
+
+- **Seed 2 costs the same as seed 0, as expected** (same architecture): 49.9 against 50.1 ms serial, 24.3 against 24.4 fps on video, and the same 23.6 ms GPU stage.
+- **No throttling visible, again.** Frame rate was flat across 30 minutes (first and last two minutes 24.2 and 24.5 fps) while the temperature rose about 2 C and levelled near 59 C. This run **started warm** (56.9 C, straight after the timing runs), which is why its temperatures are higher than seed 0's run (52.1 to 58.2 C); the 1 C higher maximum is not attributed to the model. `gpu_mhz` again read 306 in every window and is not used.
+- **The engine agrees with PyTorch on the 12 frames** under the same gate as before (no confident misses or extras, worst matched IoU at least 0.9, confidence drift at most 0.05), one detection near the threshold counted as borderline. Unlike the seed 0 ONNX (F28), the seed 2 ONNX also passed the strict raw-tensor gate on export (4.2e-3 against 1e-2 pixels).
+
+**Limits.** One engine, one run, 25 W only, 12 frames for agreement (not an on-device mAP), ambient not measured, software H.264 decode (no NVDEC), one clip, a warm start; no INT8.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
@@ -1221,7 +1242,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 
 ## 8. Not done / open
 
-- **Which YOLOv8s seed ships (decided 2026-10-11): seed 2.** Chosen by the owner after F32 and F33 as the best seed on DeepFish val (0.829 mAP@50). It is also the highest of the three on the sealed OzFish test (0.705 against 0.695 and 0.701), but that result was not used to choose it; the honest sealed figure for the recipe is the three-seed mean, 0.700 (F33). The Nano engine of F28 to F30 is seed 0; the seed 2 engine is being built and measured (FD-146).
+- **Which YOLOv8s seed ships (decided 2026-10-11): seed 2.** Chosen by the owner after F32 and F33 as the best seed on DeepFish val (0.829 mAP@50). It is also the highest of the three on the sealed OzFish test (0.705 against 0.695 and 0.701), but that result was not used to choose it; the honest sealed figure for the recipe is the three-seed mean, 0.700 (F33). The Nano engine of F28 to F30 is seed 0; the seed 2 engine was built and measured (F34, FD-146).
 - **Device measurement is only partly done.** GPU kernel time is measured for both engines (F6) and parity holds on 12 frames (F7). End-to-end latency is measured for a serial pipeline (F8). Sustained 30-min throughput and thermals are measured once at 960 / 25 W (F9); still open: other power modes, a repeat, a warmer ambient, an explained GPU-clock reading, **hardware video decode (NVDEC)**, memory under a real pipeline, any **overlap or pinned-memory optimisation** of the CPU stages that dominate, INT8, and **mAP on the device**. Engines exist only for seed 2, and the board boots from an SD card with about 8 GB free.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.

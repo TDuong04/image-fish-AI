@@ -80,6 +80,7 @@ corrections are kept in a table (§6 there), not overwritten.
 | More data | Kakadu | the biggest lever: 0.698 vs 0.473 mAP@50, 3 seeds each (F17, F18); holds on unseen OzFish deployments (F21) |
 | OzFish data | add the labelled OzFish frames | +0.052 mAP@50 over Kakadu-only on three seeds (F22 to F24); held-out OzFish 0.689 vs 0.357 |
 | Model size on combined data | YOLOv8s | best accuracy: mean 0.812 mAP@50 and 0.567 mAP@50-95 over three seeds (range 0.041), batch 5, against 0.750 and 0.514 for YOLOv8n; every YOLOv8s seed above every YOLOv8n seed (F24, F32); about 50 ms per frame on the Orin (F28) |
+| Shipped engine (seed 2) | build, check and time the chosen seed on the Orin | same as seed 0: 49.9 ms serial, 24.3 fps over 30 minutes, parity PASS on 12 frames (F34) |
 | Device cost of the bigger model | time YOLOv8s on the Orin | 50.1 ms per frame against 40.8 ms for YOLOv8n (19.9 against 24.5 fps serial, 25 W, JPEG decode); only the GPU stage grows (F28); a 30-minute video run held 24.4 fps against 34 fps for YOLOv8n, with no throttling and a plateau near 58 C (F29); MAXN_SUPER did not speed up the network (F31) |
 | Unseen source | score once on a Mediterranean set no data came from, with the published YOLO-Fish detectors | all detectors poor (AP50 0.05 to 0.23); the data finding replicates (0.045 to 0.166); published YOLOv4 highest at 0.227 (F39) |
 | Second detector family | torchvision Faster R-CNN on the same data | the data effect replicates: +0.105 AP50 on validation, +0.036 on the unseen source; one seed each (F40) |

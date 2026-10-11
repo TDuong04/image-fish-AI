@@ -1,0 +1,15 @@
+engine : engines/20261007-yolov8s-960-kakadu-ozfish-s2-544x960-fp16.engine
+frames : 12   input 'images'
+  frame 00 ok  output0  shape (1, 5, 10710)
+  frame 01 ok  output0  shape (1, 5, 10710)
+  frame 02 ok  output0  shape (1, 5, 10710)
+  frame 03 ok  output0  shape (1, 5, 10710)
+  frame 04 ok  output0  shape (1, 5, 10710)
+  frame 05 ok  output0  shape (1, 5, 10710)
+  frame 06 ok  output0  shape (1, 5, 10710)
+  frame 07 ok  output0  shape (1, 5, 10710)
+  frame 08 ok  output0  shape (1, 5, 10710)
+  frame 09 ok  output0  shape (1, 5, 10710)
+  frame 10 ok  output0  shape (1, 5, 10710)
+  frame 11 ok  output0  shape (1, 5, 10710)
+done: 12 ok, 0 failed

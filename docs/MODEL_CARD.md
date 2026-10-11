@@ -27,7 +27,7 @@ DeepFish, Kakadu and OzFish (training); DeepFish validation sites (decisions); a
 | Sealed OzFish test mAP@50 / mAP@50-95 (new deployments of the same footage, not an unseen source; 95% interval over deployments 0.669 to 0.724 for AP50) | 0.700 / 0.380 | not evaluated | F33, F37 |
 | Unseen Mediterranean source, AP50 (95% interval over groups) | 0.166 (0.136 to 0.442) | 0.154 (0.123 to 0.413) | F39 |
 | Recall on 16-32 px fish / fish under 16 px (DeepFish val) | about 29% / 0% | about 15% / 0% | F32 |
-| Jetson Orin Nano, 25 W, video, sustained 30 min | about 24 fps, about 58 C, no throttling | about 34 fps, about 57 C, no throttling | F29, F9 |
+| Jetson Orin Nano, 25 W, video, sustained 30 min (YOLOv8s: seed 2 engine, F34, same as seed 0, F29) | about 24 fps, 59 C maximum, no throttling | about 34 fps, about 57 C, no throttling | F34, F29, F9 |
 
 Uncertainty: with whole clips resampled the YOLOv8s lead over YOLOv8n is positive (+0.058 AP50, interval 0.012 to 0.104) and absolute scores carry roughly +-0.1 (F35).
 
