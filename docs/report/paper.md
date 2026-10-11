@@ -301,10 +301,7 @@ Adding two openly licensed datasets raised mAP@50 on a site-held-out split from 
 resolution (+0.09), augmentation (none after data), or test-time tiling (negative). The remaining misses are mostly
 small and faint fish, so neither test-time tiling (more fish found for more false alarms) nor training at a higher resolution (no gain, F27) fixed them, so more data that contains small, hard fish is the more likely route.
 
-**Why our scores sit below published figures.** The same pipeline scores 0.98 mAP@50 on a random per-image split
-(F20). Published results may use random per-image splits or other protocols, which we could not verify, so the
-comparison is not like for like. Precision at our operating point (about 0.89 to 0.92) is in the same range as the figures
-reported in the literature, while recall (about 0.72) is lower **[compare only after reading the cited papers]**.
+**Comparison with published figures.** We do not rank ourselves against published numbers, because the protocols differ and, where we could read them, do not separate sites. The same pipeline scores 0.98 mAP@50 on a random per-image split (F20); AquaYOLO reports 0.909 on its own pond data and 0.814 on DeepFish and OzFish combined with no site-level separation described (Section 2.1), a level close to our 0.81 on site-held-out validation, but the splits, image sizes and metric definitions differ, so the closeness means nothing by itself. Ditria et al. (2020) report F1 and mAP@50 above 0.92 for one species in one habitat type, and Salman et al. (2020) F-scores of 0.80 to 0.87 on Fish4Knowledge and LifeCLEF videos; these settings are not ours either. The only like-for-like comparison we could make is on an unseen source scored with one routine for every model, which is why the published YOLO-Fish detectors appear in Section 5.10 and not here. We did not compare precision and recall with the literature, because we did not read figures for them in the papers we could access.
 
 **Deployment.** Because the network is a small part of each frame on the Orin, the larger model is affordable: YOLOv8s adds about 9 ms (22%) per frame (F28) for a gain of about 0.06 mAP@50 on three seeds (F32).
 
