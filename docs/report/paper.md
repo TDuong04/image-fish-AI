@@ -95,6 +95,10 @@ training sites, 5,178 images and 14,078 boxes, 29.9% empty frames; 6 validation 
 boxes, 34.7% empty frames). The split is committed and the code asserts that no site appears on both sides (`docs/data_audit.md`).
 This validation split is the common yardstick for all models in this report.
 
+![fig1_leakage](figures/fig1_leakage.png)
+
+**Figure 1.** The split decides the score. AP50 on the same six DeepFish validation sites (46 clips): a YOLOv8n trained on a random per-image split, which saw neighbouring frames of these sites, scores 0.989; three site-split YOLOv8n controls score 0.491 (95% cluster-bootstrap intervals over clips; note the wide interval on the second bar). Record: `runs/stats-20261011-leakage-control/leakage.json` (F38). Drawn by `scripts/make_figures.py`.
+
 ### 3.2 Kakadu (extra training data only)
 
 The Kakadu dataset (Jansen et al., 2022; CC BY 4.0) has 44,112 frames and 82,904 boxes of 23 freshwater taxa from
@@ -261,6 +265,10 @@ the junction temperature rose from about 50 to 56.5 C and flattened, input power
 throttling was visible (F9; one run, ambient assumed 26 C, GPU clock reading unusable). The engines match PyTorch on 12
 real frames (F7). **The larger model costs more on the device (F28):** a YOLOv8s engine trained on the combined data takes 50.1 ms per frame end to end (serial, JPEG decode, 25 W, 200 runs) against 40.8 ms for the YOLOv8n engine, because only the GPU stage grows (23.6 against 14.3 ms); the serial frame rate falls from about 24.5 to 19.9 fps. In a 30 minute run with video decode the YOLOv8s engine held 24.4 fps (against 34 fps for YOLOv8n), the junction temperature plateaued near 58 C and no throttling was visible (F29; one run, 25 W, ambient not measured). The seed 2 engine, the one chosen to ship, reproduced these figures (49.9 ms serial, 24.3 fps over 30 minutes of video, 59.5 C maximum, no throttling visible) and agrees with PyTorch on all 12 test frames (F34). Switching the board to MAXN_SUPER left the GPU stage unchanged (14.3 and 23.5 ms) and sped up only CPU JPEG decode (about 4 ms), so the serial totals fell by 9 to 10% but the 10-minute video frame rates did not change (F31). A control rerun of the original baseline engine gave 41.0 ms, matching F8. **Not measured:** the 15 W and 7 W power modes, INT8, mAP computed on the device, NVDEC hardware decode, and agreement with PyTorch beyond 12 frames. On those 12 frames the YOLOv8s engine agrees with PyTorch on every detection (worst IoU 0.990), while the new YOLOv8n engine matches every detection but fails the preset IoU gate on one 9-pixel box in a crowded frame (IoU 0.708, F30).
 
+![fig4_device](figures/fig4_device.png)
+
+**Figure 2.** Thirty minutes of looped video on the Orin Nano (25 W, `jetson_clocks` inactive, software H.264 decode), YOLOv8s FP16 engines of seed 0 (F29) and seed 2, the shipped one (F34). Frame rate stays at about 24 fps; junction temperature rises a few degrees and levels off (the temperature axis does not start at zero, and the seed 2 run started warm). Ambient not measured; one run each. Records: `runs/device-20261007/sustained_*.jsonl`.
+
 ### 5.9 Sealed cross-dataset test (F33)
 
 The sealed OzFish test set (352 frames, 8,329 boxes, 297 clips from deployments excluded from training) was evaluated once on the three YOLOv8s seeds, under a plan fixed in the evaluation protocol before the run: mean mAP@50 **0.700** (seeds 0.695, 0.701, 0.705) and mAP@50-95 **0.380** (0.376, 0.381, 0.385), precision 0.807 and recall 0.610 at the default operating point. This is close to the 0.729 mAP@50 on the held-out OzFish deployments used for decisions (F32), and far above the 0.217 of the DeepFish-only YOLOv8n baselines on the same set (F2); that comparison mixes model size, Kakadu data and OzFish data. Because OzFish frames were in training, the test measures new deployments of the same footage, not an unseen source. No seed was chosen from the result, nothing was tuned on it, and the YOLOv8n arm was not evaluated on it. Because the first pass kept no boxes and so gave no interval, the same three fixed models were scored a second time, only to add uncertainty and under rules fixed beforehand (the sealed set was therefore scored twice): resampling the 249 deployments gives a mean AP50 of 0.697 with a 95% interval of 0.669 to 0.724 (AP50-95 0.379, 0.355 to 0.403), with the routine's point values within 0.005 of the first pass (F37). The point estimates quoted above are the first pass's. The set has no empty frames, so it says nothing about false alarms.
@@ -272,6 +280,10 @@ Every detector does poorly: AP50 is 0.045 for the DeepFish-only YOLOv8n, 0.109 w
 The ordering of our own arms reproduces the data finding of Section 5.4 on an unseen source, but the absolute level shows that cross-source generalisation is weak, and that the sealed OzFish score (Section 5.9) is not a cross-source score. The YOLOv4 weights are about eleven times larger than ours and were trained on different data, so the comparison is not a claim of superiority either way.
 A confidence threshold chosen on DeepFish validation also lands at very different operating points on this source (precision 0.54 to 0.86 across the three seeds), so thresholds must be re-chosen on target footage.
 
+![fig2_unseen](figures/fig2_unseen.png)
+
+**Figure 3.** AP50 on the unseen Mediterranean set (1,516 frames, 18 groups) for our detectors and the published YOLO-Fish detectors. Bars are arm means (ours: three seeds); error bars are 95% intervals over groups only, and are wide. Our scoring routine (101-point AP) differs slightly from Ultralytics mAP and the published detectors were run through OpenCV with our own letterboxing. Record: `runs/unseen-20261011-deepecomar-labels/unseen.json` (F39).
+
 ### 5.11 A second detector family (F40)
 
 To test whether the data finding is specific to YOLO, a torchvision Faster R-CNN with a MobileNetV3-Large FPN backbone (Ren et al., 2017; BSD-licensed code, COCO-pretrained) was trained on the DeepFish-only and the combined data (one seed each, 12 epochs).
@@ -282,6 +294,10 @@ and with the combined data lower than YOLOv8n (0.740) and YOLOv8s (0.798). These
 F39 left the unseen-source score low (about 0.18 AP50 on the whole Mediterranean set), so we tested how much labelled footage from one camera recovers it. Rules were fixed in advance (protocol item 12). The 886 snapshots of one fixed camera were ordered by date: the earliest 60% were the training pool, the next 10% selected the epoch, and the latest 30% (267 frames, 18 dates) formed `test_vivo`. Frames of the other 17 groups (630 frames, other cameras) formed `test_other` and never touched training. We fine-tuned our YOLOv8s on 25, 100 and all early frames, and a COCO-only YOLOv8s on all early frames as a control (one seed each, a screen).
 
 On later frames of the same camera, 25 labelled frames raised AP50 from 0.18 (95% interval 0.12 to 0.22) to 0.65 (0.58 to 0.70); 100 frames gave 0.72 and all early frames 0.76 (0.71 to 0.79). The COCO-only control reached the same 0.76, so our larger training set did not add accuracy once the camera was seen. On other cameras the gain was small and uncertain (0.39 to 0.46 to 0.48, intervals overlapping), with more false alarms at a fixed 0.25 threshold, and the COCO-only control fell below zero-shot (0.37, 11,286 false alarms), which suggests the diverse pretraining limits over-specialisation. Limits: one seed per run, same-camera test frames are a known scene rather than a new site, and the threshold was not re-tuned. We read the result as support for a label-a-little-then-fine-tune recipe for a new camera, not as a new-site result.
+
+![fig3_adaptation](figures/fig3_adaptation.png)
+
+**Figure 4.** Fine-tuning on n labelled early frames of one fixed camera (YOLOv8s seed 2 recipe, one seed per point, 95% intervals over dates or groups). Left: later frames of the same camera. Right: other cameras. The square is the COCO-only control on all early frames. Record: `runs/adaptation-20261011/adaptation.json` (F41).
 
 ## 6. Discussion
 
