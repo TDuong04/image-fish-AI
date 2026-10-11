@@ -52,15 +52,16 @@ the report says so.
 
 ### 2.1 Fish detection in underwater images
 
-Deep-learning fish detection has mostly used the YOLO family because it combines a single-pass design (Redmon et al.,
-2016) with real-time speed. YOLO-Fish adapted YOLOv3 and YOLOv4 variants to realistic underwater scenes using DeepFish
-imagery and reported average precision of roughly three quarters (Muksit et al., 2022) **[figure from a search
-snippet; confirm in the paper before publishing]**. Later work modifies YOLOv8-class detectors for fish: Zhang et al.
-(2024) add a space-to-depth convolution, an attention module and an extra small-target detection layer to YOLOv8n
-for fish in natural waters, and AquaYOLO (Vijayalakshmi and Sasithradevi, 2025) targets aquaculture monitoring and
-reports evaluation on DeepFish and OzFish among other data. These papers differ in datasets, splits, image sizes
-and metric definitions, so their numbers are not directly comparable with each other or with ours; we therefore
-quote none of them as a baseline in the results. **[Read AquaYOLO and YOLO-Fish fully and state their splits here.]**
+Early work on fish detection in underwater video compared hand-crafted features with classifiers against convolutional networks (Villon et al., 2016) and later moved to deep detectors, including motion-aware systems
+(Salman et al., 2020) and object detection for estimating fish abundance in the field (Ditria et al., 2020); the use of deep learning on board fishing vessels has been reviewed for species recognition and quantification (Ovalle et al., 2022).
+Most recent systems build on the YOLO family, which combines a single-pass design (Redmon et al., 2016) with real-time speed. YOLO-Fish adapted YOLOv3 and YOLOv4 variants to realistic underwater scenes
+using DeepFish and OzFish imagery and reported average precision of roughly three quarters (Muksit et al., 2022) **[figure from a search snippet; confirm in the paper before publishing]**; its
+weights are public and we evaluate them on an unseen source (Section 5.10). Later work modifies YOLOv8-class detectors for fish: Zhang et al. (2024) add a space-to-depth convolution, an attention module and an extra small-target
+detection layer to YOLOv8n for fish in natural waters, and AquaYOLO (Vijayalakshmi and Sasithradevi, 2025) targets pond aquaculture monitoring. The AquaYOLO paper evaluates on its own pond dataset
+(about 8,150 images and 50,000 boxes from aquaponds in South India, not public), split 70/20/10 into 5,705, 1,630 and 815 images without any site- or video-level separation being described, and reports mAP@50 of 0.909 there and 0.814 on DeepFish and OzFish combined;
+we read these figures in the paper itself. These papers differ in datasets, splits, image sizes and metric definitions, so their numbers are not directly comparable with each other or with ours; we therefore
+quote none of them as a baseline and compare detectors only on a source that none of them saw (Section 5.10). Surveys of generic object detection (Liu et al., 2020) place YOLO-style single-stage and R-CNN-style two-stage detectors (Ren et al., 2017) as the two main families,
+which is why the second family we test is a Faster R-CNN.
 
 ### 2.2 BRUVS and stereo video
 
@@ -75,9 +76,9 @@ Small objects are a known weakness of single-stage detectors. A common remedy is
 tiles at test time and merging the results (Akyon et al., 2022). We test this on our best model and report that it
 did not help here (Section 5.6), including a small-box merge rule fixed in advance.
 
-### 2.4 Evaluation practice
+### 2.4 Generalisation to new locations and evaluation practice
 
-Average precision with an IoU criterion of 0.5 follows the PASCAL VOC convention (Everingham et al., 2010) and
+Recognition models trained at some camera locations can fail at others (Beery et al., 2018), which is why we separate sites in every split and add a test on a source that no training or selection data came from. Average precision with an IoU criterion of 0.5 follows the PASCAL VOC convention (Everingham et al., 2010) and
 the COCO-style average over IoU 0.50 to 0.95 (Lin et al., 2014). Duplicate boxes are removed by non-maximum
 suppression (Neubeck and Van Gool, 2006).
 
