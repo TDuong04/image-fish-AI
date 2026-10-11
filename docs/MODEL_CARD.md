@@ -24,7 +24,7 @@ DeepFish, Kakadu and OzFish (training); DeepFish validation sites (decisions); a
 |---|---|---|---|
 | DeepFish validation mAP@50 / mAP@50-95 | 0.812 / 0.567 (range 0.041 / 0.017) | 0.750 / 0.514 | F32, F24 |
 | Held-out OzFish deployments mAP@50 | 0.729 | 0.689 | F32, F24 |
-| Sealed OzFish test mAP@50 / mAP@50-95 (new deployments of the same footage, not an unseen source) | 0.700 / 0.380 | not evaluated | F33 |
+| Sealed OzFish test mAP@50 / mAP@50-95 (new deployments of the same footage, not an unseen source; 95% interval over deployments 0.669 to 0.724 for AP50) | 0.700 / 0.380 | not evaluated | F33, F37 |
 | Recall on 16-32 px fish / fish under 16 px (DeepFish val) | about 29% / 0% | about 15% / 0% | F32 |
 | Jetson Orin Nano, 25 W, video, sustained 30 min | about 24 fps, about 58 C, no throttling | about 34 fps, about 57 C, no throttling | F29, F9 |
 

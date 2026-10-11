@@ -1,0 +1,66 @@
+{
+  "protocol": "docs/eval_protocol.md item 11",
+  "frames": 352,
+  "boxes": 8329,
+  "clusters": 249,
+  "cluster_by": "deployment (id before the first underscore)",
+  "boot": 1000,
+  "date_utc": "2026-10-11T03:54:31+00:00",
+  "note": "second pass, intervals only; the F33 point estimates are the first pass's (Ultralytics validation); AP here is the 101-point routine of bootstrap_ci.py",
+  "per_seed": {
+    "20261005-yolov8s-960-kakadu-ozfish-s0.pt": {
+      "AP50": 0.6908,
+      "AP50_ci95": [
+        0.6616,
+        0.7181
+      ],
+      "AP50_95": 0.3741,
+      "AP50_95_ci95": [
+        0.3502,
+        0.398
+      ],
+      "first_pass_ultralytics_mAP50": 0.6953,
+      "first_pass_ultralytics_mAP50_95": 0.3759
+    },
+    "20261007-yolov8s-960-kakadu-ozfish-s1.pt": {
+      "AP50": 0.6977,
+      "AP50_ci95": [
+        0.6694,
+        0.7255
+      ],
+      "AP50_95": 0.3794,
+      "AP50_95_ci95": [
+        0.3554,
+        0.4041
+      ],
+      "first_pass_ultralytics_mAP50": 0.7005,
+      "first_pass_ultralytics_mAP50_95": 0.3805
+    },
+    "20261007-yolov8s-960-kakadu-ozfish-s2.pt": {
+      "AP50": 0.7024,
+      "AP50_ci95": [
+        0.6748,
+        0.7294
+      ],
+      "AP50_95": 0.3833,
+      "AP50_95_ci95": [
+        0.3588,
+        0.4069
+      ],
+      "first_pass_ultralytics_mAP50": 0.7049,
+      "first_pass_ultralytics_mAP50_95": 0.3846
+    }
+  },
+  "mean_of_seeds": {
+    "AP50": 0.697,
+    "AP50_ci95": [
+      0.6685,
+      0.7241
+    ],
+    "AP50_95": 0.379,
+    "AP50_95_ci95": [
+      0.355,
+      0.4031
+    ]
+  }
+}

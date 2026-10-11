@@ -1069,6 +1069,24 @@ Output `runs/stats-counting/counts.json`. The split has 1,385 fish in 1,339 fram
 
 **Limits.** One validation split of 20 clips and few fish per frame (mean 1.03), so these counting errors say little about crowded scenes (the sealed OzFish set, with 23.7 fish per frame, was evaluated for mAP only, once, and not for counts); the threshold was chosen on the same split; frames are not independent; no confidence intervals were computed for these ratios.
 
+### F37. Sealed OzFish test with uncertainty (an interval-only second pass): mean 0.697 AP50, 95% interval 0.669 to 0.724, resampling 249 deployments
+**What this is.** The sealed set was scored once (F33) with Ultralytics' built-in validation, which keeps no boxes, so no interval could be computed. Under rules fixed and committed before the run (`docs/eval_protocol.md` item 11, commit `4d6930a`), `scripts/sealed_intervals.py` ran the **same three YOLOv8s checkpoints** a second time,
+only to add uncertainty: predictions at 960 px matched to the labels, the 101-point AP routine of F35, and a cluster bootstrap of 1,000 resamples over the **249 deployments** (the id before the first underscore of the file name, so stereo `_L`/`_R` partners are one cluster) among the 352 frames and 8,329 boxes. Nothing was chosen, tuned or re-run;
+the F33 numbers remain the headline and the point estimates. Record: `runs/sealed-intervals-20261011/intervals.json`. **The sealed set has therefore been scored twice, the second time for intervals only.**
+
+| YOLOv8s seed | AP50 (95% interval) | AP50 at the first pass (Ultralytics, F33) | AP50-95 (95% interval) | AP50-95 at the first pass |
+|---|---|---|---|---|
+| 0 | 0.6908 (0.6616 to 0.7181) | 0.6953 | 0.3741 (0.3502 to 0.3980) | 0.3759 |
+| 1 | 0.6977 (0.6694 to 0.7255) | 0.7005 | 0.3794 (0.3554 to 0.4041) | 0.3805 |
+| 2 | 0.7024 (0.6748 to 0.7294) | 0.7049 | 0.3833 (0.3588 to 0.4069) | 0.3846 |
+| **Mean of the three seeds** | **0.6970 (0.6685 to 0.7241)** | 0.7003 | **0.3790 (0.3550 to 0.4031)** | 0.3803 |
+
+- **The two scoring routines agree** to within 0.005 on every seed (the 101-point AP here is slightly lower than the Ultralytics mAP, by 0.0025 to 0.0045 AP50), so the interval describes the first-pass numbers well.
+- **The sealed result is uncertain by about +-0.03.** The mean AP50 is 0.697 with a 95% interval of 0.669 to 0.724; the three seeds differ by only 0.012, much less than the sampling uncertainty, so the seed spread alone understated how little the sealed score pins down (F33 gave the range 0.695 to 0.705).
+- **Even the lower end is far above the DeepFish-only baseline** of F2 (0.217), so the conclusion that more diverse training data transfers to new OzFish deployments does not depend on the width of this interval; what the interval limits is the precision of the 0.70 itself.
+
+**Limits.** The interval resamples deployments of one collection (OzFish), not independent sites in the ecological sense; it does not include seed variance beyond the three seeds shown; the AP routine differs slightly from Ultralytics'; the set is crowded (23.7 boxes per frame) and has no empty frames, so it says nothing about false alarms.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
