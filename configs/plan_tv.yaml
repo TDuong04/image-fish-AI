@@ -1,0 +1,11 @@
+# Second detector family (torchvision Faster R-CNN): DeepFish-only control, then the combined recipe. One seed each (a screen).
+# Run with: FISH_ENV=aigpu python scripts/queue_runner.py configs/plan_tv.yaml
+steps:
+  - name: tv-deepfish-only
+    skip_if: "runs/202610*-tv-frcnn-mnv3-deepfish-only-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train_tv.py", "--config", "tv_frcnn_deepfish_only", "--seed", "0"]
+  - name: tv-combined
+    skip_if: "runs/202610*-tv-frcnn-mnv3-combined-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train_tv.py", "--config", "tv_frcnn_combined", "--seed", "0"]

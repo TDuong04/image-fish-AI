@@ -216,7 +216,7 @@ deployments (about +0.10 mAP@50; F21). Adding the OzFish training frames raised 
 combined seed (0.740) is above the best Kakadu-only seed (0.709) (F24). Stronger augmentation added nothing measurable
 on top of OzFish data (F23, one seed per arm), so the gain is attributed to the data. Held-out OzFish deployments may share
 reefs with the training deployments, and DeepFish validation resembles Kakadu (F13), so these gains may be flattered.
-False alarms at the default threshold varied a lot between seeds (155, 477, 175) and the best-F1 threshold moved from 0.2
+When whole clips of the validation split are resampled instead of frames (20 clips, 1,000 paired resamples, F35), the Kakadu gain (+0.234 AP50, 95% interval 0.116 to 0.339) and the YOLOv8s lead over YOLOv8n (+0.058, 0.012 to 0.104) stay clearly positive, but the OzFish gain (+0.037, -0.001 to 0.091) is not separated from zero, so it is reported as positive on every seed and probably real, not as established. Absolute scores carry an uncertainty of roughly 0.1 at this number of clips. False alarms at the default threshold varied a lot between seeds (155, 477, 175) and the best-F1 threshold moved from 0.2
 to 0.4, so an operating threshold has to be chosen per model on validation (F24).
 
 ### 5.5 Model size (F14 to F16, F24, F32)

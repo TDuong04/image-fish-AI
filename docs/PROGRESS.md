@@ -89,6 +89,9 @@ Last updated: 2026-10-04.
 - `scripts/export_onnx.py` (changed 2026-10-06) — the checkpoint-name pattern now accepts names such as `yolov8s-960-kakadu-ozfish-s0`; it only matched `yolov8n-960-s2` before. Used to export the two best models for the Nano: `models/onnx/20261005-yolov8n-960-kakadu-ozfish-s0-544x960.onnx` (parity PASS) and `...yolov8s-960-kakadu-ozfish-s0-544x960.onnx` (**strict raw-tensor gate FAILED by 0.0006 px**: 0.0106 against 0.01; detections identical to PyTorch on 12 frames, worst IoU 0.99998; gate not relaxed; not yet built or timed on the board).
 - `scripts/post_run.py`, `configs/plan_v8s_seeds.yaml`, `tests/test_post_run.py` — the overnight queue of 2026-10-08: two more seeds of YOLOv8s on the combined data (seeds 1 and 2 of `yolov8s_960_kakadu_ozfish`, batch 5 as in F24), each followed by `post_run.py`, which finds the newest finished run folder and runs the error analysis (DeepFish val) and the held-out OzFish score on the server so no checkpoint has to be fetched first. **Queued, no result yet.**
 - `scripts/evaluate.py` (changed 2026-10-08) — the checkpoint-name pattern now accepts names such as `yolov8s-960-kakadu-ozfish-s1`; before it only read `yolov8n-<size>-s<seed>`.
+- `scripts/bootstrap_ci.py`, `configs/stats_arms.yaml` — cluster-bootstrap confidence intervals: every checkpoint of four recipes (3 seeds each) is matched to the DeepFish val labels at IoU 0.50 to 0.95 once, then scored on resamples of whole clips (20) or sites (6), the same resample for every model so differences are paired; arm score = mean over seeds. Output `runs/stats-<date>-bootstrap-{clip,site}/ci.json` (F35).
+- `scripts/prepare_deepecomar.py`, `scripts/eval_unseen.py`, `configs/unseen_arms.yaml` — the unseen-source test (rules fixed in `docs/eval_protocol.md` item 10 before it was run): converts the DEEPECOMAR Mediterranean fish set to one class (stain boxes dropped, duplicate frames removed) and scores Ultralytics checkpoints, the published YOLO-Fish darknet detectors (OpenCV DNN, CPU) and torchvision models with one AP routine. **Queued/running, no result yet.**
+- `scripts/train_tv.py`, `configs/train/tv_frcnn_deepfish_only.yaml`, `configs/train/tv_frcnn_combined.yaml`, `configs/plan_tv.yaml` — a second detector family (torchvision Faster R-CNN, MobileNetV3-Large FPN, BSD-licensed code, COCO-pretrained) trained on the DeepFish-only and the combined data (one seed each, 12 epochs, 960 px, checkpoint by 0.1 AP50 + 0.9 AP50-95 on DeepFish val) to test whether the data finding is specific to YOLO and as a permissive-licence path. **Queued 2026-10-11 on `ai-gpu`, no result yet.** `src/fish/device.py` gained a `torch` property (the `torch.device` of the choice).
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -1021,6 +1024,30 @@ The set: 352 frames, 8,329 boxes (23.7 per frame), no empty frames, from 297 cli
 
 **Limits.** 352 frames from 297 clips is a small set, so confidence intervals are wide and the three seeds are not independent samples of the footage; the set has no empty frames, so there is no false-alarm measurement here; precision and recall are at the Ultralytics default point, not a threshold chosen on validation; one recipe, three seeds, one run each; the YOLOv8n arm and the 1280 px model were not run on it.
 
+### F35. Resampling whole clips instead of frames: the Kakadu gain and the YOLOv8s lead stand, but the OzFish gain is not separated from zero (DeepFish val, 20 clips, 3 seeds per arm)
+`scripts/bootstrap_ci.py` on the DeepFish validation split (1,339 frames from **20 clips** of 6 sites), with the same checkpoints as F18, F24 and F32 (an arm is a recipe with its three seeds, same machine). Every model is matched to the labels once at IoU 0.50 to 0.95; 1,000 resamples of whole clips (or of the 6 sites) are drawn,
+the same resample for every model so differences between arms are paired, and an arm's score is the mean over its seeds. The interval therefore reflects **which clips were sampled and not seed variance** (seed ranges are in F18, F24, F32). Scores use a 101-point AP on predictions above confidence 0.005, close to but not identical to the Ultralytics mAP (arm means 0.470, 0.703, 0.740, 0.798 against 0.473, 0.698, 0.750, 0.812).
+Runs: `runs/stats-20261011-bootstrap-clip/ci.json` and `runs/stats-20261011-bootstrap-site/ci.json`.
+
+| Arm (3 seeds each) | AP50, clips (95% interval) | AP50, sites (6) | AP50-95, clips |
+|---|---|---|---|
+| YOLOv8n, DeepFish only | 0.470 (0.244 to 0.718) | 0.470 (0.238 to 0.809) | 0.302 (0.152 to 0.497) |
+| + Kakadu | 0.703 (0.560 to 0.873) | 0.703 (0.579 to 0.927) | 0.473 (0.355 to 0.638) |
+| + Kakadu + OzFish | 0.740 (0.606 to 0.894) | 0.740 (0.613 to 0.930) | 0.506 (0.383 to 0.664) |
+| YOLOv8s, same data | 0.798 (0.705 to 0.913) | 0.798 (0.708 to 0.940) | 0.554 (0.467 to 0.691) |
+
+| Paired difference (second minus first) | AP50 difference, clips (95% interval; share of resamples above 0) | AP50-95, clips | AP50, sites |
+|---|---|---|---|
+| Kakadu data (DeepFish only to + Kakadu) | **+0.234 (0.116 to 0.339; 100%)** | +0.172 (0.116 to 0.219) | +0.234 (0.081 to 0.354) |
+| OzFish data (+ Kakadu to + Kakadu + OzFish) | **+0.037 (-0.001 to 0.091; 97%)** | +0.033 (-0.001 to 0.072) | +0.037 (-0.004 to 0.074; 94%) |
+| YOLOv8s over YOLOv8n (same data) | **+0.058 (0.012 to 0.104; 99.9%)** | +0.048 (0.005 to 0.090) | +0.058 (0.010 to 0.094) |
+| All three together (DeepFish only to YOLOv8s) | +0.329 (0.174 to 0.477) | +0.253 (0.167 to 0.329) | +0.329 (0.131 to 0.470) |
+
+- **The Kakadu gain and the YOLOv8s lead are clearly positive** under clip resampling (intervals do not reach zero, also at the site level), so the two largest findings do not depend on which clips happen to be in the validation split.
+- **The OzFish gain is not established at the 95% level once clips are resampled.** Its interval includes zero (-0.001 to +0.091 on clips, -0.004 to +0.074 on sites) although 94 to 97% of resamples are positive and every seed of F24 was above every Kakadu-only seed. The honest reading is "positive on every seed, probably real, but its size is uncertain by more than the seed range suggested" (F24 said it "holds on three seeds"; see section 6).
+- **Absolute scores are uncertain by roughly +-0.1** (YOLOv8s 0.798, 0.705 to 0.913) because the split has few clips; frame-level intervals would be far narrower and wrong.
+- **Limits.** 20 clips (6 sites) is a small number of clusters, so the intervals themselves are rough (percentile bootstrap); seed variance is not included in them; the AP routine differs slightly from Ultralytics'; one validation split.
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them
@@ -1036,6 +1063,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Power mode changes FPS 2–3x | Inherited from a memo; 4GB modes are 7W/10W. Must be measured on the board. | Review |
 | INT8 is required on a 4GB Orin | False; YOLOv8n is ~6 MB in FP16. INT8 is a research question, not a necessity. | Review |
 | A single frame showed heavy colour dependence (confidence 0.71 → 0.03 in greyscale) | Full-set result is a 7–9% dip for greyscale. One frame sat just above threshold. | Running the full experiment |
+| F24, the PROGRESS headline and the README said the OzFish effect "holds on three seeds" (+0.052 mAP@50) | True of the seeds, but when whole clips are resampled the paired gain is +0.037 AP50 with a 95% interval of -0.001 to +0.091 (F35): not separated from zero. The statement is narrowed to "positive on every seed, not separately established under clip resampling". | Cluster bootstrap of the DeepFish val clips (F35) |
 | Pixel buckets "under 16 px" | Audit figures are at *model input*; first bucketing used native pixels (3x off at 640). | Frame selection returned zero matches |
 | "Best epoch" from a mAP@50 scan | `best.pt` is selected by fitness; e.g. 960 seed 0 best is epoch 89, not 18. Metrics were right; the epoch attribution was not. | Cross-checking against fitness |
 | Two seeds looked tight (spread 0.008) | Third seed landed 0.055 above the first. Two seeds hid the true spread. | Running seed 2 |
