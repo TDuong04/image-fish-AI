@@ -43,7 +43,7 @@ Three things make the question harder than a benchmark number suggests.
 (ii) An error analysis that locates the failures (which fish are missed, which boxes are false alarms) instead of
 reporting a single score. (iii) A controlled study of what raises accuracy: input resolution, additional training
 data, model size, and test-time tiling, with seed variance measured rather than assumed. (iv) End-to-end and
-sustained measurements of the detector on a Jetson Orin Nano, with the power mode and clocks stated.
+30-minute sustained measurements (one run per model, one power mode) of the detector on a Jetson Orin Nano, with the power mode and clocks stated.
 
 Throughout, we separate **observations** from **claims**: one seed, one split or one dataset supports "observed", and
 the report says so.
@@ -182,7 +182,9 @@ checked on real frames (F7).
 On the DeepFish validation split, YOLOv8n trained at 960 px reaches 0.502 mAP@50 (mean of three seeds; sd 0.018)
 against 0.416 at 640 px (sd 0.030): +0.087, and every 960 run beats every 640 run (F1). The first Kaggle-trained
 baselines are in-domain figures from a short, single-source dataset and sit well below published numbers for the
-reasons in Section 4.3; we do not compare against them.
+reasons in Section 4.3; we do not compare against them. They were trained on a different machine, batch size and library version
+from the later server runs, which alone moves a same-seed score by about 0.03 (Section 4.3), so the Kaggle 960 px mean (0.502) is not set beside
+the server control of Section 5.4 (0.473); the Kaggle runs are marked as not regenerable in the run register.
 
 ### 5.2 The in-domain advantage largely vanishes on a different dataset (F2)
 
@@ -196,7 +198,7 @@ baseline models trained before any OzFish data were used.
 Recall depends strongly on fish size (YOLOv8n, 960 px): about 3% for 16-32 px fish, 49% for 32-96 px and 91% above
 96 px (one seed, F10; the three-seed means in F3 agree to within a few points). **Missing fish, not wrongly placed
 boxes, limits the detector:** at 960 px, 523 of 688 missed fish had no prediction at all, 161 were found below the 0.25
-threshold, and only 4 were badly placed (F10). Most false alarms fall on background (321 of 365). Used as a counter, the detector counts about 80% of the labelled fish per frame on the DeepFish validation split (YOLOv8s, 79 to 84% over three seeds), but its clip-level maximum count is over-estimated (119 to 150% of the true maximum) because false alarms inflate the largest frame (F36). A manual audit of a
+threshold, and only 4 were badly placed (F10). Most false alarms fall on background (321 of 365). Used as a counter (MaxN is the largest number of fish seen in a single frame of a clip, the usual ecological summary), the detector counts about 80% of the labelled fish per frame on the DeepFish validation split (YOLOv8s, 79 to 84% over three seeds), but its clip-level maximum count is over-estimated (119 to 150% of the true maximum) because false alarms inflate the largest frame (F36). On the 464 empty validation frames the three YOLOv8s seeds raise 24, 268 and 21 false alarms at the default 0.25 threshold (F32), so the empty-frame false-alarm rate is also seed-dependent. A manual audit of a
 sample found that most "misses" were visible fish rather than label errors (F11, one reviewer, a sample). Empty frames
 explain less than 0.03 of the mAP@50 gap to published figures (F19), and the split protocol explains the rest of that gap
 (F20, Section 1). A colour perturbation study showed the model tolerates missing colour (greyscale -7% to -9%) but not
@@ -253,7 +255,7 @@ project's own runner).
 | Share of the frame spent in the GPU kernel | 8% | 11% |
 
 The GPU kernel is a small part of each frame; JPEG decode, letterboxing and host-device copies dominate (F8). In a 30
-minute run at 960 px with video decode, the frame rate held at about 34 fps (first and last two minutes within 0.5%),
+minute run at 960 px with video decode (H.264 decode takes about 8 ms per frame against about 17.5 ms for the JPEG decode of the serial table, which is why the video loop reaches about 34 fps and the serial figure is 24.5 fps for the same engine), the frame rate held at about 34 fps (first and last two minutes within 0.5%),
 the junction temperature rose from about 50 to 56.5 C and flattened, input power was about 6.5 to 7.1 W, and no
 throttling was visible (F9; one run, ambient assumed 26 C, GPU clock reading unusable). The engines match PyTorch on 12
 real frames (F7). **The larger model costs more on the device (F28):** a YOLOv8s engine trained on the combined data takes 50.1 ms per frame end to end (serial, JPEG decode, 25 W, 200 runs) against 40.8 ms for the YOLOv8n engine, because only the GPU stage grows (23.6 against 14.3 ms); the serial frame rate falls from about 24.5 to 19.9 fps. In a 30 minute run with video decode the YOLOv8s engine held 24.4 fps (against 34 fps for YOLOv8n), the junction temperature plateaued near 58 C and no throttling was visible (F29; one run, 25 W, ambient not measured). Switching the board to MAXN_SUPER left the GPU stage unchanged (14.3 and 23.5 ms) and sped up only CPU JPEG decode (about 4 ms), so the serial totals fell by 9 to 10% but the 10-minute video frame rates did not change (F31). A control rerun of the original baseline engine gave 41.0 ms, matching F8. **Not measured:** the 15 W and 7 W power modes, INT8, mAP computed on the device, NVDEC hardware decode, and agreement with PyTorch beyond 12 frames. On those 12 frames the YOLOv8s engine agrees with PyTorch on every detection (worst IoU 0.990), while the new YOLOv8n engine matches every detection but fails the preset IoU gate on one 9-pixel box in a crowded frame (IoU 0.708, F30).
@@ -274,13 +276,14 @@ small and faint fish, so neither test-time tiling (more fish found for more fals
 comparison is not like for like. Precision at our operating point (about 0.89 to 0.92) is in the same range as the figures
 reported in the literature, while recall (about 0.72) is lower **[compare only after reading the cited papers]**.
 
-**Deployment.** Because the network is a small part of each frame on the Orin, the larger model is affordable: YOLOv8s adds about 9 ms (22%) per frame (F28) for a gain of about 0.07 mAP@50 (F24, one seed).
+**Deployment.** Because the network is a small part of each frame on the Orin, the larger model is affordable: YOLOv8s adds about 9 ms (22%) per frame (F28) for a gain of about 0.06 mAP@50 on three seeds (F32).
 
 ## 7. Limitations
 
-- Most comparisons are one seed (screens); the three-seed results are the DeepFish-only control, the Kakadu arm and the
-  OzFish arm of YOLOv8n.
-- Per-frame metrics on near-duplicate video frames overstate certainty.
+- Some comparisons are one seed (screens: stronger augmentation, the stride-4 head, 1280 px, tiling); the three-seed results are the YOLOv8n arms (DeepFish only, plus Kakadu, plus OzFish) and the YOLOv8s recipe (F32, F33). The YOLOv8s arm used batch 5 and the YOLOv8n arms batch 10, and the 1280 px run batch 3.
+- Checkpoint selection (best epoch by validation fitness), early stopping, recipe choices and the choice of the shipped seed all used the same 20-clip DeepFish validation split that is also the headline table, so those scores are mildly optimistic; the sealed OzFish test is the only set no decision touched, and it has no interval because it was read once.
+- Per-frame metrics on near-duplicate video frames overstate certainty; clip-level intervals (F35) show absolute scores uncertain by about +-0.1 on the 20 validation clips.
+- The 0.98 against 0.47 contrast (F20) compares a random per-image split with a site split of the same pool; the site split also changes which footage is tested, so the contrast shows the effect of the protocol and does not by itself isolate leakage from site difficulty (a control on the same sites is planned).
 - DeepFish validation resembles Kakadu, and the held-out OzFish deployments may share reefs with training ones, so
   cross-source generalisation is only partly tested; the sealed OzFish test was run once on the YOLOv8s recipe (Section 5.9) but
   measures new deployments of the same OzFish footage, not an unrelated source, and the YOLOv8n arm was not run on it.
@@ -293,13 +296,17 @@ reported in the literature, while recall (about 0.72) is lower **[compare only a
 - Multiple Ultralytics versions and machines were used across the phases; comparisons are made within a machine.
 - **No deployment data yet.** The system is not deployed, so there is no footage from a target site and no field test; the closest substitutes are the held-out and sealed OzFish sets and the Mediterranean unseen-source test, and the on-device measurements use recorded clips. Deployment-site evaluation is future work.
 
+## Ethics and data use
+
+The work uses only openly licensed footage of fish and no human subjects. The datasets are credited and their licences followed (NOTICE.md); the models are for research and monitoring support, and a missed fish can matter, so outputs need human review where a decision depends on them (model card). No animals were handled by the authors.
+
 ## 8. Conclusion **[PENDING]**
 
-**[Remaining before writing: which YOLOv8s seed (or all) is shipped and rebuilt for the Orin, the licence decision, and the final wording.]**
+**[Remaining before writing: the seed 2 engine measurements on the Orin, the unseen-source result (Section 5.10), and the final wording. The release licence is decided (AGPL-3.0, NOTICE.md).]**
 
 ## Reproducibility statement
 
-Every table above is regenerable from a committed config and run folder (`runs/`), and the sealed-set rule, splits and
+Every table above except the first Kaggle baselines (a session that no longer exists, marked as not regenerable) is regenerable from a committed config and run folder (`runs/`), and the sealed-set rule, splits and
 seeds are in `docs/eval_protocol.md` and `docs/PROGRESS.md`. Data licences: DeepFish (MIT), Kakadu (CC BY 4.0), OzFish
 (CC BY 3.0 AU; converted labels are a derivative work and need attribution).
 
