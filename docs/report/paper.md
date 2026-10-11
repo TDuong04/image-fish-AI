@@ -271,6 +271,12 @@ Every detector does poorly: AP50 is 0.045 for the DeepFish-only YOLOv8n, 0.109 w
 The ordering of our own arms reproduces the data finding of Section 5.4 on an unseen source, but the absolute level shows that cross-source generalisation is weak, and that the sealed OzFish score (Section 5.9) is not a cross-source score. The YOLOv4 weights are about eleven times larger than ours and were trained on different data, so the comparison is not a claim of superiority either way.
 A confidence threshold chosen on DeepFish validation also lands at very different operating points on this source (precision 0.54 to 0.86 across the three seeds), so thresholds must be re-chosen on target footage.
 
+### 5.11 A second detector family (F40)
+
+To test whether the data finding is specific to YOLO, a torchvision Faster R-CNN with a MobileNetV3-Large FPN backbone (Ren et al., 2017; BSD-licensed code, COCO-pretrained) was trained on the DeepFish-only and the combined data (one seed each, 12 epochs).
+Adding the data raised AP50 on DeepFish validation from 0.554 to 0.660 (+0.105) and on the unseen Mediterranean source from 0.098 to 0.134 (+0.036, scored after the main unseen result was read), the same direction as every YOLO arm. The two families rank differently at the two ends: with DeepFish only the Faster R-CNN scores higher than the YOLOv8n controls (0.554 against 0.470),
+and with the combined data lower than YOLOv8n (0.740) and YOLOv8s (0.798). These are single seeds of a short untuned recipe, so the comparison between families is indicative only; the claim supported is that the benefit of diverse training data is not specific to YOLO.
+
 ## 6. Discussion
 
 **What limits accuracy.** Our evidence points to data diversity and fish size rather than the detector design.
@@ -309,7 +315,7 @@ The work uses only openly licensed footage of fish and no human subjects. The da
 
 ## 8. Conclusion **[PENDING]**
 
-**[Remaining before writing: the seed 2 engine measurements on the Orin, the second-family (Faster R-CNN) result, and the final wording. The release licence is decided (AGPL-3.0, NOTICE.md).]**
+**[Remaining before writing: the seed 2 engine measurements on the Orin, the adaptation experiment on the unseen source, and the final wording. The release licence is decided (AGPL-3.0, NOTICE.md).]**
 
 ## Reproducibility statement
 

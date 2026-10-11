@@ -1,0 +1,9 @@
+{
+  "ap50": 0.6596,
+  "ap50_95": 0.4075,
+  "best_epoch": 10,
+  "epochs": 12,
+  "seed": 0,
+  "batch": 8,
+  "note": "DeepFish val, 101-point AP (scripts/bootstrap_ci.py), best epoch by 0.1*AP50+0.9*AP50-95"
+}

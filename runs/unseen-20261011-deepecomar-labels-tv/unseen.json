@@ -1,0 +1,62 @@
+{
+  "data": "deepecomar",
+  "labels": "labels",
+  "images": 1516,
+  "boxes": 17157,
+  "groups": 18,
+  "boot": 1000,
+  "min_conf": 0.005,
+  "operating_conf": 0.25,
+  "date_utc": "2026-10-11T05:20:01+00:00",
+  "note": "arm score = mean over the arm's models; interval = group sampling only; 101-point AP on predictions above min_conf",
+  "arms": {
+    "tv_frcnn_deepfish_only": {
+      "AP50": {
+        "point": 0.0979,
+        "ci95": [
+          0.0517,
+          0.1237
+        ]
+      },
+      "AP50_95": {
+        "point": 0.0365,
+        "ci95": [
+          0.0181,
+          0.0431
+        ]
+      }
+    },
+    "tv_frcnn_combined": {
+      "AP50": {
+        "point": 0.1343,
+        "ci95": [
+          0.1111,
+          0.2354
+        ]
+      },
+      "AP50_95": {
+        "point": 0.0499,
+        "ci95": [
+          0.0368,
+          0.0749
+        ]
+      }
+    }
+  },
+  "models": {
+    "tv-frcnn-mnv3-deepfish-only-s0.pt": {
+      "arm": "tv_frcnn_deepfish_only",
+      "found_at_0.25": 1666,
+      "false_alarms_at_0.25": 1621,
+      "AP50": 0.0979,
+      "AP50_95": 0.0365
+    },
+    "tv-frcnn-mnv3-combined-s0.pt": {
+      "arm": "tv_frcnn_combined",
+      "found_at_0.25": 2195,
+      "false_alarms_at_0.25": 2414,
+      "AP50": 0.1343,
+      "AP50_95": 0.0499
+    }
+  }
+}

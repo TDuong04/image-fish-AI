@@ -1,0 +1,11 @@
+# Added AFTER the main unseen-source result was read (F39), so it is reported as post hoc: the second detector family (torchvision Faster R-CNN, scripts/train_tv.py)
+# scored once on the same set under the same rules. Nothing is chosen from it.
+arms:
+  tv_frcnn_deepfish_only:
+    kind: torchvision
+    models:
+      - tv-frcnn-mnv3-deepfish-only-s0.pt
+  tv_frcnn_combined:
+    kind: torchvision
+    models:
+      - tv-frcnn-mnv3-combined-s0.pt

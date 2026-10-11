@@ -1,0 +1,10 @@
+name: tv-frcnn-mnv3-deepfish-only
+data: deepfish
+imgsz: 960
+epochs: 12
+batch: 8
+lr: 0.01
+workers: 4
+seed: 0
+train_images: 5178
+val_images: 1339

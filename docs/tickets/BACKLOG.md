@@ -845,3 +845,4 @@ nothing is compared on fewer than 3 seeds. The sealed OzFish set is used only fo
 | FD-151 | **Interval-only second pass on the sealed OzFish test** (rules fixed before the run, `docs/eval_protocol.md` item 11): DONE (F37), mean AP50 0.697 (0.669 to 0.724) over 249 deployments | DONE |
 | FD-152 | **Leakage-isolating control** (reviewer request): same six sites scored by the random-split model and the site-split controls: DONE (F38), gap +0.50 AP50 (0.225 to 0.752) | DONE |
 | FD-153 | **Unseen-source test (DEEPECOMAR) with the published YOLO-Fish detectors** (rules fixed before the run): DONE (F39): all detectors poor (AP50 0.05 to 0.23), data finding replicates, published YOLOv4 highest (0.227) | DONE |
+| FD-154 | **Second detector family** (torchvision Faster R-CNN, same data, one seed each): DONE (F40): the data effect replicates (+0.105 AP50 on validation, +0.036 unseen) | DONE |
