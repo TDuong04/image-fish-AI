@@ -61,14 +61,16 @@ Front matter    Title page, abstract (written last), acknowledgements, contents,
 ## 5. Results
    5.1  Baseline and resolution                      F1 to F4
    5.2  Cross-dataset behaviour of the baseline      F2
-   5.3  Where the detector fails                     F10, F11, F19
-   5.4  Why the scores are below published figures   F20
+   5.3  Where the detector fails                     F10, F11, F19; as a counter F36
+   5.4  Why the scores are below published figures   F20 and the leakage control on the same sites F38
    5.5  What did not help                            F12 (P2 head), F14 to F16 and F23 (augmentation, size on DeepFish alone), F25 and F26 (tiling), F27 (1280 px)
-   5.6  What helped: more diverse data               F17 to F24
+   5.6  What helped: more diverse data               F17 to F24, with clip-level uncertainty F35
    5.7  Model size and the seed study                F32
-   5.8  The sealed OzFish test                       F33
-   5.9  On the Jetson Orin Nano                      F5 to F9, F28 to F31, F34
-   5.10 An informal out-of-domain check              the reef photograph (labelled as not measured)
+   5.8  The sealed OzFish test                       F33 and its intervals F37
+   5.9  An unseen source and other detectors         F39 (Mediterranean set, published YOLO-Fish detectors) and the second family F40
+   5.10 Adapting to a fixed camera                   the fine-tuning experiment (running)
+   5.11 On the Jetson Orin Nano                      F5 to F9, F28 to F31, F34
+   5.12 An informal out-of-domain check              the reef photograph (labelled as not measured)
 
 ## 6. Discussion
    6.1  What limits accuracy
