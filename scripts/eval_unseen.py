@@ -49,8 +49,9 @@ def darknet_input_size(cfg: Path) -> tuple[int, int]:
     return w or 416, h or 416
 
 
-def predict_darknet(cfg: Path, weights: Path, images):
+def predict_darknet(cfg: Path, weights: Path, images, threads: int = 2):
     import cv2
+    cv2.setNumThreads(threads)       # OpenCV's DNN otherwise takes most cores of a laptop for an hour per model
     net = cv2.dnn.readNetFromDarknet(str(cfg), str(weights))
     out_names = net.getUnconnectedOutLayersNames()
     iw, ih = darknet_input_size(cfg)
