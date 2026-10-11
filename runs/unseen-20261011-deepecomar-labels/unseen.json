@@ -1,0 +1,256 @@
+{
+  "data": "deepecomar",
+  "labels": "labels",
+  "images": 1516,
+  "boxes": 17157,
+  "groups": 18,
+  "boot": 1000,
+  "min_conf": 0.005,
+  "operating_conf": 0.25,
+  "date_utc": "2026-10-11T04:53:35+00:00",
+  "note": "arm score = mean over the arm's models; interval = group sampling only; 101-point AP on predictions above min_conf",
+  "arms": {
+    "yolov8s_combined": {
+      "AP50": {
+        "point": 0.1661,
+        "ci95": [
+          0.1355,
+          0.4416
+        ]
+      },
+      "AP50_95": {
+        "point": 0.0753,
+        "ci95": [
+          0.0656,
+          0.1796
+        ]
+      }
+    },
+    "yolov8n_combined": {
+      "AP50": {
+        "point": 0.1535,
+        "ci95": [
+          0.1234,
+          0.4129
+        ]
+      },
+      "AP50_95": {
+        "point": 0.0649,
+        "ci95": [
+          0.0559,
+          0.1606
+        ]
+      }
+    },
+    "yolov8n_plus_kakadu": {
+      "AP50": {
+        "point": 0.109,
+        "ci95": [
+          0.0895,
+          0.2607
+        ]
+      },
+      "AP50_95": {
+        "point": 0.0415,
+        "ci95": [
+          0.0359,
+          0.0917
+        ]
+      }
+    },
+    "yolov8n_deepfish_only": {
+      "AP50": {
+        "point": 0.0452,
+        "ci95": [
+          0.032,
+          0.1431
+        ]
+      },
+      "AP50_95": {
+        "point": 0.0185,
+        "ci95": [
+          0.0137,
+          0.057
+        ]
+      }
+    },
+    "yolofish_1_merge": {
+      "AP50": {
+        "point": 0.1339,
+        "ci95": [
+          0.1167,
+          0.2634
+        ]
+      },
+      "AP50_95": {
+        "point": 0.0552,
+        "ci95": [
+          0.0487,
+          0.0923
+        ]
+      }
+    },
+    "yolofish_2_merge": {
+      "AP50": {
+        "point": 0.1035,
+        "ci95": [
+          0.0869,
+          0.2095
+        ]
+      },
+      "AP50_95": {
+        "point": 0.0467,
+        "ci95": [
+          0.0405,
+          0.074
+        ]
+      }
+    },
+    "yolov3_merge": {
+      "AP50": {
+        "point": 0.1227,
+        "ci95": [
+          0.1098,
+          0.2354
+        ]
+      },
+      "AP50_95": {
+        "point": 0.0509,
+        "ci95": [
+          0.042,
+          0.0786
+        ]
+      }
+    },
+    "yolov4_merge": {
+      "AP50": {
+        "point": 0.2273,
+        "ci95": [
+          0.1866,
+          0.4764
+        ]
+      },
+      "AP50_95": {
+        "point": 0.0983,
+        "ci95": [
+          0.0876,
+          0.1731
+        ]
+      }
+    }
+  },
+  "models": {
+    "20261005-yolov8s-960-kakadu-ozfish-s0.pt": {
+      "arm": "yolov8s_combined",
+      "found_at_0.25": 2201,
+      "false_alarms_at_0.25": 1110,
+      "AP50": 0.1555,
+      "AP50_95": 0.0711
+    },
+    "20261007-yolov8s-960-kakadu-ozfish-s1.pt": {
+      "arm": "yolov8s_combined",
+      "found_at_0.25": 2507,
+      "false_alarms_at_0.25": 1394,
+      "AP50": 0.1749,
+      "AP50_95": 0.0793
+    },
+    "20261007-yolov8s-960-kakadu-ozfish-s2.pt": {
+      "arm": "yolov8s_combined",
+      "found_at_0.25": 2517,
+      "false_alarms_at_0.25": 1607,
+      "AP50": 0.1678,
+      "AP50_95": 0.0755
+    },
+    "20261005-yolov8n-960-kakadu-ozfish-s0.pt": {
+      "arm": "yolov8n_combined",
+      "found_at_0.25": 2223,
+      "false_alarms_at_0.25": 1317,
+      "AP50": 0.1572,
+      "AP50_95": 0.0682
+    },
+    "20261005-yolov8n-960-kakadu-ozfish-s1.pt": {
+      "arm": "yolov8n_combined",
+      "found_at_0.25": 1913,
+      "false_alarms_at_0.25": 1156,
+      "AP50": 0.1387,
+      "AP50_95": 0.0565
+    },
+    "20261005-yolov8n-960-kakadu-ozfish-s2.pt": {
+      "arm": "yolov8n_combined",
+      "found_at_0.25": 2282,
+      "false_alarms_at_0.25": 1158,
+      "AP50": 0.1645,
+      "AP50_95": 0.0701
+    },
+    "20261004-yolov8n-960-kakadu-s0.pt": {
+      "arm": "yolov8n_plus_kakadu",
+      "found_at_0.25": 1211,
+      "false_alarms_at_0.25": 332,
+      "AP50": 0.1155,
+      "AP50_95": 0.0431
+    },
+    "20261004-yolov8n-960-kakadu-s1.pt": {
+      "arm": "yolov8n_plus_kakadu",
+      "found_at_0.25": 1013,
+      "false_alarms_at_0.25": 334,
+      "AP50": 0.0879,
+      "AP50_95": 0.0337
+    },
+    "20261005-yolov8n-960-kakadu-s2.pt": {
+      "arm": "yolov8n_plus_kakadu",
+      "found_at_0.25": 1524,
+      "false_alarms_at_0.25": 571,
+      "AP50": 0.1234,
+      "AP50_95": 0.0475
+    },
+    "20261004-yolov8n-960-s0.pt": {
+      "arm": "yolov8n_deepfish_only",
+      "found_at_0.25": 547,
+      "false_alarms_at_0.25": 748,
+      "AP50": 0.0373,
+      "AP50_95": 0.0168
+    },
+    "20261004-yolov8n-960-s1.pt": {
+      "arm": "yolov8n_deepfish_only",
+      "found_at_0.25": 673,
+      "false_alarms_at_0.25": 428,
+      "AP50": 0.0538,
+      "AP50_95": 0.0207
+    },
+    "20261005-yolov8n-960-s2.pt": {
+      "arm": "yolov8n_deepfish_only",
+      "found_at_0.25": 625,
+      "false_alarms_at_0.25": 548,
+      "AP50": 0.0444,
+      "AP50_95": 0.018
+    },
+    "merge_yolo-fish-1": {
+      "arm": "yolofish_1_merge",
+      "found_at_0.25": 1740,
+      "false_alarms_at_0.25": 297,
+      "AP50": 0.1339,
+      "AP50_95": 0.0552
+    },
+    "merge_yolo-fish-2": {
+      "arm": "yolofish_2_merge",
+      "found_at_0.25": 1298,
+      "false_alarms_at_0.25": 115,
+      "AP50": 0.1035,
+      "AP50_95": 0.0467
+    },
+    "merge_yolov3": {
+      "arm": "yolov3_merge",
+      "found_at_0.25": 1730,
+      "false_alarms_at_0.25": 418,
+      "AP50": 0.1227,
+      "AP50_95": 0.0509
+    },
+    "merge_yolov4": {
+      "arm": "yolov4_merge",
+      "found_at_0.25": 3539,
+      "false_alarms_at_0.25": 835,
+      "AP50": 0.2273,
+      "AP50_95": 0.0983
+    }
+  }
+}

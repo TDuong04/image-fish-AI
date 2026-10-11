@@ -13,7 +13,7 @@ is forgotten.]**
 
 A single-class fish detector for underwater video is trained from COCO-pretrained YOLOv8 weights on three openly
 licensed datasets and evaluated with a site-level split that avoids frame leakage. [Headline result with seeds and
-spread.] [Cross-dataset result on the sealed test set, run once: mean 0.700 mAP@50 on three YOLOv8s seeds (F33), new deployments of the same footage.] [Measured end-to-end frame rate and sustained thermal
+spread.] [Cross-dataset result on the sealed test set, run once: mean 0.700 mAP@50 on three YOLOv8s seeds (F33), new deployments of the same footage; and on a truly unseen Mediterranean source every detector is poor, AP50 0.05 to 0.23 (F39).] [Measured end-to-end frame rate and sustained thermal
 behaviour on a Jetson Orin Nano, with the power mode stated.] The analysis shows that [what limits recall], that
 [what raised it], and that [what did not help].
 
@@ -264,6 +264,13 @@ real frames (F7). **The larger model costs more on the device (F28):** a YOLOv8s
 
 The sealed OzFish test set (352 frames, 8,329 boxes, 297 clips from deployments excluded from training) was evaluated once on the three YOLOv8s seeds, under a plan fixed in the evaluation protocol before the run: mean mAP@50 **0.700** (seeds 0.695, 0.701, 0.705) and mAP@50-95 **0.380** (0.376, 0.381, 0.385), precision 0.807 and recall 0.610 at the default operating point. This is close to the 0.729 mAP@50 on the held-out OzFish deployments used for decisions (F32), and far above the 0.217 of the DeepFish-only YOLOv8n baselines on the same set (F2); that comparison mixes model size, Kakadu data and OzFish data. Because OzFish frames were in training, the test measures new deployments of the same footage, not an unseen source. No seed was chosen from the result, nothing was tuned on it, and the YOLOv8n arm was not evaluated on it. Because the first pass kept no boxes and so gave no interval, the same three fixed models were scored a second time, only to add uncertainty and under rules fixed beforehand (the sealed set was therefore scored twice): resampling the 249 deployments gives a mean AP50 of 0.697 with a 95% interval of 0.669 to 0.724 (AP50-95 0.379, 0.355 to 0.403), with the routine's point values within 0.005 of the first pass (F37). The point estimates quoted above are the first pass's. The set has no empty frames, so it says nothing about false alarms.
 
+### 5.10 An unseen source and the published detectors (F39)
+
+To test generalisation beyond the OzFish collections, the detectors were scored once on a Mediterranean fish set (Catalan and Alvarez-Ellacuria, 2023; 1,516 frames, 17,157 boxes after conversion to one class) that no training, validation or selection data came from, under rules fixed beforehand (evaluation protocol, item 10), together with the published YOLO-Fish detectors as the external comparison.
+Every detector does poorly: AP50 is 0.045 for the DeepFish-only YOLOv8n, 0.109 with Kakadu added, 0.154 with OzFish, 0.166 for YOLOv8s (three seeds each), and 0.104 to 0.134 for YOLO-Fish-1, YOLO-Fish-2 and YOLOv3, while the published YOLOv4 scores highest at 0.227, with wide intervals over 18 groups (0.136 to 0.442 for YOLOv8s). Our YOLOv8s finds about 13 to 15% of the fish at the default threshold.
+The ordering of our own arms reproduces the data finding of Section 5.4 on an unseen source, but the absolute level shows that cross-source generalisation is weak, and that the sealed OzFish score (Section 5.9) is not a cross-source score. The YOLOv4 weights are about eleven times larger than ours and were trained on different data, so the comparison is not a claim of superiority either way.
+A confidence threshold chosen on DeepFish validation also lands at very different operating points on this source (precision 0.54 to 0.86 across the three seeds), so thresholds must be re-chosen on target footage.
+
 ## 6. Discussion
 
 **What limits accuracy.** Our evidence points to data diversity and fish size rather than the detector design.
@@ -285,7 +292,7 @@ reported in the literature, while recall (about 0.72) is lower **[compare only a
 - Per-frame metrics on near-duplicate video frames overstate certainty; clip-level intervals (F35) show absolute scores uncertain by about +-0.1 on the 20 validation clips.
 - The 0.98 against 0.47 contrast (F20) compares a random per-image split with a site split of the same pool, and the two score different frames. A control on the same six sites (F38) isolates the effect: a model that saw neighbouring frames scores 0.989 AP50 on them and site-split models 0.491, a gap of about 0.50 (95% interval 0.22 to 0.75), so the gap is leakage and not harder validation sites; it is one random-split model and one seed.
 - DeepFish validation resembles Kakadu, and the held-out OzFish deployments may share reefs with training ones, so
-  cross-source generalisation is only partly tested; the sealed OzFish test was run once on the YOLOv8s recipe (Section 5.9) but
+  cross-source generalisation is weak where it is tested on a truly different source (Section 5.10: AP50 0.17 for YOLOv8s on the Mediterranean set); the sealed OzFish test was run once on the YOLOv8s recipe (Section 5.9) but
   measures new deployments of the same OzFish footage, not an unrelated source, and the YOLOv8n arm was not run on it.
 - OzFish labels come from crowd annotation, so an unlabelled fish scores as a false alarm; the label audit is one
   reviewer's sample.
@@ -302,7 +309,7 @@ The work uses only openly licensed footage of fish and no human subjects. The da
 
 ## 8. Conclusion **[PENDING]**
 
-**[Remaining before writing: the seed 2 engine measurements on the Orin, the unseen-source result (Section 5.10), and the final wording. The release licence is decided (AGPL-3.0, NOTICE.md).]**
+**[Remaining before writing: the seed 2 engine measurements on the Orin, the second-family (Faster R-CNN) result, and the final wording. The release licence is decided (AGPL-3.0, NOTICE.md).]**
 
 ## Reproducibility statement
 

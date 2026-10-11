@@ -25,6 +25,7 @@ DeepFish, Kakadu and OzFish (training); DeepFish validation sites (decisions); a
 | DeepFish validation mAP@50 / mAP@50-95 | 0.812 / 0.567 (range 0.041 / 0.017) | 0.750 / 0.514 | F32, F24 |
 | Held-out OzFish deployments mAP@50 | 0.729 | 0.689 | F32, F24 |
 | Sealed OzFish test mAP@50 / mAP@50-95 (new deployments of the same footage, not an unseen source; 95% interval over deployments 0.669 to 0.724 for AP50) | 0.700 / 0.380 | not evaluated | F33, F37 |
+| Unseen Mediterranean source, AP50 (95% interval over groups) | 0.166 (0.136 to 0.442) | 0.154 (0.123 to 0.413) | F39 |
 | Recall on 16-32 px fish / fish under 16 px (DeepFish val) | about 29% / 0% | about 15% / 0% | F32 |
 | Jetson Orin Nano, 25 W, video, sustained 30 min | about 24 fps, about 58 C, no throttling | about 34 fps, about 57 C, no throttling | F29, F9 |
 
@@ -32,6 +33,7 @@ Uncertainty: with whole clips resampled the YOLOv8s lead over YOLOv8n is positiv
 
 ## Known limitations
 
+- **Generalisation to an unseen source is weak:** on a Mediterranean set that no training or selection data came from, YOLOv8s scores AP50 0.17 (the DeepFish-only YOLOv8n 0.05; the published YOLO-Fish YOLOv4 0.23), finding about 13 to 15% of the fish at the default threshold (F39). Expect large drops on footage unlike the training data.
 - Small and faint fish are missed (about 28% of fish overall on DeepFish validation); false alarms at a fixed confidence differ widely between seeds (80 to 601 at 0.25), so calibrate the threshold on your own footage (F32).
 - As a counter, per-frame totals are about a fifth low, and the clip-level maximum count is over-estimated because false alarms inflate the largest frame (F36).
 - Training data are tropical Australian marine and freshwater footage (Mediterranean footage was used only for testing); behaviour on pond or aquaculture footage is unmeasured.
