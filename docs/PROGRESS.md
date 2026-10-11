@@ -1085,6 +1085,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 
 ## 8. Not done / open
 
+- **Which YOLOv8s seed ships (decided 2026-10-11): seed 2.** Chosen by the owner after F32 and F33 as the best seed on DeepFish val (0.829 mAP@50). It is also the highest of the three on the sealed OzFish test (0.705 against 0.695 and 0.701), but that result was not used to choose it; the honest sealed figure for the recipe is the three-seed mean, 0.700 (F33). The Nano engine of F28 to F30 is seed 0; the seed 2 engine is being built and measured (FD-146).
 - **Device measurement is only partly done.** GPU kernel time is measured for both engines (F6) and parity holds on 12 frames (F7). End-to-end latency is measured for a serial pipeline (F8). Sustained 30-min throughput and thermals are measured once at 960 / 25 W (F9); still open: other power modes, a repeat, a warmer ambient, an explained GPU-clock reading, **hardware video decode (NVDEC)**, memory under a real pipeline, any **overlap or pinned-memory optimisation** of the CPU stages that dominate, INT8, and **mAP on the device**. Engines exist only for seed 2, and the board boots from an SD card with about 8 GB free.
 - **No false-alarm rate on unseen footage.** OzFish has zero empty frames; DeepFish val (31% empty) is the only place it can be measured, and it has not been reported yet.
 - **No annotation-quality audit.** OzFish boxes came from crowd annotation; an unlabelled fish scores as a false positive.
