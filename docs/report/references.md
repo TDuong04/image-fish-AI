@@ -32,6 +32,11 @@ from a web-search result summary only; do not quote numbers from it in the final
 | `ren2017fasterrcnn` | Faster R-CNN, TPAMI 2017 | Crossref | Method (second detector family) | OK |
 | `ovalle2022onboard` | Deep learning for fish on board fishing vessels, Marine Policy 2022 | Crossref | Related work 2.1 | Read |
 | `sun2022enhance` | Image enhancement for coral reef fish detection, Ecol. Inform. 2022 | Crossref | Related work 2.1 | Read |
+| `dwork2015reusable` | The reusable holdout, Science 2015 | **Snippet** (search results: authors, venue, DOI, and a summary of the idea: reusing a holdout adaptively invalidates it, noise added to answers restores validity) | Methods 4.3, discussion of repeated test-set reads | Read before citing specifics |
+| `recht2019imagenet` | Do ImageNet classifiers generalize to ImageNet?, ICML 2019 | **Snippet** (search results: new test sets for CIFAR-10 and ImageNet; accuracy drops attributed to harder images and distribution shift, not to adaptive overfitting) | Methods 4.3 | Read before citing specifics |
+| `roelofs2019meta` | A meta-analysis of overfitting in machine learning, NeurIPS 2019 | **Snippet** (search results: over 100 Kaggle competitions with a reused public holdout and a once-used final test; little evidence of substantial adaptive overfitting; mostly classification) | Methods 4.3 | Read before citing specifics |
+| `varoquaux2018crossval` | Cross-validation failure, NeuroImage 2018 | **Snippet** (search results: error bars of about +-10% at 100 samples; fold spread understates uncertainty) | Results (small test sets) | Read; check volume and pages |
+| `kapoor2024reforms` | REFORMS reporting guidelines, Science Advances 2024 | **Snippet** (search results: 32-item checklist from a consensus of 19 researchers) | Reproducibility statement | Read the checklist items on test-set use before claiming compliance |
 
 ## Sources considered and not used
 
