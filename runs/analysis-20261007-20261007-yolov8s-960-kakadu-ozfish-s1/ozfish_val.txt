@@ -3,7 +3,7 @@ Ultralytics 8.4.172 🚀 Python-3.11.16 torch-2.11.0+cu128 CUDA:0 (NVIDIA GeForc
 Model summary (fused): 72 layers, 11,125,971 parameters, 0 gradients, 28.4 GFLOPs
 [34m[1mval: [0mFast image access ✅ (ping: 0.0±0.0 ms, read: 5981.5±2152.0 MB/s, size: 111.5 KB)
 
-[K[34m[1mval: [0mScanning /home/developer/workspace/fish-detection/data/processed/ozfish_train/labels/val.cache... 157 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 157/157 94.1Mit/s 0.0s
+[K[34m[1mval: [0mScanning <repo>/data/processed/ozfish_train/labels/val.cache... 157 images, 0 backgrounds, 0 corrupt: 100% ━━━━━━━━━━━━ 157/157 94.1Mit/s 0.0s
 
 [K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 10% ━─────────── 1/10 1.7it/s 0.2s<5.4s
 [K                 Class     Images  Instances      Box(P          R      mAP50  mAP50-95): 20% ━━────────── 2/10 3.2it/s 0.3s<2.5s

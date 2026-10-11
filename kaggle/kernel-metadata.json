@@ -1,5 +1,5 @@
 {
-  "id": "hunhthidng04/fish-detection-train",
+  "id": "your-kaggle-username/fish-detection-train",
   "title": "fish-detection-train",
   "code_file": "fish-detection-train.ipynb",
   "language": "python",
@@ -10,6 +10,6 @@
   "dataset_sources": [],
   "competition_sources": [],
   "kernel_sources": [
-    "hunhthidng04/fish-detection-train"
+    "your-kaggle-username/fish-detection-train"
   ]
 }

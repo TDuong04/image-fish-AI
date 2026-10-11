@@ -1,4 +1,4 @@
-path: /home/developer/workspace/fish-detection/data/processed/ozfish_eval
+path: <repo>/data/processed/ozfish_eval
 train: images/val
 val: images/val
 names:

@@ -1,7 +1,7 @@
 task: detect
 mode: train
 model: yolov8n.pt
-data: /home/developer/workspace/fish-detection/runs/20261005-yolov8n-960-kakadu-s2/data.yaml
+data: <repo>/runs/20261005-yolov8n-960-kakadu-s2/data.yaml
 epochs: 150
 time: null
 patience: 30
@@ -12,7 +12,7 @@ save_period: -1
 cache: false
 device: '0'
 workers: 8
-project: /home/developer/workspace/fish-detection/runs
+project: <repo>/runs
 name: 20261005-yolov8n-960-kakadu-s2
 exist_ok: true
 pretrained: true
@@ -111,4 +111,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: tracktrack.yaml
-save_dir: /home/developer/workspace/fish-detection/runs/20261005-yolov8n-960-kakadu-s2
+save_dir: <repo>/runs/20261005-yolov8n-960-kakadu-s2

@@ -1,7 +1,7 @@
 task: detect
 mode: train
-model: /home/developer/workspace/fish-detection/runs/20261004-yolov8s-960-s0/weights/last.pt
-data: /home/developer/workspace/fish-detection/runs/20261004-yolov8s-960-s0/data.yaml
+model: <repo>/runs/20261004-yolov8s-960-s0/weights/last.pt
+data: <repo>/runs/20261004-yolov8s-960-s0/data.yaml
 epochs: 150
 time: null
 patience: 30
@@ -12,7 +12,7 @@ save_period: -1
 cache: false
 device: '0'
 workers: 8
-project: /home/developer/workspace/fish-detection/runs
+project: <repo>/runs
 name: 20261004-yolov8s-960-s0
 exist_ok: true
 pretrained: true
@@ -25,7 +25,7 @@ single_cls: false
 rect: false
 cos_lr: false
 close_mosaic: 10
-resume: /home/developer/workspace/fish-detection/runs/20261004-yolov8s-960-s0/weights/last.pt
+resume: <repo>/runs/20261004-yolov8s-960-s0/weights/last.pt
 amp: true
 fraction: 1.0
 profile: false
@@ -111,4 +111,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: tracktrack.yaml
-save_dir: /home/developer/workspace/fish-detection/runs/20261004-yolov8s-960-s0
+save_dir: <repo>/runs/20261004-yolov8s-960-s0

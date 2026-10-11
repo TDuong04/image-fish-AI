@@ -1,4 +1,4 @@
-path: /home/developer/workspace/fish-detection/data/processed/deepfish_randomsplit
+path: <repo>/data/processed/deepfish_randomsplit
 train: images/train
 val: images/val
 names:

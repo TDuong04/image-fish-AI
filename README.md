@@ -14,7 +14,7 @@ Jetson) to 0.81. Details: `docs/PROGRESS.md`.
 You need **Python 3.10 or 3.11** (`python --version`).
 
 ```bash
-git clone https://git.grifufu.io.vn/IoT-Group/image-fish-AI.git
+git clone <repository-url>
 cd image-fish-AI
 
 py -3.11 -m venv .venv            # Windows

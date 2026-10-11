@@ -25,8 +25,6 @@ __pycache__/
 *.tar
 *.zip
 
-# Personal files that are not part of this project
-creativity_marks_appeal.md
 
 # Supervisor/runner scratch state is per-machine and must NOT be committed:
 # a clone otherwise ships one machine's old failures, and kaggle_report.json

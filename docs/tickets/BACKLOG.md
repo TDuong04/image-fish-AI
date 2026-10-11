@@ -124,7 +124,7 @@ model family FD-020 trains.
 ---
 
 ## FD-001 · Initialise git repository · P0 · **DONE**
-**Done:** repo initialised, `.gitattributes` + `.gitignore` with `runs/**` negations, pushed to `IoT-Group/image-fish-AI`. Splits tracked; weights and data excluded.
+**Done:** repo initialised, `.gitattributes` + `.gitignore` with `runs/**` negations, pushed to `<owner>/<repository>`. Splits tracked; weights and data excluded.
 **Why:** No version control. No result can be tied to a commit.
 
 **Do:**

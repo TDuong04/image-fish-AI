@@ -29,7 +29,7 @@ the venv at the right interpreter (step 1).
 ## 1. Clone and bootstrap
 
 ```bash
-git clone https://git.grifufu.io.vn/IoT-Group/image-fish-AI.git
+git clone <repository-url>
 cd image-fish-AI
 ```
 

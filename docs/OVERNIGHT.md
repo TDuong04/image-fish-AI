@@ -60,6 +60,6 @@ evaluation protocol (`docs/eval_protocol.md`); claim a comparison from fewer tha
   and `--restore <manifest> --yes` undoes it): our redundant OzFish copy and the leaky random-split diagnostic dataset (`20261005-173254`), the 397 loose Kakadu PNGs and a JSON that were byte-size-identical
   copies of members of `kakadu_training_data.zip`, and our abandoned upload and download leftovers (`20261005-173255`, with `MANIFEST_loose_copies.json` rebuilt after a manifest overwrite).
   **`data/raw/fixed-archive.zip` was left in place:** it is the same size as the Kakadu zip but a different checksum, it is not ours, and nothing uses it; ask before touching it.
-  The other project in `~/workspace` (`RL-agent-iot`) is not ours and was not touched.
+  The other project in `~/workspace` (`another-project`) is not ours and was not touched.
 - **A held-out split inside Kakadu leaks** (PROGRESS F13). Kakadu is training data only; judge on the DeepFish
   val split (comparable with every run) and, at the end, once, on the sealed OzFish set.

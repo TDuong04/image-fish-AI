@@ -1,4 +1,4 @@
-path: /home/developer/workspace/fish-detection/data/processed
+path: <repo>/data/processed
 train:
 - deepfish/images/train
 - kakadu_1280/images/train
