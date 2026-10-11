@@ -154,6 +154,17 @@ These were applied from 2026-10-04 and are why some earlier numbers are not comp
    range. No seed is chosen from the result, no threshold is tuned on it, nothing is re-run, and the YOLOv8n arm is not evaluated on it. The test frames come from
    deployments excluded from the OzFish training frames, but from the same collections, so this measures new deployments of the same footage and not an unseen source.
 
+10. **Unseen-source test (DEEPECOMAR), fixed before it was run, 2026-10-11.** The test set is the Mediterranean fish dataset of Catalan and Alvarez-Ellacuria
+    (Zenodo 7534425, CC BY 4.0: 1,548 images, 17,965 boxes, 20 species and the categories `stain`, `small` and `fish poly`). No image of it, nor any image from
+    that project or region, was used for training, validation, threshold choice or model selection. Rules, all fixed here:
+    - **One class.** Every box of a fish class, `small` and `fish poly` is a fish; `stain` boxes (lens stains) are dropped and are not fish. A second score excludes the `small` category.
+    - **Models, each evaluated once:** the YOLOv8s recipe (3 seeds, F32), the YOLOv8n arms (DeepFish only, plus Kakadu, plus Kakadu and OzFish; 3 seeds each), and the published YOLO-Fish
+      detectors (the `merge` darknet weights: yolo-fish-1, yolo-fish-2, yolov3, yolov4) as the external comparison; a detector from a second, permissively licensed family only if it is trained before the run.
+    - **Scoring:** one AP routine for every model (101-point AP at IoU 0.50 and 0.50 to 0.95), ours at 960 px and darknet models at their configured input size; found fish and false alarms at confidence 0.25;
+      no threshold is tuned on this set. Frames are scored as given; if the dataset has no clip or site identifiers the intervals are frame-level and are labelled as such.
+    - **No selection from the result:** nothing is chosen, tuned or re-run because of it. A failure to read a model (for example a darknet file that does not load) may be repaired and retried, a poor score may not.
+    - **YOLO-Fish caveat stated in advance:** those weights were trained on DeepFish and OzFish frames, so DEEPECOMAR is also new to them, but their training data and ours overlap in source, which is why the comparison is on a source neither saw and not on our validation split.
+
 ## Known limitations, declared up front
 
 1. `ozfish_eval` has no empty frames → no cross-dataset false-alarm measurement.

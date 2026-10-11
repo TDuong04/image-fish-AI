@@ -1,0 +1,25 @@
+# Arms for scripts/bootstrap_ci.py: each arm is a recipe with its seeds (checkpoints under models/).
+# Same-machine arms only (server runs); each recipe has three seeds. DeepFish validation split.
+arms:
+  deepfish_only_n:        # F14/F18 control: YOLOv8n, DeepFish only
+    - 20261004-yolov8n-960-s0.pt
+    - 20261004-yolov8n-960-s1.pt
+    - 20261005-yolov8n-960-s2.pt
+  plus_kakadu_n:          # F18: + Kakadu
+    - 20261004-yolov8n-960-kakadu-s0.pt
+    - 20261004-yolov8n-960-kakadu-s1.pt
+    - 20261005-yolov8n-960-kakadu-s2.pt
+  plus_kakadu_ozfish_n:   # F24: + OzFish
+    - 20261005-yolov8n-960-kakadu-ozfish-s0.pt
+    - 20261005-yolov8n-960-kakadu-ozfish-s1.pt
+    - 20261005-yolov8n-960-kakadu-ozfish-s2.pt
+  plus_kakadu_ozfish_s:   # F32: YOLOv8s on the same data
+    - 20261005-yolov8s-960-kakadu-ozfish-s0.pt
+    - 20261007-yolov8s-960-kakadu-ozfish-s1.pt
+    - 20261007-yolov8s-960-kakadu-ozfish-s2.pt
+# Differences reported (second minus first), in this order.
+contrasts:
+  - [deepfish_only_n, plus_kakadu_n]
+  - [plus_kakadu_n, plus_kakadu_ozfish_n]
+  - [plus_kakadu_ozfish_n, plus_kakadu_ozfish_s]
+  - [deepfish_only_n, plus_kakadu_ozfish_s]
