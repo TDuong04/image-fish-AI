@@ -172,6 +172,17 @@ These were applied from 2026-10-04 and are why some earlier numbers are not comp
     Second addendum, also written before any result of this run was read: as a secondary reading, found fish and false alarms are also reported at each YOLOv8s seed's own best-F1 confidence chosen on the DeepFish validation split
     (seed 0: 0.25, seed 1: 0.5, seed 2: 0.2, from `runs/analysis-*`), to show whether a threshold chosen on validation transfers to an unseen source. It is a reading, not a selection.
 
+11. **Interval-only second pass on the sealed OzFish test, declared 2026-10-11 before it was run.** The first and only scoring pass of the sealed set (F33) used Ultralytics' built-in validation, which keeps no boxes, so
+    no interval could be computed, and the independent review asked for one (352 frames from a few hundred clips is a small set). The literature distinguishes adaptive reuse of a test set (choosing something because of its result), which
+    is the danger, from re-measuring a fixed model, which is not adaptive. The rules for this pass, all fixed here:
+    - **Same fixed models only:** the three YOLOv8s seeds of F33. No other model is scored on the sealed set.
+    - **Nothing is chosen, tuned or re-run because of it:** no threshold, seed, recipe or model changes; the F33 numbers stay the headline; this pass only adds uncertainty.
+    - **What is computed:** predictions at 960 px with confidence 0.005 and NMS IoU 0.7; the 101-point AP routine of `scripts/bootstrap_ci.py` at IoU 0.50 and 0.50 to 0.95 per seed and as the mean of the seeds; a
+      cluster bootstrap (1,000 resamples, percentile 95% interval) that resamples whole **deployments** (the id before the first underscore of the file name, so stereo `_L`/`_R` partners are one cluster).
+    - **Consistency check:** the AP routine's point values are printed beside the F33 Ultralytics values; a difference is reported, not corrected.
+    - **Disclosure:** the paper states that the sealed set was scored twice, the second time only for intervals, and that the point estimates are the first pass's.
+    - **One run:** `scripts/sealed_intervals.py` runs once; a crash may be retried, a result may not.
+
 ## Known limitations, declared up front
 
 1. `ozfish_eval` has no empty frames → no cross-dataset false-alarm measurement.
