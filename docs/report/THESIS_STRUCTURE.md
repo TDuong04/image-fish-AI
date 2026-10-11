@@ -68,7 +68,7 @@ Front matter    Title page, abstract (written last), acknowledgements, contents,
    5.7  Model size and the seed study                F32
    5.8  The sealed OzFish test                       F33 and its intervals F37
    5.9  An unseen source and other detectors         F39 (Mediterranean set, published YOLO-Fish detectors) and the second family F40
-   5.10 Adapting to a fixed camera                   the fine-tuning experiment (running)
+   5.10 Adapting to a fixed camera                   the fine-tuning experiment (F41: same camera 0.18 to 0.65-0.76 AP50, other cameras small and uncertain)
    5.11 On the Jetson Orin Nano                      F5 to F9, F28 to F31, F34
    5.12 An informal out-of-domain check              the reef photograph (labelled as not measured)
 

@@ -1,0 +1,24 @@
+name: yolov8s_adapt_all
+model: models/20261007-yolov8s-960-kakadu-ozfish-s2.pt
+data: deepecomar_adapt_all
+imgsz: 960
+epochs: 40
+patience: 30
+seeds:
+- 0
+batch: 5
+workers: 8
+amp: true
+close_mosaic: 5
+val_conf: 0.001
+val_iou: 0.7
+extra:
+  plots: false
+  lr0: 0.002
+  lrf: 0.1
+  warmup_epochs: 1
+seed: 0
+device: '0'
+device_resolved: cuda (NVIDIA GeForce RTX 5060, 7.6 GB)
+fish_env: aigpu
+run_dir: runs/20261011-yolov8s_adapt_all-s0

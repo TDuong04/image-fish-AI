@@ -1,0 +1,5 @@
+path: /home/developer/workspace/fish-detection/data/processed/deepecomar
+train: splits_adapt/train_25.txt
+val: splits_adapt/val.txt
+names:
+  0: fish

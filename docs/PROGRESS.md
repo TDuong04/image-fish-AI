@@ -1177,6 +1177,25 @@ Logs and the parity record: `runs/device-20261007/` (`e2e_20261011_*`, `sustaine
 
 **Limits.** One engine, one run, 25 W only, 12 frames for agreement (not an on-device mAP), ambient not measured, software H.264 decode (no NVDEC), one clip, a warm start; no INT8.
 
+### F41. Fine-tuning on early frames of one fixed camera lifts later frames of that camera from 0.18 to 0.65-0.76 AP50, but the gain on other cameras is small and uncertain (one seed per run, screen)
+Rules were fixed before the runs in `docs/eval_protocol.md` item 12 (committed `04e2af7`). Splits (`scripts/prepare_adaptation.py`): the 886 time-stamped `vivo` snapshots of one fixed camera, ordered by date; earliest 60% = train pool, next 10% = validation block (epoch selection only), latest 30% = `test_vivo` (267 frames, 5,843 boxes, 18 dates). `test_other` = the 630 frames (3,619 boxes, 17 groups) of other cameras, never in training or selection.
+Runs (`configs/plan_adapt.yaml`, seed 0, one each): our YOLOv8s seed 2 recipe fine-tuned on 25, 100 and all pool frames, plus a COCO-only YOLOv8s on all pool frames (control). Scoring: `scripts/eval_adaptation.py`, 101-point AP, cluster bootstrap (1000) over dates or groups, found fish and false alarms at confidence 0.25. Record: `runs/adaptation-20261011/adaptation.json`; training runs `runs/20261011-yolov8s_adapt_25-s0`, `runs/20261011-yolov8s_adapt_100-s0`, `runs/20261011-yolov8s_adapt_all-s0`, `runs/20261011-yolov8s_adapt_coco_all-s0`.
+
+| Model | `test_vivo` AP50 [95% CI] | AP50-95 | found / false alarms at 0.25 (of 5,843) | `test_other` AP50 [95% CI] | AP50-95 | found / false alarms (of 3,619) |
+|---|---|---|---|---|---|---|
+| Zero-shot, 3 seeds mean (F39) | 0.181 [0.116, 0.222] | 0.090 | 546 / 26 | 0.387 [0.318, 0.453] | 0.153 | 1,407 / 1,307 |
+| Fine-tuned, 25 frames | 0.647 [0.581, 0.699] | 0.340 | 3,612 / 1,597 | 0.471 [0.350, 0.592] | 0.228 | 1,965 / 3,054 |
+| Fine-tuned, 100 frames | 0.716 [0.660, 0.760] | 0.393 | 4,198 / 2,376 | 0.457 [0.348, 0.575] | 0.229 | 2,000 / 3,572 |
+| Fine-tuned, all early frames (about 530) | 0.756 [0.706, 0.795] | 0.432 | 4,365 / 1,933 | 0.478 [0.379, 0.586] | 0.231 | 2,082 / 4,235 |
+| COCO-only control, all early frames | 0.759 [0.713, 0.793] | 0.430 | 4,443 / 2,222 | 0.367 [0.254, 0.494] | 0.191 | 1,891 / 11,286 |
+
+- **Same camera, later months: large, fast gain.** 25 labelled frames take AP50 from 0.18 to 0.65; 100 frames reach 0.72; the whole early pool 0.76. The intervals of zero-shot and every fine-tuned run do not overlap. Returns diminish: 25 to 100 frames adds about 0.07, 100 to all adds about 0.04.
+- **Our pretraining did not matter on the adapted camera.** The COCO-only control matches ours on all early frames (0.759 against 0.756, AP50-95 0.430 against 0.432). The 0.18 zero-shot figure therefore reflects the camera, not a weak starting model: a few dozen labelled frames from the site matter more than the 6,500-image training set of F33.
+- **Other cameras: small, uncertain gain.** 0.39 to 0.46-0.48, with intervals (over 17 groups) that overlap the zero-shot interval; nothing separates 25, 100 and all frames. The adapted models also raise false alarms at 0.25 (1,307 to 3,054-4,235). The COCO-only control is **worse** than zero-shot on other cameras (0.367, 11,286 false alarms), so our diverse pretraining is what keeps adaptation from over-specialising; this is the only place the control and our model differ, and it rests on one seed each.
+- **False alarms are high at a fixed 0.25 on `test_vivo`** (1,600 to 2,400 against about 4,000 found); the threshold was not re-chosen on the Mediterranean validation block, so operating-point use needs a site-specific threshold (compare F6, threshold transfer in F39).
+- **What this does not show.** One seed per run (YOLOv8s seed spread was 0.041, F32, so the 100-frame and all-frame gap of 0.04 is within it; the 25-frame gap to the others is not). The test frames come from the same camera and scene as training, a month apart at least, so this is "later frames of a known camera", not a new site; `test_vivo` frames are clustered by date, with several near-duplicate frames per date. Annotation style of this set (small, crowded) differs from our other sets. No on-device measurement of the adapted models.
+- **Decision.** The unseen-source figure of F39 stands unchanged as the zero-shot claim. For a real deployment the recipe is: start from the shipped model, label about 100 frames of the target camera, fine-tune; this is a hypothesis the owner can only confirm with target-site footage (none yet).
+
 ---
 
 ## 6. Corrections — claims that were wrong and what replaced them

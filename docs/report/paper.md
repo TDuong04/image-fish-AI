@@ -277,6 +277,11 @@ To test whether the data finding is specific to YOLO, a torchvision Faster R-CNN
 Adding the data raised AP50 on DeepFish validation from 0.554 to 0.660 (+0.105) and on the unseen Mediterranean source from 0.098 to 0.134 (+0.036, scored after the main unseen result was read), the same direction as every YOLO arm. The two families rank differently at the two ends: with DeepFish only the Faster R-CNN scores higher than the YOLOv8n controls (0.554 against 0.470),
 and with the combined data lower than YOLOv8n (0.740) and YOLOv8s (0.798). These are single seeds of a short untuned recipe, so the comparison between families is indicative only; the claim supported is that the benefit of diverse training data is not specific to YOLO.
 
+### 5.12 Adapting to a fixed camera (F41)
+F39 left the unseen-source score low (about 0.18 AP50 on the whole Mediterranean set), so we tested how much labelled footage from one camera recovers it. Rules were fixed in advance (protocol item 12). The 886 snapshots of one fixed camera were ordered by date: the earliest 60% were the training pool, the next 10% selected the epoch, and the latest 30% (267 frames, 18 dates) formed `test_vivo`. Frames of the other 17 groups (630 frames, other cameras) formed `test_other` and never touched training. We fine-tuned our YOLOv8s on 25, 100 and all early frames, and a COCO-only YOLOv8s on all early frames as a control (one seed each, a screen).
+
+On later frames of the same camera, 25 labelled frames raised AP50 from 0.18 (95% interval 0.12 to 0.22) to 0.65 (0.58 to 0.70); 100 frames gave 0.72 and all early frames 0.76 (0.71 to 0.79). The COCO-only control reached the same 0.76, so our larger training set did not add accuracy once the camera was seen. On other cameras the gain was small and uncertain (0.39 to 0.46 to 0.48, intervals overlapping), with more false alarms at a fixed 0.25 threshold, and the COCO-only control fell below zero-shot (0.37, 11,286 false alarms), which suggests the diverse pretraining limits over-specialisation. Limits: one seed per run, same-camera test frames are a known scene rather than a new site, and the threshold was not re-tuned. We read the result as support for a label-a-little-then-fine-tune recipe for a new camera, not as a new-site result.
+
 ## 6. Discussion
 
 **What limits accuracy.** Our evidence points to data diversity and fish size rather than the detector design.
@@ -315,7 +320,7 @@ The work uses only openly licensed footage of fish and no human subjects. The da
 
 ## 8. Conclusion **[PENDING]**
 
-**[Remaining before writing: the adaptation experiment on the unseen source, and the final wording. The release licence is decided (AGPL-3.0, NOTICE.md).]**
+**[Remaining before writing: the abstract, the conclusion and the final wording. The release licence is decided (AGPL-3.0, NOTICE.md).]**
 
 ## Reproducibility statement
 
