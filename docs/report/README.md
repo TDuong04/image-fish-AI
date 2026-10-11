@@ -5,6 +5,7 @@ The research report is drafted here, section by section, as results come in.
 | File | What |
 |---|---|
 | `PLAN.md` | **Start here:** the thesis chapter plan, the publication plan and the ordered work list |
+| `fishiot_sections.md` | Draft text for the detection slots (2.4 design, 3.2 results) in the FishIoT team report |
 | `paper.md` | The manuscript draft. Sections marked **[PENDING]** wait on experiments. |
 | `references.bib` | Machine-readable references. |
 | `references.md` | How each reference was verified, where it is used and what is still to check. |
