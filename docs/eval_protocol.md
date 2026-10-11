@@ -165,6 +165,10 @@ These were applied from 2026-10-04 and are why some earlier numbers are not comp
     - **No selection from the result:** nothing is chosen, tuned or re-run because of it. A failure to read a model (for example a darknet file that does not load) may be repaired and retried, a poor score may not.
     - **YOLO-Fish caveat stated in advance:** those weights were trained on DeepFish and OzFish frames, so DEEPECOMAR is also new to them, but their training data and ours overlap in source, which is why the comparison is on a source neither saw and not on our validation split.
 
+    Addendum, written before any model was scored on it, after inspecting the files only: the stain class is `taca` (Catalan for stain; checked by drawing its boxes, which are blurred lens blobs, not fish);
+    the export holds 1,590 image files of which 1,516 are unique source frames (74 frames appear twice under different Roboflow hashes; the first copy is kept; train and valid folders share no source frame);
+    after conversion the set has 1,516 images, 17,157 fish boxes (16,488 without the `small` category), 794 stain boxes dropped and 30 images without a fish.
+
 ## Known limitations, declared up front
 
 1. `ozfish_eval` has no empty frames → no cross-dataset false-alarm measurement.

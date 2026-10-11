@@ -1,0 +1,8 @@
+# Second detector family, combined recipe: DeepFish + Kakadu + OzFish train data (the data of yolov8s_960_kakadu_ozfish).
+name: tv-frcnn-mnv3-combined
+data: deepfish_kakadu_ozfish
+imgsz: 960
+epochs: 12
+batch: 8
+lr: 0.01
+workers: 4

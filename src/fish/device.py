@@ -20,6 +20,12 @@ class DeviceInfo:
     total_memory_gb: float | None
     ultralytics: str   # what to pass as Ultralytics' `device=`
 
+    @property
+    def torch(self):
+        """The `torch.device` for this choice (for code that moves tensors itself)."""
+        import torch
+        return torch.device(self.kind)
+
     def __str__(self) -> str:
         mem = f", {self.total_memory_gb:.1f} GB" if self.total_memory_gb else ""
         return f"{self.kind} ({self.name}{mem})"

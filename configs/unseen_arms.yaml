@@ -1,0 +1,47 @@
+# Arms for scripts/eval_unseen.py: the unseen-source test (DEEPECOMAR, docs/eval_protocol.md item 10). Fixed before the run.
+# kind: ultralytics (checkpoint under models/), darknet (YOLO-Fish: cfg + weights, repo-relative), torchvision (state dict under models/, scripts/train_tv.py)
+arms:
+  yolov8s_combined:
+    kind: ultralytics
+    imgsz: 960
+    models:
+      - 20261005-yolov8s-960-kakadu-ozfish-s0.pt
+      - 20261007-yolov8s-960-kakadu-ozfish-s1.pt
+      - 20261007-yolov8s-960-kakadu-ozfish-s2.pt
+  yolov8n_combined:
+    kind: ultralytics
+    imgsz: 960
+    models:
+      - 20261005-yolov8n-960-kakadu-ozfish-s0.pt
+      - 20261005-yolov8n-960-kakadu-ozfish-s1.pt
+      - 20261005-yolov8n-960-kakadu-ozfish-s2.pt
+  yolov8n_plus_kakadu:
+    kind: ultralytics
+    imgsz: 960
+    models:
+      - 20261004-yolov8n-960-kakadu-s0.pt
+      - 20261004-yolov8n-960-kakadu-s1.pt
+      - 20261005-yolov8n-960-kakadu-s2.pt
+  yolov8n_deepfish_only:
+    kind: ultralytics
+    imgsz: 960
+    models:
+      - 20261004-yolov8n-960-s0.pt
+      - 20261004-yolov8n-960-s1.pt
+      - 20261005-yolov8n-960-s2.pt
+  yolofish_1_merge:
+    kind: darknet
+    models:
+      - {cfg: fish-research/YOLO-Fish/models/trained_on_merge/yolo-fish-1.cfg, weights: fish-research/YOLO-Fish/weights/merge/merge_yolo-fish-1.weights}
+  yolofish_2_merge:
+    kind: darknet
+    models:
+      - {cfg: fish-research/YOLO-Fish/models/trained_on_merge/yolo-fish-2.cfg, weights: fish-research/YOLO-Fish/weights/merge/merge_yolo-fish-2.weights}
+  yolov3_merge:
+    kind: darknet
+    models:
+      - {cfg: fish-research/YOLO-Fish/models/trained_on_merge/yolov3.cfg, weights: fish-research/YOLO-Fish/weights/merge/merge_yolov3.weights}
+  yolov4_merge:
+    kind: darknet
+    models:
+      - {cfg: fish-research/YOLO-Fish/models/trained_on_merge/yolov4.cfg, weights: fish-research/YOLO-Fish/weights/merge/merge_yolov4.weights}

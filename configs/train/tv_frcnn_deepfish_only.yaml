@@ -1,0 +1,9 @@
+# Second detector family (torchvision Faster R-CNN, MobileNetV3-Large FPN, BSD-licensed code): DeepFish-only recipe.
+# Control for tv_frcnn_combined: does adding Kakadu and OzFish data help this family too? One seed: a screen.
+name: tv-frcnn-mnv3-deepfish-only
+data: deepfish
+imgsz: 960
+epochs: 12
+batch: 8
+lr: 0.01
+workers: 4
