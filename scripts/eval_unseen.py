@@ -126,11 +126,15 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--arms", nargs="*", default=None, help="only these arms of the config (used to cache slow CPU models in parallel processes)")
+    ap.add_argument("--predict-only", action="store_true", help="stop after the predictions are cached (no scoring)")
     args = ap.parse_args()
     if "ozfish_eval" in args.data:
         sys.exit("refusing: ozfish_eval is the sealed test set.")
 
     cfg = yaml.safe_load(args.config.read_text(encoding="utf-8"))
+    if args.arms:
+        cfg["arms"] = {k: v for k, v in cfg["arms"].items() if k in args.arms}
     root = paths.DATA_ROOT / "processed" / args.data
     img_dir, lab_dir = root / "images" / "val", root / args.labels / "val"
     if not img_dir.exists():
@@ -163,6 +167,10 @@ def main() -> int:
             scorers[name] = bc.Scorer(gts, boxes, confs)
             tp, fp = found_and_false(gts, boxes, confs, OPERATING_CONF)
             models_info[name] = {"arm": arm, "found_at_0.25": tp, "false_alarms_at_0.25": fp}
+
+    if args.predict_only:
+        print("predictions cached; no scoring (--predict-only)")
+        return 0
 
     rng = np.random.default_rng(args.seed)
     full = np.ones(len(images))

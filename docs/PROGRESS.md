@@ -95,6 +95,7 @@ Last updated: 2026-10-04.
 - `scripts/count_accuracy.py` — per-frame counts and clip-level MaxN from the cached predictions of `scripts/bootstrap_ci.py`, at each model's own validation best-F1 confidence; output `runs/stats-counting/counts.json` (F36).
 - `LICENSE`, `NOTICE.md`, `docs/MODEL_CARD.md`, `docs/PUBLISH_CHECKLIST.md` — licensing for public release under the AGPL-3.0 (decided by the owner 2026-10-11): the official licence text, third-party and dataset attributions with the changes made, the model card with weight checksums, and what still needs the owner before the repository is made public (a personal file in the git history, hostnames and identifiers in tracked files, the repository address, the weight release). `demo/app.py` and `edge/app.py` print the AGPL section 13 source offer from `$FISH_SOURCE_URL`; the demo's stale "no Jetson numbers" text was corrected.
 - `scripts/sealed_intervals.py` — the interval-only second pass on the sealed OzFish test (rules fixed in `docs/eval_protocol.md` item 11 before it was run): the same three YOLOv8s checkpoints, predictions matched to the labels, cluster bootstrap over deployments; refuses to run without `--confirm-protocol-item-11`; chooses nothing, the F33 numbers stay the headline. **Run once on 2026-10-11 (result: F37).**
+- `scripts/leakage_control.py` — holds the sites fixed to separate leakage from site difficulty: the random-split model on its validation frames from the six site-split validation sites against the site-split controls on the same sites, clip-level bootstrap; output `runs/stats-<date>-leakage-control/leakage.json` (F38).
 - `configs/env/aigpu.yaml` — profile for the shared remote server (RTX 5060 8 GB, headless container). Selected
   with `FISH_ENV=aigpu`. Verified `check_env.py --require-gpu` READY there with torch 2.11.0+cu128,
   ultralytics 8.4.172 (the workstation has 8.4.130; a cross-machine comparison must note this).
@@ -1086,6 +1087,24 @@ the F33 numbers remain the headline and the point estimates. Record: `runs/seale
 - **Even the lower end is far above the DeepFish-only baseline** of F2 (0.217), so the conclusion that more diverse training data transfers to new OzFish deployments does not depend on the width of this interval; what the interval limits is the precision of the 0.70 itself.
 
 **Limits.** The interval resamples deployments of one collection (OzFish), not independent sites in the ecological sense; it does not include seed variance beyond the three seeds shown; the AP routine differs slightly from Ultralytics'; the set is crowded (23.7 boxes per frame) and has no empty frames, so it says nothing about false alarms.
+
+### F38. On the same six sites, a model that saw neighbouring frames scores 0.989 AP50 and models that did not score 0.491: leakage, not site difficulty, accounts for the gap of F20 (diagnostic)
+**The question.** F20 compares a random per-image split (0.98 mAP@50) with a site split (about 0.47), but the two score different test frames, so the gap could partly reflect harder validation sites. `scripts/leakage_control.py` holds the footage fixed: the random-split YOLOv8n (`20261005-yolov8n-960-randomsplit-s0`, trained on a random 80% of the fish-containing DeepFish frames, so it saw neighbours of every site) is scored on its validation frames from
+the **same six validation sites** of the site split (172 of its 901 validation frames; the list is rebuilt by the same seeded shuffle and checked against F20's recorded 901 images and 3,058 boxes), and the three site-split YOLOv8n controls (DeepFish only, trained **without** those sites, F18) are scored on the 875 fish-containing frames of the same sites.
+Same 101-point AP as F35, 1,000 paired resamples of clips (46 clips in all). Diagnostic only; the random-split numbers are inflated by construction. Record: `runs/stats-20261011-leakage-control/leakage.json`.
+
+| Same six sites | AP50 (95% interval) | AP50-95 (95% interval) |
+|---|---|---|
+| Random-split model (saw neighbouring frames) | **0.989 (0.969 to 1.000)** | 0.776 (0.720 to 0.836) |
+| Site-split controls (3 seeds, did not see the sites) | **0.491 (0.244 to 0.761)** | 0.313 (0.150 to 0.505) |
+| **Gap (identical sites)** | **+0.498 (0.225 to 0.752)** | **+0.463 (0.319 to 0.579)** |
+| For reference: the random-split model on the other 14 sites | 0.970 | 0.630 |
+
+- **The gap survives holding the sites fixed.** On identical footage, seeing neighbouring frames in training adds about 0.50 AP50 (and 0.46 AP50-95), with a 95% interval well above zero, so the 0.98 against 0.47 contrast of F20 is the effect of the split and not mainly a property of hard validation sites. The random-split model scores about the same on the six sites (0.989) as on the other fourteen (0.970), so these sites are not special.
+- **What the control does and does not isolate.** It isolates "neighbouring frames of the same sites in training" from "which sites are tested". It does not separate leakage within a clip (adjacent frames) from other shared-site information (same background, water, camera), because the random split gives both; both are what a site split removes.
+- **Statistical weight.** The site-split controls on these sites are uncertain by about +-0.25 AP50 (a handful of clips), which is why the gap interval is wide (0.225 to 0.752) even though the point gap is about 0.5.
+
+**Limits.** One random-split model (one seed), YOLOv8n only; 172 random-split validation frames from the six sites against 875 control frames (different frames of the same sites, so the comparison is paired by clip and not by image); the random-split set drops empty frames (F19: worth under 0.03 AP50); the control sites are few (six sites, 20 clips).
 
 ---
 

@@ -1,0 +1,85 @@
+{
+  "random_split_model": "20261005-yolov8n-960-randomsplit-s0.pt",
+  "control_models": [
+    "20261004-yolov8n-960-s0.pt",
+    "20261004-yolov8n-960-s1.pt",
+    "20261005-yolov8n-960-s2.pt"
+  ],
+  "validation_sites": [
+    "7398",
+    "7623",
+    "9862",
+    "9870",
+    "9892",
+    "9898"
+  ],
+  "boot": 1000,
+  "clips": 46,
+  "images": {
+    "random_model_same_sites": 172,
+    "random_model_other_sites": 729,
+    "control_fish_frames_same_sites": 875
+  },
+  "date_utc": "2026-10-11T04:16:19+00:00",
+  "note": "diagnostic only; 101-point AP of bootstrap_ci.py; interval resamples clips for both sets together",
+  "AP50": {
+    "random_split_model_on_the_same_sites": {
+      "point": 0.9888,
+      "ci95": [
+        0.9686,
+        0.9996
+      ]
+    },
+    "site_split_controls_on_the_same_sites": {
+      "point": 0.4905,
+      "ci95": [
+        0.2437,
+        0.7612
+      ]
+    },
+    "gap_same_sites": {
+      "point": 0.4982,
+      "ci95": [
+        0.2245,
+        0.7515
+      ]
+    },
+    "random_split_model_on_the_other_sites": {
+      "point": 0.9696,
+      "ci95": [
+        0.9563,
+        0.9857
+      ]
+    }
+  },
+  "AP50_95": {
+    "random_split_model_on_the_same_sites": {
+      "point": 0.776,
+      "ci95": [
+        0.7202,
+        0.836
+      ]
+    },
+    "site_split_controls_on_the_same_sites": {
+      "point": 0.3127,
+      "ci95": [
+        0.1497,
+        0.5051
+      ]
+    },
+    "gap_same_sites": {
+      "point": 0.4633,
+      "ci95": [
+        0.3192,
+        0.5785
+      ]
+    },
+    "random_split_model_on_the_other_sites": {
+      "point": 0.6304,
+      "ci95": [
+        0.5731,
+        0.7435
+      ]
+    }
+  }
+}

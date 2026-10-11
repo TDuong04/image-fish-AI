@@ -31,7 +31,7 @@ Three things make the question harder than a benchmark number suggests.
 1. **Scores depend heavily on how the data are split.** Underwater datasets are made of video frames, and neighbouring
    frames are nearly identical. A random per-image split lets the model see almost the same picture in training and in
    testing. We measured the effect on our own pipeline: the same model scores 0.98 mAP@50 on a random per-image split of
-   DeepFish and about 0.47 when whole capture sites are held out (F20). Results from the literature should not be
+   DeepFish and about 0.47 when whole capture sites are held out (F20), and on identical sites a model that saw neighbouring frames scores 0.989 AP50 against 0.491 for models that did not (F38). Results from the literature should not be
    compared with ours unless the protocol is known to match (Kapoor and Narayanan, 2023, discuss leakage of this kind
    across machine-learning-based science).
 2. **Fish are small.** At the resolutions that suit a small device, many fish occupy a few tens of pixels, and detection
@@ -283,7 +283,7 @@ reported in the literature, while recall (about 0.72) is lower **[compare only a
 - Some comparisons are one seed (screens: stronger augmentation, the stride-4 head, 1280 px, tiling); the three-seed results are the YOLOv8n arms (DeepFish only, plus Kakadu, plus OzFish) and the YOLOv8s recipe (F32, F33). The YOLOv8s arm used batch 5 and the YOLOv8n arms batch 10, and the 1280 px run batch 3.
 - Checkpoint selection (best epoch by validation fitness), early stopping, recipe choices and the choice of the shipped seed all used the same 20-clip DeepFish validation split that is also the headline table, so those scores are mildly optimistic; the sealed OzFish test is the only set no decision touched (scored once for the numbers and a second time only for intervals, F37).
 - Per-frame metrics on near-duplicate video frames overstate certainty; clip-level intervals (F35) show absolute scores uncertain by about +-0.1 on the 20 validation clips.
-- The 0.98 against 0.47 contrast (F20) compares a random per-image split with a site split of the same pool; the site split also changes which footage is tested, so the contrast shows the effect of the protocol and does not by itself isolate leakage from site difficulty (a control on the same sites is planned).
+- The 0.98 against 0.47 contrast (F20) compares a random per-image split with a site split of the same pool, and the two score different frames. A control on the same six sites (F38) isolates the effect: a model that saw neighbouring frames scores 0.989 AP50 on them and site-split models 0.491, a gap of about 0.50 (95% interval 0.22 to 0.75), so the gap is leakage and not harder validation sites; it is one random-split model and one seed.
 - DeepFish validation resembles Kakadu, and the held-out OzFish deployments may share reefs with training ones, so
   cross-source generalisation is only partly tested; the sealed OzFish test was run once on the YOLOv8s recipe (Section 5.9) but
   measures new deployments of the same OzFish footage, not an unrelated source, and the YOLOv8n arm was not run on it.
