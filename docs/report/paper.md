@@ -53,9 +53,10 @@ the report says so.
 ### 2.1 Fish detection in underwater images
 
 Early work on fish detection in underwater video compared hand-crafted features with classifiers against convolutional networks (Villon et al., 2016) and later moved to deep detectors, including motion-aware systems
-(Salman et al., 2020) and object detection for estimating fish abundance in the field (Ditria et al., 2020); the use of deep learning on board fishing vessels has been reviewed for species recognition and quantification (Ovalle et al., 2022).
+(Salman et al., 2020; background subtraction and optical flow combined with a region-based CNN, tested on Fish4Knowledge and LifeCLEF videos with F-scores of 87.4% and 80.0%) and object detection for estimating fish abundance in the field (Ditria et al., 2020); deep learning is also applied to species recognition and quantification on board fishing vessels (Ovalle et al., 2022).
+Ditria et al. trained Mask R-CNN on 6,080 annotations of one species (luderick) in seagrass and scored mAP@50 of 0.925 on unseen footage from the training estuary and 0.934 on a second estuary (32 videos each); the setting is one species in one habitat type, and their random 80:20 split was between training and validation only, so it is not comparable with our tropical-to-Mediterranean result (Section 5.10).
 Most recent systems build on the YOLO family, which combines a single-pass design (Redmon et al., 2016) with real-time speed. YOLO-Fish adapted YOLOv3 and YOLOv4 variants to realistic underwater scenes
-using DeepFish and OzFish imagery and reported average precision of roughly three quarters (Muksit et al., 2022) **[figure from a search snippet; confirm in the paper before publishing]**; its
+using DeepFish and OzFish imagery and reported average precision of roughly three quarters (Muksit et al., 2022) (76.56% and 75.70% for its two variants, as given in a repository summary of the abstract; **the paper itself was not available to us, confirm the figures before publishing**); its
 weights are public and we evaluate them on an unseen source (Section 5.10). Later work modifies YOLOv8-class detectors for fish: Zhang et al. (2024) add a space-to-depth convolution, an attention module and an extra small-target
 detection layer to YOLOv8n for fish in natural waters, and AquaYOLO (Vijayalakshmi and Sasithradevi, 2025) targets pond aquaculture monitoring. The AquaYOLO paper evaluates on its own pond dataset
 (about 8,150 images and 50,000 boxes from aquaponds in South India, not public), split 70/20/10 into 5,705, 1,630 and 815 images without any site- or video-level separation being described, and reports mAP@50 of 0.909 there and 0.814 on DeepFish and OzFish combined;
@@ -66,19 +67,19 @@ which is why the second family we test is a Faster R-CNN.
 ### 2.2 BRUVS and stereo video
 
 BRUVS are a standard tool in fish ecology. Deep-learning models for BRUVS include generalised models for
-semi-automated length measurement in stereo-BRUVS (Marrable et al., 2023). Our footage includes baited, crowded
+semi-automated length measurement in stereo-BRUVS (Marrable et al., 2023). That work fine-tunes a COCO-pretrained YOLOv5s with early stopping, as we do, but to find head and tail points on fish crops cut from OzFish stereo pairs; it drops fish smaller than 200 pixels in height or width, and it holds out OzFish deployments (by filename prefix) as out-of-sample test data. Dropping small fish is the opposite of our reporting of recall by size (F10, F11). Our footage includes baited, crowded
 scenes (OzFish) as well as sparse reef scenes (DeepFish), and the two behave differently (F2).
 **[Read and expand: what BRUVS studies need from a detector, and the annotation practice behind OzFish.]**
 
 ### 2.3 Small objects and tiling
 
 Small objects are a known weakness of single-stage detectors. A common remedy is slicing the image into overlapping
-tiles at test time and merging the results (Akyon et al., 2022). We test this on our best model and report that it
+tiles at test time and merging the results (Akyon et al., 2022); SAHI uses 25% overlap between slices, merges with non-maximum suppression at a 0.5 matching threshold, and can add a pass over the full image for large objects, and it was evaluated on aerial datasets (VisDrone, xView). We test this on our best model and report that it
 did not help here (Section 5.6), including a small-box merge rule fixed in advance.
 
 ### 2.4 Generalisation to new locations and evaluation practice
 
-Recognition models trained at some camera locations can fail at others (Beery et al., 2018), which is why we separate sites in every split and add a test on a source that no training or selection data came from. Average precision with an IoU criterion of 0.5 follows the PASCAL VOC convention (Everingham et al., 2010) and
+Recognition models trained at some camera locations can fail at others: Beery et al. (2018) state that state-of-the-art algorithms perform well at the locations they were trained on but that generalisation to new locations is poor, especially for classification (their data are camera traps, not underwater). Kapoor and Narayanan (2023) list non-independence between training and test samples as a leakage type, unless the claim concerns a distribution with the same dependence structure, and suggest partitioning that respects the dependencies (block cross-validation); they found leakage in 329 papers across 17 fields. That is the reason we separate sites in every split and add a test on a source that no training or selection data came from. Reuse of a test set is a separate threat. Dwork et al. (2015) show that reusing a holdout adaptively can invalidate the estimates (their remedy is to perturb the answers); Recht et al. (2019) built fresh test sets for CIFAR-10 and ImageNet, saw accuracy drops of 3 to 15% and 11 to 14%, and attributed them to harder images, not to adaptive overfitting; Roelofs et al. (2019) compared public and final rankings in more than 100 Kaggle competitions and found little evidence of substantial overfitting. We therefore use the sealed OzFish set once, report its uncertainty by a pre-declared second pass over the same predictions (F37), and state that checkpoint selection reused the validation split (Section 7). Varoquaux (2018) shows in neuroimaging that the standard error across cross-validation folds underestimates the error bars (about 10% at 100 samples), which is why our intervals come from a cluster bootstrap over clips, sites or dates. The REFORMS checklist (Kapoor et al., 2024) is a 32-question reporting standard for machine-learning science; we did not read its individual items and use it here only as pointer to a reporting standard. Average precision with an IoU criterion of 0.5 follows the PASCAL VOC convention (Everingham et al., 2010) and
 the COCO-style average over IoU 0.50 to 0.95 (Lin et al., 2014). Duplicate boxes are removed by non-maximum
 suppression (Neubeck and Van Gool, 2006).
 
@@ -331,6 +332,6 @@ seeds are in `docs/eval_protocol.md` and `docs/PROGRESS.md`. Data licences: Deep
 ## References
 
 See `references.bib` (machine-readable) and `references.md` (how each was verified and what it is used for). Entries
-cited above: Akyon et al. (2022); Australian Institute of Marine Science et al. (2019); Everingham et al. (2010); Jansen et
-al. (2022); Jocher et al. (2023); Kapoor and Narayanan (2023); Lin et al. (2014); Marrable et al. (2023); Muksit et al. (2022);
-Neubeck and Van Gool (2006); Redmon et al. (2016); Saleh et al. (2020); Vijayalakshmi and Sasithradevi (2025); Zhang et al. (2024).
+cited above: Akyon et al. (2022); Australian Institute of Marine Science et al. (2019); Beery et al. (2018); Catalan et al. (2023); Ditria et al. (2020); Dwork et al. (2015); Everingham et al. (2010); Jansen et
+al. (2022); Jocher et al. (2023); Kapoor and Narayanan (2023); Kapoor et al. (2024); Liu et al. (2020); Lin et al. (2014); Marrable et al. (2023); Muksit et al. (2022); Neubeck and Van Gool (2006);
+Ovalle et al. (2022); Recht et al. (2019); Redmon et al. (2016); Ren et al. (2017); Roelofs et al. (2019); Saleh et al. (2020); Salman et al. (2020); Varoquaux (2018); Vijayalakshmi and Sasithradevi (2025); Villon et al. (2016); Zhang et al. (2024).
