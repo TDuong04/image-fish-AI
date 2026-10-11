@@ -56,6 +56,5 @@ Tickets: FD-147 (thesis), FD-148 (publication) in `docs/tickets/BACKLOG.md`.
 
 ## 4. The team report (FishIoT)
 
-Decided 2026-10-05 with the team: the detection content has two slots in the shared report, **design in section 2.4** and **results in section 3.2**, with one
-paragraph in 1B, two sentences in 1C and one sentence in the discussion; the glue is that the detector is the only physical sensor for the agent's fish observation. Draft text: `fishiot_sections.md`.
-The note that records the decision names YOLOv8n and LCFCN as the design; the current design is YOLOv8s (YOLOv8n as fallback) and LCFCN is not part of it (the run was unconverged), so the draft text says so.
+A separate shared report exists in the team. Its structure note was used only as a layout template for `THESIS_STRUCTURE.md`; **our thesis is its own document**, structured there.
+`fishiot_sections.md` is an optional draft of the detection slots for that team report and is not part of the thesis.
