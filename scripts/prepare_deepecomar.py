@@ -61,7 +61,7 @@ def main() -> int:
     img_dir, lab_dir, lab2_dir = (args.out / "images" / "val", args.out / "labels" / "val", args.out / "labels_nosmall" / "val")
     for d in (img_dir, lab_dir, lab2_dir):
         d.mkdir(parents=True, exist_ok=True)
-    groups, n_boxes, n_boxes2, n_stain, n_empty = {}, 0, 0, 0, 0
+    groups, sources, n_boxes, n_boxes2, n_stain, n_empty = {}, {}, 0, 0, 0, 0
     for k, (base, m) in enumerate(sorted(chosen.items())):
         stem = f"dem_{k:05d}"
         (img_dir / f"{stem}.jpg").write_bytes(z.read(m))
@@ -87,7 +87,9 @@ def main() -> int:
         (lab_dir / f"{stem}.txt").write_text("\n".join(rows) + ("\n" if rows else ""))
         (lab2_dir / f"{stem}.txt").write_text("\n".join(rows2) + ("\n" if rows2 else ""))
         groups[stem] = group_of(base)
+        sources[stem] = base
     (args.out / "groups.json").write_text(json.dumps(groups, indent=1))
+    (args.out / "sources.json").write_text(json.dumps(sources, indent=1))     # stem -> original frame name (for time-ordered splits)
     summary = {"source": "Zenodo 7534425 (CC BY 4.0)", "images": len(chosen), "boxes_fish": n_boxes, "boxes_fish_without_small": n_boxes2,
                "stain_boxes_dropped": n_stain, "empty_images": n_empty, "groups": len(set(groups.values()))}
     (args.out / "summary.json").write_text(json.dumps(summary, indent=2))

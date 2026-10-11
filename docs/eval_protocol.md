@@ -183,6 +183,14 @@ These were applied from 2026-10-04 and are why some earlier numbers are not comp
     - **Disclosure:** the paper states that the sealed set was scored twice, the second time only for intervals, and that the point estimates are the first pass's.
     - **One run:** `scripts/sealed_intervals.py` runs once; a crash may be retried, a result may not.
 
+12. **Adaptation experiment on the Mediterranean set, declared 2026-10-11 before it was run.** F39 showed poor zero-shot performance on the unseen source. This is a separate experiment that asks how much labelled footage of a fixed camera recovers it;
+    after fine-tuning, the Mediterranean set is no longer unseen for those models and F39 is unchanged. Rules, all fixed here:
+    - **Splits** (`scripts/prepare_adaptation.py`): the 886 time-stamped `vivo` snapshots of one fixed camera (Aug 2018 to Aug 2019) are ordered by time; the earliest 60% are the train pool, the next 10% the validation block (epoch selection only), the latest 30% `test_vivo` (same camera, later months).
+      The 630 frames of the other 17 groups are `test_other` (other cameras, dates) and never touch training or selection. Training subsets of 25 and 100 frames are drawn from the pool with seed 0 (nested); the third uses the whole pool.
+    - **Runs** (`configs/plan_adapt.yaml`, one seed each, a screen): our YOLOv8s seed 2 fine-tuned on 25, 100 and all pool frames (lr0 0.002, 100, 60 and 40 epochs), and a COCO-only YOLOv8s on all pool frames as the control for the value of our pretraining.
+    - **Scoring** (`scripts/eval_adaptation.py`): the three zero-shot YOLOv8s seeds and the four runs, 101-point AP and found fish and false alarms at 0.25 on both test lists, cluster bootstrap over dates (`test_vivo`) or groups (`test_other`).
+    - **No selection from the result:** the numbers are reported as they come; one seed per run, so differences of a few hundredths are within seed spread. The adaptation numbers are never compared with the unseen-source claims of F39 as if they were zero-shot.
+
 ## Known limitations, declared up front
 
 1. `ozfish_eval` has no empty frames → no cross-dataset false-alarm measurement.

@@ -1,0 +1,19 @@
+# Adaptation experiment (docs/eval_protocol.md item 12): fine-tune our best YOLOv8s on 25, 100 and all early frames of the fixed camera, and a COCO-only control on all of them.
+# Run with: FISH_ENV=aigpu python scripts/queue_runner.py configs/plan_adapt.yaml   (after scripts/prepare_adaptation.py)
+steps:
+  - name: adapt-25
+    skip_if: "runs/202610*-yolov8s_adapt_25-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8s_adapt_25", "--seed", "0"]
+  - name: adapt-100
+    skip_if: "runs/202610*-yolov8s_adapt_100-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8s_adapt_100", "--seed", "0"]
+  - name: adapt-all
+    skip_if: "runs/202610*-yolov8s_adapt_all-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8s_adapt_all", "--seed", "0"]
+  - name: adapt-coco-all
+    skip_if: "runs/202610*-yolov8s_adapt_coco_all-s0/metrics.json"
+    env: {FISH_ENV: aigpu}
+    cmd: ["{python}", "scripts/train.py", "--config", "yolov8s_adapt_coco_all", "--seed", "0"]

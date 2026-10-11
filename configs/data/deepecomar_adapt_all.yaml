@@ -1,0 +1,7 @@
+# Adaptation experiment (docs/eval_protocol.md item 12): fine-tune on all early frames of the fixed camera; epoch selection on the next block in time.
+# Lists built by scripts/prepare_adaptation.py. The test lists (test_vivo, test_other) are never used here.
+path: processed/deepecomar
+train: splits_adapt/train_all.txt
+val: splits_adapt/val.txt
+names:
+  0: fish
