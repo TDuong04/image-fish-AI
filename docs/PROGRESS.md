@@ -1330,6 +1330,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Research narrative, methodology, next steps | `docs/RESEARCH.md` |
 | Report draft and reference tracker | `docs/report/` |
 | Plain-language guide to the concepts and mechanisms (for the owner) | `docs/GUIDE.md` |
+| The whole research story, reasoning and mechanisms (for the owner and a second AI assistant) | `docs/RESEARCH_STORY.md` |
 | Dataset statistics | `docs/data_audit.md` |
 | Setup and training | `README.md`, `docs/TRAINING.md` |
 | Tickets | `docs/tickets/BACKLOG.md` |
