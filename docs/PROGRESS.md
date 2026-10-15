@@ -1331,6 +1331,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | Report draft and reference tracker | `docs/report/` |
 | Plain-language guide to the concepts and mechanisms (for the owner) | `docs/GUIDE.md` |
 | The whole research story, reasoning and mechanisms (for the owner and a second AI assistant) | `docs/RESEARCH_STORY.md` |
+| Condensed double-blind conference draft (WACV 2028 Applications track; 8-page budget) | `docs/report/paper_wacv.md` |
 | Dataset statistics | `docs/data_audit.md` |
 | Setup and training | `README.md`, `docs/TRAINING.md` |
 | Tickets | `docs/tickets/BACKLOG.md` |
