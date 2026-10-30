@@ -208,10 +208,12 @@ The authoritative, current account is **`docs/PROGRESS.md`** — what was built,
 every correction, every open item. Read it before starting work; do not rely on this file for
 status, because this file holds rules and constraints, not results.
 
-Headline, as of 2026-10-04: six converged YOLOv8n runs (3 seeds x 640/960 px) on DeepFish;
-960 beats 640 by +0.087 mAP@50 in-domain but only +0.013 on the sealed OzFish set; the detector
-tolerates missing colour (−7 to −9%) but not wrong colour (up to −49%). **No Jetson Orin Nano
-exists in this project, so there is no device measurement of any kind.**
+Headline, as of 2026-10-15: the strongest detector is YOLOv8s trained on DeepFish + Kakadu + OzFish
+(mean 0.812 mAP@50 on site-held-out DeepFish validation over three seeds, range 0.041; 0.700 on the
+sealed OzFish test, run once; 0.17 AP50 on an unseen Mediterranean source, where every detector tried
+is poor). On the Jetson Orin Nano (25 W, TensorRT FP16 built on the board) the shipped engine takes
+about 50 ms per frame end to end and held 24 fps over 30 minutes of recorded video with no throttling
+visible; there is no live-camera or deployment-site test. Details and limits: `docs/PROGRESS.md`.
 
 Still-stale artefacts: `report_sections.md` describes the older LCFCN counting experiment
 (val MAE 0.3375 @ 10 epochs, Kaggle T4) — a different task, not the baseline for this work.

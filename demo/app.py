@@ -10,8 +10,8 @@ nothing is faked: the boxes come from the same weights that produced the
 reported mAP, and the timings are measured on whatever GPU this machine has.
 
 The one thing it cannot do is tell you what this costs on a Jetson Orin Nano.
-No such board exists in this project yet, so the timing panel reports the
-machine it is actually running on and says so.
+The timing panel reports the machine it is actually running on and says so;
+board timings come from edge/app.py running on the Jetson (docs/PROGRESS.md F8, F28).
 """
 
 from __future__ import annotations
@@ -103,7 +103,7 @@ def run_image(image, imgsz_choice, conf, show_conf, compare):
     table = ("| Input | Fish found | Time | Mean conf |\n|---|---|---|---|\n"
              + "\n".join(lines))
     note = (f"\n\nRunning on **{_device}**. Timings are this machine, not a Jetson — "
-            f"no such board exists in this project yet.")
+            f"the Jetson figures are measured by edge/app.py on the board.")
     if compare and len(sizes) == 2:
         a, b = [int(l.split("**")[1]) for l in lines]
         delta = b - a

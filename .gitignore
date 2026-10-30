@@ -37,3 +37,4 @@ __pycache__/
 *.mp4
 /demo/demo_data.json
 /demo/device_data.json
+!docs/images/*.mp4

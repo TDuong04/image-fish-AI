@@ -1,6 +1,6 @@
 # Publication checklist: making the repository and weights public under the AGPL-3.0
 
-Decision recorded 2026-10-11: **share everything openly under the AGPL-3.0** (`docs/report/LICENCE_OPTIONS.md`, option 1). Nothing has been pushed or published yet.
+Decision recorded 2026-10-11: **share everything openly under the AGPL-3.0** (`docs/report/LICENCE_OPTIONS.md`, option 1). **Correction (2026-10-31):** the earlier line here said nothing had been pushed. In fact the GitHub repository `TDuong04/image-fish-AI` is public (created 2026-09-22, last push 2026-10-04, release `v0.1.0-models`), so its history up to commit `eeba2fc` is the unfiltered history, including the personal file removed in `4fb0893` and the private identifiers that the filtered public copy replaces. Decide whether to make it private, or replace it with the filtered copy, before pushing anything further.
 
 ## Done
 
