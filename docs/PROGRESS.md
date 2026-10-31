@@ -1258,6 +1258,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | `fish.parity.nms()` modified the array it was given | Ultralytics' NMS converts boxes xywh to xyxy in place and `torch.from_numpy` shares memory, so the caller's raw output was silently overwritten and a second decoder converted it twice (boxes like `[167, 52, 628, 248]`). Fixed with a copy and a regression test. | Cross-checking the edge decoder against it |
 | `cuda-python` pinned at 12.6.2 | That release was yanked by its maintainers. Replaced by 12.6.2.post1. | pip's yanked-version warning |
 | `pkill -f "python3 app.py"` run over SSH | It matched the SSH session's own command line and killed it (exit 255). The bracket trick fails too when the pattern also appears elsewhere in the command. Kill by PID found from the port owner, never by name: NVIDIA's system services also run as `python3`. | Two failed launches |
+| `pytest.ini` sent pytest's temp folder to `data/.cache/pytest`, whose parent `data/` does not exist in a fresh clone | On a clean checkout every test using `tmp_path` errored (25 errors; green only where `data/` already existed) | The first CI run on GitHub; fixed by `tests/conftest.py`, checked on a fresh local clone (347 passed, 4 skipped) |
 
 ---
 
