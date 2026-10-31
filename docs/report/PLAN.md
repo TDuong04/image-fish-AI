@@ -50,7 +50,7 @@ Extras for a **journal version** (not needed for the thesis or the workshop pape
 | 5 | Figures: pipeline diagram, dataset samples, score by data recipe with seeds, recall by size, example detections and failures, device timing | assistant | |
 | 6 | Abstract and conclusion | assistant | F34 |
 | 7 | Convert to the venue and thesis templates; proofread | both | 1 |
-| 8 | Replace the stale `report_sections.md`; refresh the headline in `CLAUDE.md` | assistant | |
+| 8 | Replace the stale `docs/archive/report_sections.md`; refresh the headline in `CLAUDE.md` | assistant | |
 
 Tickets: FD-147 (thesis), FD-148 (publication) in `docs/tickets/BACKLOG.md`.
 

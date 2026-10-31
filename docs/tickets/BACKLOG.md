@@ -137,7 +137,7 @@ model family FD-020 trains.
   `metrics.json` and `env.txt` untracked and FD-051's matrix with no provenance. Use negation
   patterns: ignore `runs/**` but keep `runs/**/config.yaml`, `runs/**/metrics.json`,
   `runs/**/env.txt`. **`splits/` is tracked, explicitly.**
-- Ignore `fish-research/` (vendored clones); record clone commands in `fish_download_links.md`.
+- Ignore `fish-research/` (vendored clones); record clone commands in `docs/archive/fish_download_links.md`.
 - No LFS. Binaries stay out of git; provenance goes in `docs/data_manifest.md`.
 
 ---
@@ -336,7 +336,7 @@ subset exists at `labelled/speciesboxes`, annotated in VGG by an ecologist — s
 
 **Consequences:** FD-063's planned limitation "single-class collapse from 507 species" describes
 a limitation that does not exist and must be struck. **The same error is in
-`report_sections.md` §2.2** — "45,000 bounding box annotations spanning 507 species" — and must
+`docs/archive/report_sections.md` §2.2** — "45,000 bounding box annotations spanning 507 species" — and must
 be fixed there (FD-060).
 
 **Do:**
@@ -368,7 +368,7 @@ it as an error bar on FD-024.
 **Why:** Independent, different-domain test set for FD-026.
 
 **[corrected] — check before building.** The original assumed hand-deriving boxes from the 620
-segmentation masks. But `report_sections.md` §2.3 itself cites AquaYOLO evaluating **detection on
+segmentation masks. But `docs/archive/report_sections.md` §2.3 itself cites AquaYOLO evaluating **detection on
 DeepFish over 4,505 images**, and the YOLO-Fish authors' **`deepfish_darknet.zip`** — gdown ID
 already in `fish-research/README.md` — is DeepFish in darknet **box** format. That is potentially
 7× more data for none of the work.
@@ -428,7 +428,7 @@ a stated limitation.
 convergence** with early stopping on val mAP — not a fixed small epoch count. Logs to
 `runs/<date>-yolov8n-base/` with config, metrics, env, git SHA.
 
-**Trap:** the LCFCN result in `report_sections.md` was stopped at 10 epochs and is explicitly not
+**Trap:** the LCFCN result in `docs/archive/report_sections.md` was stopped at 10 epochs and is explicitly not
 converged. Do not repeat that pattern — it makes the number uncomparable to anything published.
 
 ## FD-021 · `n` vs `s` · P1 · TODO **[shrunk]**
@@ -850,3 +850,4 @@ nothing is compared on fewer than 3 seeds. The sealed OzFish set is used only fo
 | FD-156 | **Research-story document** (`docs/RESEARCH_STORY.md`): the project from the start to the draft paper, with the reasoning, mechanisms, decision log and questions, written for the owner and for a second AI assistant | DONE |
 | FD-157 | **Venue rework**: condensed double-blind 8-page draft for WACV 2028 Applications track (`docs/report/paper_wacv.md`, a markdown stand-in until the 2028 kit exists); `paper.md` stays the long master for a journal (ICES JMS / Ecological Informatics) and no longer quotes the unreadable YOLO-Fish AP figures. Do not submit the journal and conference versions at once (WACV: 20% overlap rule). Open: venue choice, 2028 dates/kit, trim to fit | IN PROGRESS |
 | FD-158 | **Repository polish**: rewritten root README (results with finding ids, limits, demo GIF/video/pictures), folder READMEs (`scripts/`, `edge/`, `demo/`, `docs/`), stale 'no board exists' text fixed in `demo/app.py` and `CLAUDE.md`. Open: decide the public-repository question (the GitHub repo is already public with unfiltered history up to 2026-10-04, see `docs/PUBLISH_CHECKLIST.md`) | DONE (local, not pushed) |
+| FD-159 | **Repository quality pass for public viewing**: CI workflow, test skip without torch, stale root files archived, README diagram, reviewer reading guide and all four result figures, repository description and topics | DONE (CI result checked after the push) |

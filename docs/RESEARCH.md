@@ -115,5 +115,5 @@ In order of value for the report:
 4. **Small fish** (tiling and a small-box merge were tried and did not help, F25 and F26): training at 1280 px did not help either, F27): training on tiles is untried; the likelier route is more data with small, hard fish.
 5. **Decide the licence question** (will any copy of software or weights leave the institution?). If yes, the AGPL
    encumbrance on Ultralytics weights means YOLOX-nano or NanoDet-Plus.
-6. **Write the report** from this file, `docs/PROGRESS.md` and `docs/eval_protocol.md`; `report_sections.md` is the
+6. **Write the report** from this file, `docs/PROGRESS.md` and `docs/eval_protocol.md`; `docs/archive/report_sections.md` is the
    older counting experiment and should be replaced.

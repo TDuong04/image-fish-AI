@@ -1,5 +1,6 @@
 # Fish detection for the Jetson Orin Nano
 
+[![tests](https://github.com/TDuong04/image-fish-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/TDuong04/image-fish-AI/actions/workflows/ci.yml)
 [![Licence: AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue.svg)](LICENSE)
 ![Python 3.10 | 3.11](https://img.shields.io/badge/python-3.10%20%7C%203.11-informational)
 ![Target: Jetson Orin Nano 8 GB](https://img.shields.io/badge/target-Jetson%20Orin%20Nano%208GB-76b900)
@@ -20,6 +21,27 @@ A single-class fish detector for underwater video, trained with an evaluation pr
 - **An evaluation.** Site-level splits, a sealed test set scored once, same-machine controls with three seeds, cluster-bootstrap intervals, and a test on a source no model saw. All of it is written down before the numbers are read (`docs/eval_protocol.md`).
 - **A device measurement.** TensorRT FP16 engines built on a Jetson Orin Nano 8 GB Super, timed end to end (decode, letterbox, GPU, NMS), with 30-minute runs that log frame rate and temperature.
 
+## How it fits together
+
+```mermaid
+flowchart LR
+    D["DeepFish, Kakadu, OzFish<br/>(open datasets)"] --> P["Prepare<br/>one class, split by capture site,<br/>leakage checks"]
+    P --> T["Train YOLOv8<br/>COCO weights, 3 seeds,<br/>same-machine controls"]
+    T --> E["Evaluate<br/>site-held-out validation,<br/>sealed OzFish test (once),<br/>unseen Mediterranean set,<br/>cluster bootstrap"]
+    T --> X["Export ONNX"]
+    X --> R["Build TensorRT FP16 engine<br/>ON the Jetson Orin Nano"]
+    R --> A["edge/app.py<br/>counts, MaxN, per-frame CSV,<br/>per-stage timing"]
+```
+
+## Where to look (for reviewers)
+
+| Time | Read | You will see |
+|---|---|---|
+| 2 minutes | this README | the problem, the measured results and what is not shown |
+| 15 minutes | [`docs/PROGRESS.md`](docs/PROGRESS.md): F20 and F38 (leakage), F32 (model comparison), F39 and F41 (unseen source), F8 and F34 (the board) | each result with its run folder, seeds, spread and limits |
+| An hour | [`docs/eval_protocol.md`](docs/eval_protocol.md) and [`docs/RESEARCH_STORY.md`](docs/RESEARCH_STORY.md) | the rules fixed before the numbers were read, and the reasoning from the start |
+| To check a claim | the `runs/` folders named in each finding | configs, metrics, environment records and device logs |
+
 ## Results (the short version)
 
 Every row names the finding that holds the evidence, the run folder and the limits: `docs/PROGRESS.md`.
@@ -37,6 +59,12 @@ Every row names the finding that holds the evidence, the run folder and the limi
 The GPU kernel is only 8 to 11% of a frame on the board; decoding, resizing and copying dominate (F8). A kernel benchmark is never reported as a frame rate.
 
 ![Same sites, different split](docs/report/figures/fig1_leakage.png)
+
+| Unseen source: every detector is poor | A few labelled frames help one camera | The board over 30 minutes |
+|---|---|---|
+| ![Unseen source](docs/report/figures/fig2_unseen.png) | ![Adaptation](docs/report/figures/fig3_adaptation.png) | ![Device](docs/report/figures/fig4_device.png) |
+
+Figures are drawn from committed run records by `scripts/make_figures.py`; each caption, interval and limit is in `docs/report/paper.md`.
 
 ## What it does not show
 

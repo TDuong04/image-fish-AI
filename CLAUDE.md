@@ -157,7 +157,7 @@ the grouping yields far fewer groups than frames before trusting any split.
 **OzFish boxes are already single-class.** Per `fish-research/ozfish/README.md` line 57: the box
 annotations are *"fish/no-fish only and have no species/genus/family labels."* The 507-species
 figure belongs to the ~80k **crops**, a different artefact. There is no species collapse to
-perform. (`report_sections.md` §2.2 was corrected; the file as a whole is still stale.)
+perform. (`docs/archive/report_sections.md` §2.2 was corrected; the file as a whole is still stale.)
 
 **Sonar ≠ optical.** CFC is sonar imagery. It is a valid separate benchmark and the right
 data for domain-adaptation work, but it is not extra training data for an optical detector.
@@ -215,7 +215,7 @@ is poor). On the Jetson Orin Nano (25 W, TensorRT FP16 built on the board) the s
 about 50 ms per frame end to end and held 24 fps over 30 minutes of recorded video with no throttling
 visible; there is no live-camera or deployment-site test. Details and limits: `docs/PROGRESS.md`.
 
-Still-stale artefacts: `report_sections.md` describes the older LCFCN counting experiment
+Still-stale artefacts: `docs/archive/report_sections.md` describes the older LCFCN counting experiment
 (val MAE 0.3375 @ 10 epochs, Kaggle T4) — a different task, not the baseline for this work.
 `fish-research/` holds 5 cloned repos and ~4 GB of labels and weights, git-ignored.
 

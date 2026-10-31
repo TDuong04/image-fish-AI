@@ -157,9 +157,9 @@ Dates are commit dates. The "why next" line of each phase is the logic that link
 ### Phase 0 — Before the detector (up to 27 Aug 2026)
 
 *Starting point.* An earlier experiment used **LCFCN**, a method that learns to count fish from single clicks per fish
-(point labels) on DeepFish (`report_sections.md`: validation MAE 0.3375 after 10 epochs on a Kaggle T4). It is a
+(point labels) on DeepFish (`docs/archive/report_sections.md`: validation MAE 0.3375 after 10 epochs on a Kaggle T4). It is a
 different task (counting, no boxes), not converged, and not the baseline for this work. It is kept only as history;
-`report_sections.md` is stale.
+`docs/archive/report_sections.md` is stale.
 
 *What was decided.* On 27 Aug the project charter, backlog (`docs/tickets/BACKLOG.md`, tickets `FD-###`) and a portable
 training scaffold were committed, with the evaluation protocol **before any detection result existed** (P1). The goal

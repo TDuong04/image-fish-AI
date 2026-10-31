@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -112,6 +113,7 @@ def test_nms_does_not_modify_its_input():
     """Ultralytics' NMS converts boxes xywh -> xyxy in place, and torch.from_numpy shares
     memory. Without a copy the caller's raw output was silently overwritten, so a later
     reader (or a second decoder) saw already-converted boxes and converted them again."""
+    pytest.importorskip("torch", reason="NMS goes through torch/ultralytics; not installed in the light CI")
     raw = np.zeros((1, 5, 6), dtype=np.float32)
     raw[0, :, 0] = [100, 80, 40, 30, 0.9]          # cx, cy, w, h, score
     before = raw.copy()

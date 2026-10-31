@@ -21,7 +21,7 @@ Last updated: 2026-10-04.
 | Demos | Three shareable pages and a runnable Gradio app. |
 | Automation | Crash-recovering supervisor and a Kaggle session runner. |
 | **Jetson Orin Nano** | **In hand and probed:** 8 GB Super dev kit, L4T 36.4.7, TensorRT 10.3.0, active fan, SD-card boot with ~8 GB free (`docs/hardware.md`). **Two FP16 engines built on the board at the shapes the accuracy was evaluated at; both match PyTorch on real frames, and GPU kernel time is measured (2.56 ms at 384x640, 4.37 ms at 544x960, a 20 s burst).** **End to end, a serial pipeline takes about 33 ms per frame at 640 and 41 ms at 960 (about 30 and 24 fps), and a web app runs on the board** (`edge/app.py`). **A 30-minute sustained run held about 34 fps at 960 with no throttling (F9, one run, 25 W mode, ambient 26 C assumed).** **YOLOv8s on the combined data takes about 50 ms per frame (19.9 fps serial) against 41 ms for YOLOv8n (F28, 25 W, 2026-10-07).** **A 30-minute run of YOLOv8s held 24.4 fps with no throttling, plateau about 58 C (F29, one run, 25 W, ambient not measured).** **MAXN_SUPER gave no speed-up of the network; the video frame rate was unchanged (F31, 10-minute runs).** Not yet measured: hardware video decode, INT8, on-device mAP, the 15 W and 7 W modes. The deployment half of the thesis is only partly answered. |
-| Report | Draft started 2026-10-06 in `docs/report/` (`paper.md`, `references.bib`, `references.md`, `README.md`); sections that need F27, YOLOv8s on the Orin and the sealed test are marked pending. `docs/RESEARCH.md` (2026-10-06) is the narrative of the research and methodology and the suggested next steps; `report_sections.md` still describes the older LCFCN *counting* experiment, not this work, and the final report prose is not yet written. |
+| Report | Draft started 2026-10-06 in `docs/report/` (`paper.md`, `references.bib`, `references.md`, `README.md`); sections that need F27, YOLOv8s on the Orin and the sealed test are marked pending. `docs/RESEARCH.md` (2026-10-06) is the narrative of the research and methodology and the suggested next steps; `docs/archive/report_sections.md` still describes the older LCFCN *counting* experiment, not this work, and the final report prose is not yet written. |
 
 ---
 
@@ -1306,7 +1306,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 - **No trivial baselines** (predict-nothing, zero-shot COCO, frame differencing).
 - **Licence position undecided.** Ultralytics and the COCO-pretrained weights are AGPL-3.0; weights are published
   publicly alongside the code, which is the compliant posture, but a closed device would not be.
-- **`report_sections.md` is stale** — still the LCFCN counting experiment.
+- **`docs/archive/report_sections.md` is stale** — still the LCFCN counting experiment.
 - **One personal file remains in git history** (commit `b56ca8d`). Purging needs a history rewrite and force-push
   on a shared repo; owner's decision.
 
@@ -1333,6 +1333,7 @@ Kept deliberately. A correction deleted is a mistake someone repeats.
 | The whole research story, reasoning and mechanisms (for the owner and a second AI assistant) | `docs/RESEARCH_STORY.md` |
 | Condensed double-blind conference draft (WACV 2028 Applications track; 8-page budget) | `docs/report/paper_wacv.md` |
 | README pictures, demo video and GIF (made with the shipped YOLOv8s on a DeepFish clip) | `docs/images/` (provenance: `docs/images/README.md`); folder READMEs: `scripts/`, `edge/`, `demo/`, `docs/` |
+| Continuous integration (light install, no torch: `pytest` on Ubuntu, Python 3.11) | `.github/workflows/ci.yml`; the one torch-dependent test skips itself. Stale root files moved to `docs/archive/` |
 | Dataset statistics | `docs/data_audit.md` |
 | Setup and training | `README.md`, `docs/TRAINING.md` |
 | Tickets | `docs/tickets/BACKLOG.md` |
