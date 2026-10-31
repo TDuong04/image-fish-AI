@@ -13,7 +13,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
       # Light install on purpose: the tests cover paths, dataset grouping, statistics,
       # documentation traceability and the edge runner's pure-Python parts. Training and
       # TensorRT are not exercised here (they need a GPU / a Jetson); the one test that
